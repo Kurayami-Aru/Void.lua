@@ -751,7 +751,11 @@ local Window = Library:CreateWindow({
     Center = true,
     AutoShow = true
 })
-
+						
+--=======================
+-- TAB: BLATANT
+--=======================
+						
 local BlatantTab = Window:AddTab("Blatant", "swords")
 
 local AutoParryGroup = BlatantTab:AddLeftGroupbox("Auto Parry")
@@ -1235,6 +1239,7 @@ DetectionGroup:AddToggle("AntiPhantom", {
 --=======================
 -- TAB: SPECIAL
 --=======================
+						
 local SpecialTab = Window:AddTab("Special", "palette")
 local SkinGroup = SpecialTab:AddLeftGroupbox("Skin Changer")
 
@@ -1244,8 +1249,9 @@ SkinGroup:AddToggle("SkinChangerToggle", {
     Tooltip = "Toggle skin changer functionality",
     Callback = function(value)
         getgenv().skinChanger = value
-        if value and getgenv().updateSword then
-            getgenv().updateSword()
+        if value then
+            getgenv().slashName = getSlashName(getgenv().swordFX)
+            setSword()
         end
     end
 })
@@ -1258,8 +1264,9 @@ SkinGroup:AddInput("SwordModel", {
     Tooltip = "Model name of the sword to attach",
     Callback = function(value)
         getgenv().swordModel = value
-        if getgenv().skinChanger and getgenv().updateSword then
-            getgenv().updateSword()
+        if getgenv().skinChanger then
+            getgenv().slashName = getSlashName(getgenv().swordFX)
+            setSword()
         end
     end
 })
@@ -1272,8 +1279,9 @@ SkinGroup:AddInput("SwordAnimation", {
     Tooltip = "Animation used for the sword",
     Callback = function(value)
         getgenv().swordAnimations = value
-        if getgenv().skinChanger and getgenv().updateSword then
-            getgenv().updateSword()
+        if getgenv().skinChanger then
+            getgenv().slashName = getSlashName(getgenv().swordFX)
+            setSword()
         end
     end
 })
@@ -1286,8 +1294,9 @@ SkinGroup:AddInput("SwordFX", {
     Tooltip = "Visual effect used during slash",
     Callback = function(value)
         getgenv().swordFX = value
-        if getgenv().skinChanger and getgenv().updateSword then
-            getgenv().updateSword()
+        if getgenv().skinChanger then
+            getgenv().slashName = getSlashName(value)
+            setSword()
         end
     end
 })
@@ -1295,15 +1304,16 @@ SkinGroup:AddInput("SwordFX", {
 SkinGroup:AddButton("ApplySkinButton", {
     Text = "Apply Skin",
     Func = function()
-        if getgenv().skinChanger and getgenv().updateSword then
-            getgenv().updateSword()
+        if getgenv().skinChanger then
+            getgenv().slashName = getSlashName(getgenv().swordFX)
+            setSword()
         end
     end,
     DoubleClick = false
 })
 
 --=======================
--- CORE LOGIC (placed at top or bottom)
+-- CORE LOGIC
 --=======================
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -1314,26 +1324,24 @@ local swordInstances = require(
         :WaitForChild("Swords", 9e9)
 )
 
-local function getSlashName(skinName)
+function getSlashName(skinName)
     local data = swordInstances:GetSword(skinName)
     return (data and data.SlashName) or "SlashEffect"
 end
 
-local function setSword()
-    if not getgenv().skinChanger then return end
-
+function setSword()
     local player = Players.LocalPlayer
     local character = player.Character or player.CharacterAdded:Wait()
 
     setupvalue(rawget(swordInstances, "EquipSwordTo"), 2, false)
 
-    swordInstances:EquipSwordTo(character, getgenv().swordModel)
-    getgenv().swordsController:SetSword(getgenv().swordAnimations)
-end
+    if getgenv().swordModel then
+        swordInstances:EquipSwordTo(character, getgenv().swordModel)
+    end
 
-getgenv().updateSword = function()
-    getgenv().slashName = getSlashName(getgenv().swordFX)
-    setSword()
+    if getgenv().swordsController and getgenv().swordAnimations then
+        getgenv().swordsController:SetSword(getgenv().swordAnimations)
+    end
 end
 
 task.spawn(function()
