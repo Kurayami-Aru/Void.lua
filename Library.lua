@@ -1236,10 +1236,7 @@ DetectionGroup:AddToggle("AntiPhantom", {
     end
 })
 
---=======================
--- TAB: SPECIAL
---=======================
-						
+--===[ TAB + UI Setup ]===
 local SpecialTab = Window:AddTab("Special", "palette")
 local SkinGroup = SpecialTab:AddLeftGroupbox("Skin Changer")
 
@@ -1250,8 +1247,7 @@ SkinGroup:AddToggle("SkinChangerToggle", {
     Callback = function(value)
         getgenv().skinChanger = value
         if value then
-            getgenv().slashName = getSlashName(getgenv().swordFX)
-            setSword()
+            updateSword()
         end
     end
 })
@@ -1262,11 +1258,10 @@ SkinGroup:AddInput("SwordModel", {
     Placeholder = "Enter sword model name...",
     Text = "Sword Model",
     Tooltip = "Model name of the sword to attach",
-    Callback = function(value)
-        getgenv().swordModel = value
+    Callback = function(v)
+        getgenv().swordModel = v
         if getgenv().skinChanger then
-            getgenv().slashName = getSlashName(getgenv().swordFX)
-            setSword()
+            updateSword()
         end
     end
 })
@@ -1277,11 +1272,10 @@ SkinGroup:AddInput("SwordAnimation", {
     Placeholder = "Enter animation name...",
     Text = "Sword Animation",
     Tooltip = "Animation used for the sword",
-    Callback = function(value)
-        getgenv().swordAnimations = value
+    Callback = function(v)
+        getgenv().swordAnimations = v
         if getgenv().skinChanger then
-            getgenv().slashName = getSlashName(getgenv().swordFX)
-            setSword()
+            updateSword()
         end
     end
 })
@@ -1292,11 +1286,10 @@ SkinGroup:AddInput("SwordFX", {
     Placeholder = "Enter FX/Effect name...",
     Text = "Sword FX",
     Tooltip = "Visual effect used during slash",
-    Callback = function(value)
-        getgenv().swordFX = value
+    Callback = function(v)
+        getgenv().swordFX = v
         if getgenv().skinChanger then
-            getgenv().slashName = getSlashName(value)
-            setSword()
+            updateSword()
         end
     end
 })
@@ -1305,16 +1298,13 @@ SkinGroup:AddButton("ApplySkinButton", {
     Text = "Apply Skin",
     Func = function()
         if getgenv().skinChanger then
-            getgenv().slashName = getSlashName(getgenv().swordFX)
-            setSword()
+            updateSword()
         end
     end,
     DoubleClick = false
 })
 
---=======================
--- CORE LOGIC
---=======================
+--===[ Core Logic ]===
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
@@ -1324,19 +1314,21 @@ local swordInstances = require(
         :WaitForChild("Swords", 9e9)
 )
 
-function getSlashName(skinName)
-    local data = swordInstances:GetSword(skinName)
+local function getSlashName(skin)
+    local data = swordInstances:GetSword(skin)
     return (data and data.SlashName) or "SlashEffect"
 end
 
-function setSword()
-    local player = Players.LocalPlayer
-    local character = player.Character or player.CharacterAdded:Wait()
+function updateSword()
+    local plr = Players.LocalPlayer
+    local char = plr.Character or plr.CharacterAdded:Wait()
+    if not char then return end
 
-    setupvalue(rawget(swordInstances, "EquipSwordTo"), 2, false)
+    getgenv().slashName = getSlashName(getgenv().swordFX)
 
     if getgenv().swordModel then
-        swordInstances:EquipSwordTo(character, getgenv().swordModel)
+        setupvalue(rawget(swordInstances, "EquipSwordTo"), 2, false)
+        swordInstances:EquipSwordTo(char, getgenv().swordModel)
     end
 
     if getgenv().swordsController and getgenv().swordAnimations then
@@ -1347,19 +1339,19 @@ end
 task.spawn(function()
     while task.wait(1) do
         if getgenv().skinChanger then
-            local player = Players.LocalPlayer
-            local character = player.Character
-            if not character then continue end
+            local plr = Players.LocalPlayer
+            local char = plr.Character
+            if not char then continue end
 
-            if player:GetAttribute("CurrentlyEquippedSword") ~= getgenv().swordModel then
-                setSword()
+            if plr:GetAttribute("CurrentlyEquippedSword") ~= getgenv().swordModel then
+                updateSword()
             end
 
-            if not character:FindFirstChild(getgenv().swordModel) then
-                setSword()
+            if not char:FindFirstChild(getgenv().swordModel) then
+                updateSword()
             end
 
-            for _, obj in character:GetChildren() do
+            for _, obj in char:GetChildren() do
                 if obj:IsA("Model") and obj.Name ~= getgenv().swordModel then
                     obj:Destroy()
                 end
@@ -1367,4 +1359,4 @@ task.spawn(function()
             end
         end
     end
-end)
+end)            
