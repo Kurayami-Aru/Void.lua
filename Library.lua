@@ -760,33 +760,183 @@ AutoParryGroup:AddToggle("AutoParry", {
     Text = "Auto Parry",
     Default = false,
     Callback = function(v)
-        
+        if value then
+            
+            Connections_Manager['Auto Parry'] = RunService.PreSimulation:Connect(function()
+                    local One_Ball = Auto_Parry.Get_Ball()
+                    local Balls = Auto_Parry.Get_Balls()
+ 
+                    for _, Ball in pairs(Balls) do
+ 
+                        if not Ball then
+                            return
+                        end
+ 
+                        local Zoomies = Ball:FindFirstChild('zoomies')
+                        if not Zoomies then
+                            return
+                        end
+ 
+                        Ball:GetAttributeChangedSignal('target'):Once(function()
+                            Parried = false
+                        end)
+ 
+                        if Parried then
+                            return
+                        end
+ 
+                        local Ball_Target = Ball:GetAttribute('target')
+                        local One_Target = One_Ball:GetAttribute('target')
+ 
+                        local Velocity = Zoomies.VectorVelocity
+ 
+                        local Distance = (Player.Character.PrimaryPart.Position - Ball.Position).Magnitude
+ 
+                        local Ping = game:GetService('Stats').Network.ServerStatsItem['Data Ping']:GetValue() / 10
+ 
+                        local Ping_Threshold = math.clamp(Ping / 10 + 0.2, 5.8, 15.5)
+ 
+                        local Speed = Velocity.Magnitude
+ 
+                        local cappedSpeedDiff = math.min(math.max(Speed - 9.5, 0), 650)
+                        local speed_divisor_base = 2.0 + cappedSpeedDiff * 0.00175
+ 
+                        local effectiveMultiplier = Speed_Divisor_Multiplier
+                        if getgenv().RandomParryAccuracyEnabled then
+                            if Speed < 200 then
+                                effectiveMultiplier = 0.7 + (math.random(40, 100) - 1) * (0.35 / 99)
+                            else
+                                effectiveMultiplier = 0.7 + (math.random(1, 100) - 1) * (0.35 / 99)
+                            end
+                        end
+ 
+                        local speed_divisor = speed_divisor_base * effectiveMultiplier
+                        local Parry_Accuracy = Ping_Threshold + math.clamp(Speed / speed_divisor, 8.7, Distance - (Speed < 150 and 1.0 or 0.5))
+ 
+                        local Curved = Auto_Parry.Is_Curved()
+ 
+                        if Ball:FindFirstChild('AeroDynamicSlashVFX') then
+                            Debris:AddItem(Ball.AeroDynamicSlashVFX, 0)
+                            Tornado_Time = tick()
+                        end
+ 
+                        if Runtime:FindFirstChild('Tornado') then
+                            if (tick() - Tornado_Time) < (Runtime.Tornado:GetAttribute("TornadoTime") or 1) + 0.314159 then
+                            return
+                            end
+                        end
+ 
+                        if One_Target == tostring(Player) and Curved then
+                            return
+                        end
+ 
+                        if Ball:FindFirstChild("ComboCounter") then
+                            return
+                        end
+ 
+                        local Singularity_Cape = Player.Character.PrimaryPart:FindFirstChild('SingularityCape')
+                        if Singularity_Cape then
+                            return
+                        end 
+ 
+                        if getgenv().InfinityDetection and Infinity then
+                            return
+                        end
+ 
+                        if getgenv().DeathSlashDetection and deathshit then
+                            return
+                        end
+ 
+                        if getgenv().TimeHoleDetection and timehole then
+                            return
+                        end
+ 
+                        if Ball_Target == tostring(Player) and Distance <= Parry_Accuracy then
+                            if getgenv().AutoAbility and AutoAbility() then
+                                return
+                            end
+                        end
+ 
+                        if Ball_Target == tostring(Player) and Distance <= Parry_Accuracy then
+                            if getgenv().CooldownProtection and cooldownProtection() then
+                                return
+                            end
+ 
+                            local Parry_Time = os.clock()
+                            local Time_View = Parry_Time - (Last_Parry)
+                            if Time_View > 0.35 then
+                                Auto_Parry.Parry_Animation()
+                            end
+ 
+                            if getgenv().AutoParryKeypress then
+                                VirtualInputService:SendKeyEvent(true, Enum.KeyCode.F, false, nil)
+                            else
+                                Auto_Parry.Parry(Selected_Parry_Type)
+                            end
+ 
+                            Last_Parry = Parry_Time
+                            Parried = true
+                        end
+                        local Last_Parrys = tick()
+                        repeat
+                            RunService.PreSimulation:Wait()
+                        until (tick() - Last_Parrys) >= 1 or not Parried
+                        Parried = false
+                    end
+                end)
+            else
+                if Connections_Manager['Auto Parry'] then
+                    Connections_Manager['Auto Parry']:Disconnect()
+                    Connections_Manager['Auto Parry'] = nil
+                end
+            end
+        end
+    })
 
 AutoParryGroup:AddSlider("ParryAccuracy", {
     Text = "Parry Accuracy",
     Default = 100,
     Min = 1,
     Max = 100,
-    Callback = function(v) end
+    Callback = function(v)
+        Speed_Divisor_Multiplier = 0.8 + (value - 1) * (0.22 / 99)
+	end
 })
 
+local parryTypeMap = {
+    ["Camera"] = "Camera",
+    ["Random"] = "Random",
+    ["Backwards"] = "Backwards",
+    ["Straight"] = "Straight",
+    ["High"] = "High",
+    ["Left"] = "Left",
+    ["Right"] = "Right",
+    ["Random Target"] = "RandomTarget"
+}
+
 AutoParryGroup:AddDropdown("CurveDirection", {
-    Values = { "Camera", "Random", "Right", "Left", "Straight", "Up" },
-    Default = 1,
+    Values = { "Camera", "Random", "Backwards", "Straight", "High", "Left", "Right" },
+    Default = "Camera",
     Text = "Curve Direction",
-    Callback = function(v) end
+    Callback = function(v)
+        Selected_Parry_Type = parryTypeMap[value] or value
+    end
 })
 
 AutoParryGroup:AddToggle("RandomAccuracy", {
     Text = "Random Accuracy",
     Default = false,
-    Callback = function(v) end
+    Callback = function(v) 
+        getgenv().RandomParryAccuracyEnabled = value
+    end
 })
 
 AutoParryGroup:AddToggle("AutoParryKeypress", {
     Text = "Keypress",
     Default = false,
-    Callback = function(v) end
+    Callback = function(v)
+        getgenv().AutoParryKeypress = value
+    end
 })
 
 local AutoSpamGroup = BlatantTab:AddRightGroupbox("Auto Spam")
@@ -794,7 +944,55 @@ local AutoSpamGroup = BlatantTab:AddRightGroupbox("Auto Spam")
 AutoSpamGroup:AddToggle("AutoSpamParry", {
     Text = "Auto Spam Parry",
     Default = false,
-    Callback = function(v) end
+    Callback = function(v)
+        if value then
+            Connections_Manager['Auto Spam'] = RunService.Heartbeat:Connect(function()
+                local now = tick()
+                if not lastAutoSpam then lastAutoSpam = 0 end
+                if now - lastAutoSpam < (getgenv().SpamCooldown or 0.001) then return end
+                lastAutoSpam = now
+                local Ball = Auto_Parry.Get_Ball()
+                if not Ball then return end
+                local Zoomies = Ball:FindFirstChild('zoomies')
+                if not Zoomies then return end
+                Auto_Parry.Closest_Player()
+                local Ping = game:GetService('Stats').Network.ServerStatsItem['Data Ping']:GetValue()
+                local Ping_Threshold = math.clamp(Ping / 10, 1, 16)
+                local Ball_Target = Ball:GetAttribute('target')
+                local Ball_Properties = Auto_Parry:Get_Ball_Properties()
+                local Entity_Properties = Auto_Parry:Get_Entity_Properties()
+                local Spam_Accuracy = Auto_Parry.Spam_Service({
+                    Ball_Properties = Ball_Properties,
+                    Entity_Properties = Entity_Properties,
+                    Ping = Ping_Threshold
+                })
+                local Target_Position = Closest_Entity.PrimaryPart.Position
+                local Target_Distance = Player:DistanceFromCharacter(Target_Position)
+                local Direction = (Player.Character.PrimaryPart.Position - Ball.Position).Unit
+                local Ball_Direction = Zoomies.VectorVelocity.Unit
+                local Dot = Direction:Dot(Ball_Direction)
+                local Distance = Player:DistanceFromCharacter(Ball.Position)
+                if not Ball_Target then return end
+                if Target_Distance > Spam_Accuracy or Distance > Spam_Accuracy then return end
+                local Pulsed = Player.Character:GetAttribute('Pulsed')
+                if Pulsed then return end
+                if Ball_Target == tostring(Player) and Target_Distance > 30 and Distance > 30 then return end
+                local threshold = ParryThreshold
+                if Distance <= Spam_Accuracy and Parries > threshold then
+                    if getgenv().SpamParryKeypress then
+                        VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.F, false, game) 
+                    else
+                        Auto_Parry.Parry(Selected_Parry_Type)
+                    end
+                end
+            end)
+        else
+            if Connections_Manager['Auto Spam'] then
+                Connections_Manager['Auto Spam']:Disconnect()
+                Connections_Manager['Auto Spam'] = nil
+            end
+        end
+    end
 })
 
 AutoSpamGroup:AddDropdown("ParryType", {
@@ -854,7 +1052,9 @@ local DetectionGroup = BlatantTab:AddRightGroupbox("Detection")
 DetectionGroup:AddToggle("Infinity", {
     Text = "Infinity",
     Default = false,
-    Callback = function(v) end
+    Callback = function(v)
+        getgenv().InfinityDetection = value
+    end
 })
 
 DetectionGroup:AddToggle("AntiPhantom", {
