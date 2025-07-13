@@ -759,7 +759,7 @@ local AutoParryGroup = BlatantTab:AddLeftGroupbox("Auto Parry")
 AutoParryGroup:AddToggle("AutoParry", {
     Text = "Auto Parry",
     Default = false,
-    Callback = function(v)
+    Callback = function(value)
         if value then
             
             Connections_Manager['Auto Parry'] = RunService.PreSimulation:Connect(function()
@@ -898,7 +898,7 @@ AutoParryGroup:AddSlider("ParryAccuracy", {
     Default = 100,
     Min = 1,
     Max = 100,
-    Callback = function(v)
+    Callback = function(value)
         Speed_Divisor_Multiplier = 0.8 + (value - 1) * (0.22 / 99)
 	end
 })
@@ -918,7 +918,7 @@ AutoParryGroup:AddDropdown("CurveDirection", {
     Values = { "Camera", "Random", "Backwards", "Straight", "High", "Left", "Right" },
     Default = "Camera",
     Text = "Curve Direction",
-    Callback = function(v)
+    Callback = function(value)
         Selected_Parry_Type = parryTypeMap[value] or value
     end
 })
@@ -926,7 +926,7 @@ AutoParryGroup:AddDropdown("CurveDirection", {
 AutoParryGroup:AddToggle("RandomAccuracy", {
     Text = "Random Accuracy",
     Default = false,
-    Callback = function(v) 
+    Callback = function(value) 
         getgenv().RandomParryAccuracyEnabled = value
     end
 })
@@ -934,7 +934,7 @@ AutoParryGroup:AddToggle("RandomAccuracy", {
 AutoParryGroup:AddToggle("AutoParryKeypress", {
     Text = "Keypress",
     Default = false,
-    Callback = function(v)
+    Callback = function(value)
         getgenv().AutoParryKeypress = value
     end
 })
@@ -944,7 +944,7 @@ local AutoSpamGroup = BlatantTab:AddRightGroupbox("Auto Spam")
 AutoSpamGroup:AddToggle("AutoSpamParry", {
     Text = "Auto Spam Parry",
     Default = false,
-    Callback = function(v)
+    Callback = function(value)
         if value then
             Connections_Manager['Auto Spam'] = RunService.Heartbeat:Connect(function()
                 local now = tick()
@@ -999,7 +999,7 @@ AutoSpamGroup:AddDropdown("ParryType", {
     Values = { "Legit", "Blatant" },
     Default = 1,
     Text = "Parry Type",
-    Callback = function(v) 
+    Callback = function(value) 
     end
 })
 
@@ -1008,7 +1008,7 @@ AutoSpamGroup:AddSlider("ParryThreshold", {
     Default = 2.5,
     Min = 1,
     Max = 3,
-    Callback = function(v)
+    Callback = function(value)
 	ParryThreshold = value
     end
 })
@@ -1017,7 +1017,7 @@ if not game:GetService("UserInputService").TouchEnabled then
     AutoSpamGroup:AddToggle("AnimationFix", {
         Text = "Animation Fix",
         Default = false,
-        Callback = function(v)
+        Callback = function(value)
 	    if value then
                 Connections_Manager['Animation Fix'] = RunService.PreSimulation:Connect(function()
                     local Ball = Auto_Parry.Get_Ball()
@@ -1096,7 +1096,7 @@ end
 AutoSpamGroup:AddToggle("AutoSpamKeypress", {
     Text = "Keypress",
     Default = false,
-    Callback = function(v)
+    Callback = function(value)
         getgenv().SpamParryKeypress = value
     end
 })
@@ -1106,7 +1106,7 @@ local ManualSpamGroup = BlatantTab:AddLeftGroupbox("Manual Spam")
 ManualSpamGroup:AddToggle("ManualSpam", {
     Text = "Manual Spam",
     Default = false,
-    Callback = function(v)
+    Callback = function(value)
 	if value then
             Connections_Manager['Manual Spam'] = RunService.Heartbeat:Connect(function()
                 local now = tick()
@@ -1138,7 +1138,7 @@ if game:GetService("UserInputService").TouchEnabled then
     ManualSpamGroup:AddToggle("ManualSpamUI", {
         Text = "Manual Spam UI",
         Default = false,
-        Callback = function(v)
+        Callback = function(value)
 	    getgenv().spamui = value
 
         if value then
@@ -1215,7 +1215,7 @@ end
 ManualSpamGroup:AddToggle("ManualSpamKeypress", {
     Text = "Keypress",
     Default = false,
-    Callback = function(v)
+    Callback = function(value)
 	getgenv().ManualSpamKeypress = value
     end
 })
@@ -1226,7 +1226,7 @@ local DetectionGroup = BlatantTab:AddRightGroupbox("Detection")
 DetectionGroup:AddToggle("Infinity", {
     Text = "Infinity",
     Default = false,
-    Callback = function(v)
+    Callback = function(value)
         getgenv().InfinityDetection = value
     end
 })
@@ -1234,7 +1234,7 @@ DetectionGroup:AddToggle("Infinity", {
 DetectionGroup:AddToggle("AntiPhantom", {
     Text = "Anti Phantom",
     Default = false,
-    Callback = function(v)
+    Callback = function(value)
 	PhantomV2Detection = value
     end
 })
@@ -1246,7 +1246,7 @@ local SkinGroup = SpecialTab:AddLeftGroupbox("Skin Changer")
 SkinGroup:AddToggle("SkinChanger", {
     Text = "Skin Changer",
     Default = false,
-    Callback = function(v)
+    Callback = function(value)
 	getgenv().skinChanger = value
             if value then
                 getgenv().updateSword()
@@ -1259,7 +1259,7 @@ SkinGroup:AddInput("SwordSkin", {
     Numeric = false,
     Placeholder = "Enter Skin Name",
     Text = "Custom Skin Sword",
-    Callback = function(v)
+    Callback = function(value)
 	getgenv().swordModel = text
             getgenv().swordAnimations = text
             getgenv().swordFX = text
