@@ -1264,7 +1264,7 @@ end
 local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/deividcomsono/Obsidian/refs/heads/main/Library.lua"))()
 
 local Window = Library:CreateWindow({
-    Title = "VOID HUB by HUY",
+    Title = "VOID HUB",
     Footer = "v1.0",
     ToggleKeybind = Enum.KeyCode.RightShift,
     Center = true,
