@@ -741,3 +741,142 @@ local function AutoAbility()
     end
     return false
 end
+
+local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/deividcomsono/Obsidian/refs/heads/main/Library.lua"))()
+
+local Window = Library:CreateWindow({
+    Title = "VOID Paid Version",
+    Footer = "v1.0",
+    ToggleKeybind = Enum.KeyCode.RightShift,
+    Center = true,
+    AutoShow = true
+})
+
+local BlatantTab = Window:AddTab("Blatant", "swords")
+
+local AutoParryGroup = BlatantTab:AddLeftGroupbox("Auto Parry")
+
+AutoParryGroup:AddToggle("AutoParry", {
+    Text = "Auto Parry",
+    Default = false,
+    Callback = function(v)
+        
+
+AutoParryGroup:AddSlider("ParryAccuracy", {
+    Text = "Parry Accuracy",
+    Default = 100,
+    Min = 1,
+    Max = 100,
+    Callback = function(v) end
+})
+
+AutoParryGroup:AddDropdown("CurveDirection", {
+    Values = { "Camera", "Random", "Right", "Left", "Straight", "Up" },
+    Default = 1,
+    Text = "Curve Direction",
+    Callback = function(v) end
+})
+
+AutoParryGroup:AddToggle("RandomAccuracy", {
+    Text = "Random Accuracy",
+    Default = false,
+    Callback = function(v) end
+})
+
+AutoParryGroup:AddToggle("AutoParryKeypress", {
+    Text = "Keypress",
+    Default = false,
+    Callback = function(v) end
+})
+
+local AutoSpamGroup = BlatantTab:AddRightGroupbox("Auto Spam")
+
+AutoSpamGroup:AddToggle("AutoSpamParry", {
+    Text = "Auto Spam Parry",
+    Default = false,
+    Callback = function(v) end
+})
+
+AutoSpamGroup:AddDropdown("ParryType", {
+    Values = { "Quick", "Strong", "Random" },
+    Default = 1,
+    Text = "Parry Type",
+    Callback = function(v) end
+})
+
+AutoSpamGroup:AddSlider("ParryThreshold", {
+    Text = "Parry Threshold",
+    Default = 3,
+    Min = 1,
+    Max = 5,
+    Callback = function(v) end
+})
+
+if not game:GetService("UserInputService").TouchEnabled then
+    AutoSpamGroup:AddToggle("AnimationFix", {
+        Text = "Animation Fix",
+        Default = false,
+        Callback = function(v) end
+    })
+end
+
+AutoSpamGroup:AddToggle("AutoSpamKeypress", {
+    Text = "Keypress",
+    Default = false,
+    Callback = function(v) end
+})
+
+local ManualSpamGroup = BlatantTab:AddLeftGroupbox("Manual Spam")
+
+ManualSpamGroup:AddToggle("ManualSpam", {
+    Text = "Manual Spam",
+    Default = false,
+    Callback = function(v) end
+})
+
+if game:GetService("UserInputService").TouchEnabled then
+    ManualSpamGroup:AddToggle("ManualSpamUI", {
+        Text = "Manual Spam UI",
+        Default = false,
+        Callback = function(v) end
+    })
+end
+
+ManualSpamGroup:AddToggle("ManualSpamKeypress", {
+    Text = "Keypress",
+    Default = false,
+    Callback = function(v) end
+})
+
+local DetectionGroup = BlatantTab:AddRightGroupbox("Detection")
+
+
+DetectionGroup:AddToggle("Infinity", {
+    Text = "Infinity",
+    Default = false,
+    Callback = function(v) end
+})
+
+DetectionGroup:AddToggle("AntiPhantom", {
+    Text = "Anti Phantom",
+    Default = false,
+    Callback = function(v) end
+})
+
+local SpecialTab = Window:AddTab("Special", "palette")
+
+local SkinGroup = SpecialTab:AddLeftGroupbox("Skin Changer")
+
+SkinGroup:AddToggle("SkinChanger", {
+    Text = "Skin Changer",
+    Default = false,
+    Callback = function(v) end
+})
+
+SkinGroup:AddInput("SkinID", {
+    Default = "",
+    Numeric = false,
+    Placeholder = "Nhập ID Skin...",
+    Text = "Custom Skin ID",
+    Callback = function(v) end
+})
