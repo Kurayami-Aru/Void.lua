@@ -996,32 +996,109 @@ AutoSpamGroup:AddToggle("AutoSpamParry", {
 })
 
 AutoSpamGroup:AddDropdown("ParryType", {
-    Values = { "Quick", "Strong", "Random" },
+    Values = { "Legit", "Blatant" },
     Default = 1,
     Text = "Parry Type",
-    Callback = function(v) end
+    Callback = function(v) 
+    end
 })
 
 AutoSpamGroup:AddSlider("ParryThreshold", {
     Text = "Parry Threshold",
-    Default = 3,
+    Default = 2.5,
     Min = 1,
-    Max = 5,
-    Callback = function(v) end
+    Max = 3,
+    Callback = function(v)
+	ParryThreshold = value
+    end
 })
 
 if not game:GetService("UserInputService").TouchEnabled then
     AutoSpamGroup:AddToggle("AnimationFix", {
         Text = "Animation Fix",
         Default = false,
-        Callback = function(v) end
+        Callback = function(v)
+	    if value then
+                Connections_Manager['Animation Fix'] = RunService.PreSimulation:Connect(function()
+                    local Ball = Auto_Parry.Get_Ball()
+
+                    if not Ball then
+                        return
+                    end
+
+                    local Zoomies = Ball:FindFirstChild('zoomies')
+
+                    if not Zoomies then
+                        return
+                    end
+
+                    Auto_Parry.Closest_Player()
+
+                    local Ping = game:GetService('Stats').Network.ServerStatsItem['Data Ping']:GetValue()
+
+                    local Ping_Threshold = math.clamp(Ping / 10, 10, 16)
+
+                    local Ball_Target = Ball:GetAttribute('target')
+
+                    local Ball_Properties = Auto_Parry:Get_Ball_Properties()
+                    local Entity_Properties = Auto_Parry:Get_Entity_Properties()
+
+                    local Spam_Accuracy = Auto_Parry.Spam_Service({
+                        Ball_Properties = Ball_Properties,
+                        Entity_Properties = Entity_Properties,
+                        Ping = Ping_Threshold
+                    })
+
+                    local Target_Position = Closest_Entity.PrimaryPart.Position
+                    local Target_Distance = Player:DistanceFromCharacter(Target_Position)
+
+                    local Direction = (Player.Character.PrimaryPart.Position - Ball.Position).Unit
+                    local Ball_Direction = Zoomies.VectorVelocity.Unit
+
+                    local Dot = Direction:Dot(Ball_Direction)
+
+                    local Distance = Player:DistanceFromCharacter(Ball.Position)
+
+                    if not Ball_Target then
+                        return
+                    end
+
+                    if Target_Distance > Spam_Accuracy or Distance > Spam_Accuracy then
+                        return
+                    end
+                    
+                    local Pulsed = Player.Character:GetAttribute('Pulsed')
+
+                    if Pulsed then
+                        return
+                    end
+
+                    if Ball_Target == tostring(Player) and Target_Distance > 30 and Distance > 30 then
+                        return
+                    end
+
+                    local threshold = ParryThreshold
+
+                    if Distance <= Spam_Accuracy and Parries > threshold then
+                        VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.F, false, game) 
+                    end
+                end)
+            else
+                if Connections_Manager['Animation Fix'] then
+                    Connections_Manager['Animation Fix']:Disconnect()
+                    Connections_Manager['Animation Fix'] = nil
+                end
+            end
+        end
     })
 end
 
 AutoSpamGroup:AddToggle("AutoSpamKeypress", {
     Text = "Keypress",
     Default = false,
-    Callback = function(v) end
+    Callback = function(v)
+        getgenv().SpamParryKeypress = value
+    end
 })
 
 local ManualSpamGroup = BlatantTab:AddLeftGroupbox("Manual Spam")
@@ -1029,21 +1106,118 @@ local ManualSpamGroup = BlatantTab:AddLeftGroupbox("Manual Spam")
 ManualSpamGroup:AddToggle("ManualSpam", {
     Text = "Manual Spam",
     Default = false,
-    Callback = function(v) end
+    Callback = function(v)
+	if value then
+            Connections_Manager['Manual Spam'] = RunService.Heartbeat:Connect(function()
+                local now = tick()
+                if not lastManualSpam then lastManualSpam = 0 end
+                if now - lastManualSpam < (getgenv().ManualSpamCooldown or 0.005) then return end
+                lastManualSpam = now
+ 
+                if getgenv().spamui then
+                    return
+                end
+ 
+                if getgenv().ManualSpamKeypress then
+                    VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.F, false, game) 
+                else
+                    Auto_Parry.Parry(Selected_Parry_Type)
+                end
+ 
+            end)
+        else
+            if Connections_Manager['Manual Spam'] then
+                Connections_Manager['Manual Spam']:Disconnect()
+                Connections_Manager['Manual Spam'] = nil
+            end
+        end
+    end
 })
-
+						
 if game:GetService("UserInputService").TouchEnabled then
     ManualSpamGroup:AddToggle("ManualSpamUI", {
         Text = "Manual Spam UI",
         Default = false,
-        Callback = function(v) end
+        Callback = function(v)
+	    getgenv().spamui = value
+
+        if value then
+            local gui = Instance.new("ScreenGui")
+            gui.Name = "ManualSpamUI"
+            gui.ResetOnSpawn = false
+            gui.Parent = game.CoreGui
+
+            local frame = Instance.new("Frame")
+            frame.Name = "MainFrame"
+            frame.Position = UDim2.new(0, 20, 0, 20)
+            frame.Size = UDim2.new(0, 200, 0, 100)
+            frame.BackgroundColor3 = Color3.fromRGB(152, 117, 255)
+            frame.BackgroundTransparency = 0.3
+            frame.BorderSizePixel = 0
+            frame.Active = true
+            frame.Draggable = true
+            frame.Parent = gui
+
+            local uiCorner = Instance.new("UICorner")
+            uiCorner.CornerRadius = UDim.new(0, 12)
+            uiCorner.Parent = frame
+
+            local uiStroke = Instance.new("UIStroke")
+            uiStroke.Thickness = 2
+            uiStroke.Color = Color3.new(255, 255, 255)
+            uiStroke.Parent = frame
+
+            local button = Instance.new("TextButton")
+            button.Name = "ClashModeButton"
+            button.Text = "Clash Mode"
+            button.Size = UDim2.new(0, 160, 0, 40)
+            button.Position = UDim2.new(0.5, -80, 0.5, -20)
+            button.BackgroundTransparency = 1
+            button.BorderSizePixel = 0
+            button.Font = Enum.Font.GothamSemibold
+            button.TextColor3 = Color3.new(255, 255, 255)
+            button.TextSize = 22
+            button.Parent = frame
+
+            local activated = false
+
+            local function toggle()
+                activated = not activated
+                button.Text = activated and "Stop" or "Clash Mode"
+                if activated then
+                    Connections_Manager['Manual Spam UI'] = game:GetService("RunService").Heartbeat:Connect(function()
+                        Auto_Parry.Parry(Selected_Parry_Type)
+                    end)
+                else
+                    if Connections_Manager['Manual Spam UI'] then
+                        Connections_Manager['Manual Spam UI']:Disconnect()
+                        Connections_Manager['Manual Spam UI'] = nil
+                    end
+                end
+            end
+
+            button.MouseButton1Click:Connect(toggle)
+        else
+            if game.CoreGui:FindFirstChild("ManualSpamUI") then
+                game.CoreGui:FindFirstChild("ManualSpamUI"):Destroy()
+            end
+
+            if Connections_Manager['Manual Spam UI'] then
+                Connections_Manager['Manual Spam UI']:Disconnect()
+                Connections_Manager['Manual Spam UI'] = nil
+            end
+        end
+    end
     })
 end
+						
 
 ManualSpamGroup:AddToggle("ManualSpamKeypress", {
     Text = "Keypress",
     Default = false,
-    Callback = function(v) end
+    Callback = function(v)
+	getgenv().ManualSpamKeypress = value
+    end
 })
 
 local DetectionGroup = BlatantTab:AddRightGroupbox("Detection")
@@ -1060,7 +1234,9 @@ DetectionGroup:AddToggle("Infinity", {
 DetectionGroup:AddToggle("AntiPhantom", {
     Text = "Anti Phantom",
     Default = false,
-    Callback = function(v) end
+    Callback = function(v)
+	PhantomV2Detection = value
+    end
 })
 
 local SpecialTab = Window:AddTab("Special", "palette")
@@ -1070,13 +1246,25 @@ local SkinGroup = SpecialTab:AddLeftGroupbox("Skin Changer")
 SkinGroup:AddToggle("SkinChanger", {
     Text = "Skin Changer",
     Default = false,
-    Callback = function(v) end
-})
+    Callback = function(v)
+	getgenv().skinChanger = value
+            if value then
+                getgenv().updateSword()
+            end
+        end
+    })
 
-SkinGroup:AddInput("SkinID", {
+SkinGroup:AddInput("SwordSkin", {
     Default = "",
     Numeric = false,
-    Placeholder = "Nhập ID Skin...",
-    Text = "Custom Skin ID",
-    Callback = function(v) end
-})
+    Placeholder = "Enter Skin Name",
+    Text = "Custom Skin Sword",
+    Callback = function(v)
+	getgenv().swordModel = text
+            getgenv().swordAnimations = text
+            getgenv().swordFX = text
+            if getgenv().skinChanger then
+                getgenv().updateSword()
+            end
+        end
+    })
