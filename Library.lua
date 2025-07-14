@@ -798,12 +798,12 @@ AutoParryGroup:AddToggle("AutoParry", {
  
                         local Ping = game:GetService('Stats').Network.ServerStatsItem['Data Ping']:GetValue() / 10
  
-                        local Ping_Threshold = math.clamp(Ping / 10 + 0.2, 5.8, 15.5)
+                        local Ping_Threshold = math.clamp(Ping / 10 + 0.2, 6.0, 15)
  
                         local Speed = Velocity.Magnitude
  
                         local cappedSpeedDiff = math.min(math.max(Speed - 9.5, 0), 650)
-                        local speed_divisor_base = 2.0 + cappedSpeedDiff * 0.00175
+                        local speed_divisor_base = 2.0 + cappedSpeedDiff * 0.0018
  
                         local effectiveMultiplier = Speed_Divisor_Multiplier
                         if getgenv().RandomParryAccuracyEnabled then
