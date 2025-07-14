@@ -2237,11 +2237,11 @@ BoosterGroup:AddToggle("NoRenderToggle", {
     end
 })
 
-BoosterGroup:AddToggle("FPSBooster", {
+BoosterGroup:AddToggle("FPSBoosterToggle", {
 	Text = "FPS Booster",
 	Default = false,
 	Tooltip = "Darkens sky and removes lighting effects to improve FPS"
-}):OnChanged(function(value)
+        Callback = function(value)
 	local Lighting = game:GetService("Lighting")
 
 	if value then
