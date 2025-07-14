@@ -2200,42 +2200,6 @@ ESPGroup:AddToggle("BallStatsToggle", {
 })
 
 local BoosterGroup = WorldTab:AddRightGroupbox("Booster")
-
-BoosterGroup:AddToggle("FPSBoosterToggle", {
-    Text = "FPS Booster",
-    Default = false,
-    Tooltip = "Optimize performance by disabling heavy effects",
-    Callback = function(state)
-    if state then
-	task.spawn(function()
-	local Lighting = game:GetService("Lighting")
-
-	-- Làm trời xám tối nhẹ
-	Lighting.Ambient = Color3.fromRGB(80, 80, 80)
-	Lighting.OutdoorAmbient = Color3.fromRGB(80, 80, 80)
-	Lighting.Brightness = 0.5
-	Lighting.FogColor = Color3.fromRGB(80, 80, 80)
-	Lighting.FogStart = 0
-	Lighting.FogEnd = 1000
-	Lighting.GlobalShadows = false
-	Lighting.EnvironmentSpecularScale = 0
-	Lighting.EnvironmentDiffuseScale = 0
-
-	-- Xoá post-effect
-	for _, v in ipairs(Lighting:GetChildren()) do
-		if v:IsA("PostEffect") or v:IsA("Sky") or v:IsA("Atmosphere") then
-			pcall(function() v:Destroy() end)
-		end
-	end
-
-	-- Ngăn tái tạo sky
-	game.DescendantAdded:Connect(function(obj)
-		if obj:IsA("Sky") or obj:IsA("Atmosphere") then
-			task.wait()
-			pcall(function() obj:Destroy() end)
-		end
-	end)
-end)
 										
 BoosterGroup:AddToggle("NoRenderToggle", {
     Text = "No Render",
