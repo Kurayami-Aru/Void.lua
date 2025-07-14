@@ -1877,7 +1877,7 @@ FOVGroup:AddSlider("FOVSlider", {
     end
 })
 
-local VisualGroup = PlayerTab:AddRightGroupbox("Visualize")
+local VisualGroup = PlayerTab:AddRightGroupbox("Visualise")
 
 VisualGroup:AddToggle("VisualiseToggle", {
     Text = "Visualiser",
@@ -1950,6 +1950,17 @@ VisualGroup:AddToggle("VisualiseToggle", {
     Tooltip = "Rainbow Visualiser",
     Callback = function(value)
 	getgenv().VisualiserRainbow = value
+    end
+})
+
+VisualGroup:AddSlider("VisualiseSlider", {
+    Text = "Color Hue",
+    Default = 0,
+    Min = 0,
+    Max = 360,
+    Tooltip = "VisualiserHue",
+    Callback = function(value)
+        getgenv().VisualiserHue = value
     end
 })
 
