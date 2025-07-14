@@ -2245,6 +2245,7 @@ BoosterGroup:AddToggle("FPSBoosterToggle", {
     local Lighting = game:GetService("Lighting")
 
     if enabled then
+        -- Áp dụng cấu hình tối ưu FPS
         Lighting.Ambient = Color3.fromRGB(80, 80, 80)
         Lighting.OutdoorAmbient = Color3.fromRGB(80, 80, 80)
         Lighting.Brightness = 0.5
@@ -2255,20 +2256,26 @@ BoosterGroup:AddToggle("FPSBoosterToggle", {
         Lighting.EnvironmentSpecularScale = 0
         Lighting.EnvironmentDiffuseScale = 0
 
+        -- Xoá Sky, Atmosphere, PostEffect
         for _, obj in ipairs(Lighting:GetChildren()) do
             if obj:IsA("Sky") or obj:IsA("Atmosphere") or obj:IsA("PostEffect") then
                 pcall(function() obj:Destroy() end)
             end
         end
 
-        -- Chặn việc thêm lại Sky hoặc Atmosphere
-        game.DescendantAdded:Connect(function(desc)
-            if desc:IsA("Sky") or desc:IsA("Atmosphere") then
-                task.wait()
-                pcall(function() desc:Destroy() end)
-            end
-        end)
+        -- Ngăn spawn lại hiệu ứng Lighting
+        if not getgenv().fpsBoosterDescHooked then
+            getgenv().fpsBoosterDescHooked = true
+            game.DescendantAdded:Connect(function(obj)
+                if obj:IsA("Sky") or obj:IsA("Atmosphere") then
+                    task.defer(function()
+                        pcall(function() obj:Destroy() end)
+                    end)
+                end
+            end)
+        end
     else
+        -- Khôi phục cấu hình Lighting mặc định
         Lighting.Ambient = Color3.fromRGB(127, 127, 127)
         Lighting.OutdoorAmbient = Color3.fromRGB(127, 127, 127)
         Lighting.Brightness = 2
