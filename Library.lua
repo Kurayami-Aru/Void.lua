@@ -2198,12 +2198,3 @@ ESPGroup:AddToggle("BallStatsToggle", {
 		end
 	end
 })
-
-ESPGroup:AddToggle("ServerStatsToggle", {
-    Text = "Server Stats",
-    Default = false,
-    Tooltip = "Show server performance and status",
-    Callback = function(state)
-        getgenv().serverStatsEnabled = state
-    end
-})
