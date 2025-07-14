@@ -1964,3 +1964,246 @@ VisualGroup:AddSlider("VisualiseSlider", {
     end
 })
 
+local WorldTab = Window:AddTab("World", "globe")
+local ESPGroup = WorldTab:AddLeftGroupbox("ESP")
+
+ESPGroup:AddToggle("QuantumEffectsToggle", {
+    Text = "Disable Quantum Arena Effects",
+    Default = false,
+    Tooltip = "Turn off arena FX visuals",
+    Callback = function(value)
+        getgenv().NoQuantumEffects = value
+            if value then
+                task.spawn(function()
+                    local quantumfx
+                    while task.wait() and getgenv().NoQuantumEffects and not quantumfx do
+                        for _, v in getconnections(ReplicatedStorage.Remotes.QuantumArena.OnClientEvent) do
+                            quantumfx = v
+                            v:Disable()
+                        end
+                    end
+                end)
+            end
+        end
+    })
+
+local espEnabled = false
+local espConnections = {}
+
+local function clearESP()
+	for _, player in pairs(game.Players:GetPlayers()) do
+		local char = player.Character
+		if char and char:FindFirstChild("Head") then
+			local esp = char.Head:FindFirstChild("AbilityESP")
+			if esp then esp:Destroy() end
+		end
+	end
+	for _, conn in pairs(espConnections) do
+		conn:Disconnect()
+	end
+	espConnections = {}
+end
+
+local function getAbilityName(player)
+	local char = player.Character
+	if not char then return "No Character" end
+
+	local abilities = char:FindFirstChild("Abilities")
+	if abilities then
+		for _, ability in ipairs(abilities:GetChildren()) do
+			if ability:IsA("BoolValue") and ability.Value then
+				return ability.Name
+			end
+		end
+	end
+
+	return player:GetAttribute("EquippedAbility") or "No Ability"
+end
+
+local function createAbilityESP(player)
+	if player == game.Players.LocalPlayer then return end
+
+	local char = player.Character
+	if not char or not char:FindFirstChild("Head") then return end
+	local head = char.Head
+
+	local old = head:FindFirstChild("AbilityESP")
+	if old then old:Destroy() end
+
+	local gui = Instance.new("BillboardGui")
+	gui.Name = "AbilityESP"
+	gui.Size = UDim2.new(0, 200, 0, 30)
+	gui.StudsOffset = Vector3.new(0, 3, 0)
+	gui.AlwaysOnTop = true
+	gui.Parent = head
+
+	local label = Instance.new("TextLabel")
+	label.Size = UDim2.new(1, 0, 1, 0)
+	label.BackgroundTransparency = 1
+	label.TextColor3 = Color3.fromRGB(255, 255, 255)
+	label.TextStrokeTransparency = 0.5
+	label.TextScaled = false
+	label.TextSize = 12
+	label.Font = Enum.Font.Gotham
+	label.Text = player.Name .. " (" .. getAbilityName(player) .. ")"
+	label.Parent = gui
+
+	local lastText = ""
+	local runConn = game:GetService("RunService").Heartbeat:Connect(function()
+		if not label or not label.Parent then
+			runConn:Disconnect()
+			return
+		end
+
+		local newText = player.Name .. " (" .. getAbilityName(player) .. ")"
+		if newText ~= lastText then
+			label.Text = newText
+			lastText = newText
+		end
+	end)
+
+	table.insert(espConnections, runConn)
+end
+
+local function enableAbilityESP()
+	for _, player in ipairs(game.Players:GetPlayers()) do
+		if player ~= game.Players.LocalPlayer then
+			if player.Character then
+				createAbilityESP(player)
+			end
+
+			local charConn = player.CharacterAdded:Connect(function()
+				task.wait(1)
+				createAbilityESP(player)
+			end)
+
+			table.insert(espConnections, charConn)
+		end
+	end
+
+	local playerConn = game.Players.PlayerAdded:Connect(function(player)
+		local charConn = player.CharacterAdded:Connect(function()
+			task.wait(1)
+			createAbilityESP(player)
+		end)
+		table.insert(espConnections, charConn)
+	end)
+
+	table.insert(espConnections, playerConn)
+end
+						
+ESPGroup:AddToggle("AbilityESP", {
+    Text = "Ability ESP",
+    Default = false,
+    Tooltip = "Show ESP for abilities or skills",
+    Callback = function(value)
+        espEnabled = value
+		if value then
+			enableAbilityESP()
+		else
+			clearESP()
+		end
+	end
+})
+
+local ballStatsConn
+local statsGui
+						
+ESPGroup:AddToggle("BallStatsToggle", {
+    Text = "Ball Stats",
+    Default = false,
+    Tooltip = "Display ball-related statistics",
+    Callback = function(value)
+        if value then
+			local Players = game:GetService("Players")
+			local RunService = game:GetService("RunService")
+			local player = Players.LocalPlayer
+			local peakSpeed = 0
+
+			statsGui = Instance.new("ScreenGui")
+			statsGui.Name = "BallSpeedGui"
+			statsGui.ResetOnSpawn = false
+			statsGui.Parent = player:WaitForChild("PlayerGui")
+
+			local label = Instance.new("TextLabel")
+			label.Size = UDim2.new(0, 320, 0, 100)
+			label.Position = UDim2.new(0, 10, 0, 10)
+			label.BackgroundTransparency = 1
+			label.TextColor3 = Color3.new(1, 1, 1)
+			label.Font = Enum.Font.GothamBold
+			label.TextSize = 28
+			label.Text = "velocity: ...\npeak: ...\nstatus: ..."
+			label.TextXAlignment = Enum.TextXAlignment.Left
+			label.TextYAlignment = Enum.TextYAlignment.Top
+			label.TextWrapped = true
+			label.Parent = statsGui
+
+			local function findFastestBall()
+				local ballsFolder = workspace:FindFirstChild("Balls")
+				if not ballsFolder then return nil end
+				local bestBall, maxSpeed = nil, 0
+				for _, obj in ipairs(ballsFolder:GetChildren()) do
+					if obj:IsA("BasePart") then
+						local speed = obj.Velocity.Magnitude
+						if speed > maxSpeed then
+							maxSpeed = speed
+							bestBall = obj
+						end
+					end
+				end
+				return bestBall
+			end
+
+			local function trackHumanoid(hum)
+				if hum:GetAttribute("__Tracked") then return end
+				hum:SetAttribute("__Tracked", true)
+				hum.Died:Connect(function()
+					peakSpeed = 0
+				end)
+			end
+
+			for _, v in ipairs(workspace:GetDescendants()) do
+				if v:IsA("Humanoid") then
+					trackHumanoid(v)
+				end
+			end
+
+			workspace.DescendantAdded:Connect(function(obj)
+				if obj:IsA("Humanoid") then
+					trackHumanoid(obj)
+				end
+			end)
+
+			ballStatsConn = RunService.RenderStepped:Connect(function()
+				local ball = findFastestBall()
+				local status = "Stopped"
+				if ball and ball:IsDescendantOf(workspace) then
+					local speed = math.floor(ball.Velocity.Magnitude + 0.5)
+					if speed > peakSpeed then peakSpeed = speed end
+					if speed > 1 and not ball.Anchored then status = "Moving" end
+					label.Text = "velocity: " .. speed .. "\npeak: " .. peakSpeed .. "\nstatus: " .. status
+				else
+					label.Text = "velocity: not found\npeak: " .. peakSpeed .. "\nstatus: Stopped"
+				end
+			end)
+		else
+			if statsGui then
+				statsGui:Destroy()
+				statsGui = nil
+			end
+			if ballStatsConn then
+				ballStatsConn:Disconnect()
+				ballStatsConn = nil
+			end
+		end
+	end
+})
+
+ESPGroup:AddToggle("ServerStatsToggle", {
+    Text = "Server Stats",
+    Default = false,
+    Tooltip = "Show server performance and status",
+    Callback = function(state)
+        getgenv().serverStatsEnabled = state
+    end
+})
