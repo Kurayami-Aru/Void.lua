@@ -1396,15 +1396,13 @@ end)
 --== INITIAL APPLY ==
 getgenv().updateSword()
 
-local PlayerTab = Window:AddTab("Player", "globe")
-
--- SPEED GROUP
+local PlayerTab = Window:AddTab("Player", "user")
 local SpeedGroup = PlayerTab:AddLeftGroupbox("Speed")
 
 SpeedGroup:AddToggle("AutoSpeedToggle", {
-    Text = "Enable Auto Speed",
+    Text = "Strafe",
     Default = false,
-    Tooltip = "Toggle custom walk speed",
+    Tooltip = "walk speed",
     Callback = function(state)
         getgenv().autoSpeedEnabled = state
     end
