@@ -1396,7 +1396,7 @@ end)
 --== INITIAL APPLY ==
 getgenv().updateSword()
 
-local PlayerWorldTab = Window:AddTab("Player", "globe", {
+local PlayerTab = Window:AddTab("Player", "user", {
 local SpeedGroup = PlayerTab:AddLeftGroupbox("Speed")
 
 SpeedGroup:AddToggle("Strafe", {
