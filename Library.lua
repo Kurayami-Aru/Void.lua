@@ -1244,18 +1244,61 @@ getgenv().config = {
     fx = "Flowing Katana"
 }
 
---== Obsidian UI Toggle ==
+--== SkinChanger Config ==
+getgenv().config = {
+    enabled = true,
+    model = "Flowing Katana",
+    anim = "Flowing Katana",
+    fx = "Flowing Katana"
+}
+
+--== Obsidian UI: Toggle + 3 Textbox ==
 local SpecialTab = Window:AddTab("Special", "palette")
 local SkinGroup = SpecialTab:AddLeftGroupbox("Skin Changer")
 
 SkinGroup:AddToggle("SkinChangerToggle", {
     Text = "Enable Skin Changer",
     Default = getgenv().config.enabled,
-    Tooltip = "Toggle skin changer from config.enabled",
+    Tooltip = "Toggle skin changer logic",
     Callback = function(value)
         getgenv().config.enabled = value
     end
 })
+
+SkinGroup:AddInput("SwordModelInput", {
+    Text = "Sword Model",
+    Placeholder = getgenv().config.model,
+    Tooltip = "Model name of the sword to equip",
+    Callback = function(v)
+        getgenv().config.model = v
+        getgenv().updateSword()
+    end
+})
+
+SkinGroup:AddInput("SwordAnimationInput", {
+    Text = "Sword Animation",
+    Placeholder = getgenv().config.anim,
+    Tooltip = "Animation name used for slash/parry",
+    Callback = function(v)
+        getgenv().config.anim = v
+        getgenv().updateSword()
+    end
+})
+
+SkinGroup:AddInput("SwordFXInput", {
+    Text = "Sword FX",
+    Placeholder = getgenv().config.fx,
+    Tooltip = "Slash effect name to inject",
+    Callback = function(v)
+        getgenv().config.fx = v
+        getgenv().config.slash = getSlash(v)
+        getgenv().updateSword()
+    end
+})
+
+SkinGroup:AddButton("Apply Skin", function()
+    getgenv().updateSword()
+end)
 
 --== Required Services ==
 local Players = game:GetService("Players")
@@ -1268,7 +1311,6 @@ local function getSlash(name)
     local s = swords:GetSword(name)
     return (s and s.SlashName) or "SlashEffect"
 end
-
 getgenv().config.slash = getSlash(getgenv().config.fx)
 
 --== Detect Sword Controller ==
@@ -1322,7 +1364,7 @@ task.spawn(function()
         if getgenv().config.enabled then
             local char = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
             if LocalPlayer:GetAttribute("CurrentlyEquippedSword") ~= getgenv().config.model
-                or not char:FindFirstChild(getgenv().config.model) then
+            or not char:FindFirstChild(getgenv().config.model) then
                 setSword()
             end
             for _, m in pairs(char:GetChildren()) do
@@ -1334,5 +1376,5 @@ task.spawn(function()
     end
 end)
 
---== Apply once on load ==
+--== Initial Apply ==
 getgenv().updateSword()
