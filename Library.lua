@@ -1427,8 +1427,8 @@ SpeedGroup:AddToggle("AutoSpeedToggle", {
 
 SpeedGroup:AddSlider("SpeedSlider", {
     Text = "Walk Speed",
-    Default = 20,
-    Min = 16,
+    Default = 1,
+    Min = 1,
     Max = 100,
     Tooltip = "Adjust player walk speed",
     Callback = function(val)
@@ -1486,9 +1486,9 @@ SpinBotGroup:AddToggle("SpinBotToggle", {
 
 SpinBotGroup:AddSlider("SpinSpeedSlider", {
     Text = "Spin Speed",
-    Default = 2,
+    Default = 1,
     Min = 1,
-    Max = 10,
+    Max = 100,
     Tooltip = "Rotation speed of spin bot",
     Callback = function(val)
         getgenv().spinSpeed = math.rad(val)
@@ -1498,7 +1498,9 @@ SpinBotGroup:AddSlider("SpinSpeedSlider", {
 
 -- PLAYER COSMETIC GROUP
 local CosmeticGroup = PlayerTab:AddLeftGroupbox("Player Cosmetic")
-
+						
+_G.PlayerCosmeticsCleanup = {}
+						
 CosmeticGroup:AddToggle("PlayerCosmeticToggle", {
     Text = "Enable Cosmetic",
     Default = false,
@@ -1684,8 +1686,137 @@ FlyGroup:AddToggle("FlyToggle", {
     Text = "Enable Fly",
     Default = false,
     Tooltip = "Toggle fly mode",
-    Callback = function(state)
-        getgenv().flyEnabled = state
+    Callback = function(value)
+        if value then
+            getgenv().FlyEnabled = true
+            local char = Player.Character or Player.CharacterAdded:Wait()
+            local hrp = char:WaitForChild("HumanoidRootPart")
+            local humanoid = char:WaitForChild("Humanoid")
+            
+            getgenv().OriginalStateType = humanoid:GetState()
+            
+            getgenv().RagdollHandler = humanoid.StateChanged:Connect(function(oldState, newState)
+                if getgenv().FlyEnabled then
+                    if newState == Enum.HumanoidStateType.Physics or newState == Enum.HumanoidStateType.Ragdoll then
+                        task.defer(function()
+                            humanoid:ChangeState(Enum.HumanoidStateType.GettingUp)
+                            humanoid:ChangeState(Enum.HumanoidStateType.Running)
+                        end)
+                    end
+                end
+            end)
+            
+            local bodyGyro = Instance.new("BodyGyro")
+            bodyGyro.P = 90000
+            bodyGyro.MaxTorque = Vector3.new(9e9, 9e9, 9e9)
+            bodyGyro.Parent = hrp
+            
+            local bodyVelocity = Instance.new("BodyVelocity")
+            bodyVelocity.Velocity = Vector3.new(0, 0, 0)
+            bodyVelocity.MaxForce = Vector3.new(9e9, 9e9, 9e9)
+            bodyVelocity.Parent = hrp
+            
+            humanoid.PlatformStand = true
+            
+            getgenv().ResetterConnection = RunService.Heartbeat:Connect(function()
+                if not getgenv().FlyEnabled then return end
+                
+                if bodyGyro and bodyGyro.Parent then
+                    bodyGyro.P = 90000
+                    bodyGyro.MaxTorque = Vector3.new(9e9, 9e9, 9e9)
+                end
+                
+                if bodyVelocity and bodyVelocity.Parent then
+                    bodyVelocity.MaxForce = Vector3.new(9e9, 9e9, 9e9)
+                end
+                
+                humanoid.PlatformStand = true
+                
+                if not bodyGyro.Parent or not bodyVelocity.Parent then
+                    if bodyGyro then bodyGyro:Destroy() end
+                    if bodyVelocity then bodyVelocity:Destroy() end
+                    
+                    bodyGyro = Instance.new("BodyGyro")
+                    bodyGyro.P = 90000
+                    bodyGyro.MaxTorque = Vector3.new(9e9, 9e9, 9e9)
+                    bodyGyro.Parent = hrp
+                    
+                    bodyVelocity = Instance.new("BodyVelocity")
+                    bodyVelocity.Velocity = Vector3.new(0, 0, 0)
+                    bodyVelocity.MaxForce = Vector3.new(9e9, 9e9, 9e9)
+                    bodyVelocity.Parent = hrp
+                end
+            end)
+            
+            getgenv().FlyConnection = RunService.RenderStepped:Connect(function()
+                if not getgenv().FlyEnabled then return end
+                local camCF = workspace.CurrentCamera.CFrame
+                local moveDir = Vector3.new(0, 0, 0)
+                
+                if UserInputService:IsKeyDown(Enum.KeyCode.W) then
+                    moveDir = moveDir + camCF.LookVector
+                end
+                if UserInputService:IsKeyDown(Enum.KeyCode.S) then
+                    moveDir = moveDir - camCF.LookVector
+                end
+                if UserInputService:IsKeyDown(Enum.KeyCode.A) then
+                    moveDir = moveDir - camCF.RightVector
+                end
+                if UserInputService:IsKeyDown(Enum.KeyCode.D) then
+                    moveDir = moveDir + camCF.RightVector
+                end
+                if UserInputService:IsKeyDown(Enum.KeyCode.E) then
+                    moveDir = moveDir + Vector3.new(0, 1, 0)
+                end
+                if UserInputService:IsKeyDown(Enum.KeyCode.Q) then
+                    moveDir = moveDir - Vector3.new(0, 1, 0)
+                end
+                
+                if moveDir.Magnitude > 0 then
+                    moveDir = moveDir.Unit
+                end
+                bodyVelocity.Velocity = moveDir * (getgenv().FlySpeed or 50)
+                bodyGyro.CFrame = camCF
+            end)
+        else
+            getgenv().FlyEnabled = false
+            
+            if getgenv().FlyConnection then
+                getgenv().FlyConnection:Disconnect()
+                getgenv().FlyConnection = nil
+            end
+            
+            if getgenv().RagdollHandler then
+                getgenv().RagdollHandler:Disconnect()
+                getgenv().RagdollHandler = nil
+            end
+            
+            if getgenv().ResetterConnection then
+                getgenv().ResetterConnection:Disconnect()
+                getgenv().ResetterConnection = nil
+            end
+            
+            local char = Player.Character
+            if char then
+                local hrp = char:FindFirstChild("HumanoidRootPart")
+                local humanoid = char:FindFirstChild("Humanoid")
+                
+                if humanoid then
+                    humanoid.PlatformStand = false
+                    if getgenv().OriginalStateType then
+                        humanoid:ChangeState(getgenv().OriginalStateType)
+                    end
+                end
+                
+                if hrp then
+                    for _, v in ipairs(hrp:GetChildren()) do
+                        if v:IsA("BodyGyro") or v:IsA("BodyVelocity") then
+                            v:Destroy()
+                        end
+                    end
+                end
+            end
+        end
     end
 })
 
@@ -1693,9 +1824,9 @@ FlyGroup:AddSlider("FlySpeedSlider", {
     Text = "Fly Speed",
     Default = 50,
     Min = 10,
-    Max = 200,
+    Max = 100,
     Tooltip = "Adjust flying movement speed",
     Callback = function(val)
-        getgenv().flySpeedValue = val
+        getgenv().FlySpeed = val
     end
 })
