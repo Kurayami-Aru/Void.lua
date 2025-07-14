@@ -2236,3 +2236,41 @@ BoosterGroup:AddToggle("NoRenderToggle", {
         end
     end
 })
+
+BoosterGroup:AddToggle("FPSBooster", {
+	Text = "FPS Booster",
+	Default = false,
+	Tooltip = "Darkens sky and removes lighting effects to improve FPS"
+}):OnChanged(function(value)
+	local Lighting = game:GetService("Lighting")
+
+	if value then
+		Lighting.Ambient = Color3.fromRGB(80, 80, 80)
+		Lighting.OutdoorAmbient = Color3.fromRGB(80, 80, 80)
+		Lighting.Brightness = 0.5
+		Lighting.FogColor = Color3.fromRGB(80, 80, 80)
+		Lighting.FogStart = 0
+		Lighting.FogEnd = 1000
+		Lighting.GlobalShadows = false
+		Lighting.EnvironmentSpecularScale = 0
+		Lighting.EnvironmentDiffuseScale = 0
+
+		for _, v in ipairs(Lighting:GetChildren()) do
+			if v:IsA("Sky") or v:IsA("Atmosphere") or v:IsA("PostEffect") then
+				pcall(function() v:Destroy() end)
+			end
+		end
+
+		game.DescendantAdded:Connect(function(obj)
+			if obj:IsA("Sky") or obj:IsA("Atmosphere") then
+				task.wait()
+				pcall(function() obj:Destroy() end)
+			end
+		end)
+	else
+		Lighting.Ambient = Color3.fromRGB(127, 127, 127)
+		Lighting.OutdoorAmbient = Color3.fromRGB(127, 127, 127)
+		Lighting.Brightness = 2
+		Lighting.FogEnd = 100000
+	end
+end)
