@@ -1236,7 +1236,7 @@ DetectionGroup:AddToggle("AntiPhantom", {
     end
 })
 
---== SkinChanger Config ==
+--== CONFIG ==
 getgenv().config = {
     enabled = true,
     model = "Flowing Katana",
@@ -1244,15 +1244,7 @@ getgenv().config = {
     fx = "Flowing Katana"
 }
 
---== SkinChanger Config ==
-getgenv().config = {
-    enabled = true,
-    model = "Flowing Katana",
-    anim = "Flowing Katana",
-    fx = "Flowing Katana"
-}
-
---== Obsidian UI: Toggle + 3 Textbox ==
+--== UI: Obsidian Integration ==
 local SpecialTab = Window:AddTab("Special", "palette")
 local SkinGroup = SpecialTab:AddLeftGroupbox("Skin Changer")
 
@@ -1268,7 +1260,7 @@ SkinGroup:AddToggle("SkinChangerToggle", {
 SkinGroup:AddInput("SwordModelInput", {
     Text = "Sword Model",
     Placeholder = getgenv().config.model,
-    Tooltip = "Model name of the sword to equip",
+    Tooltip = "Model name of the sword",
     Callback = function(v)
         getgenv().config.model = v
         getgenv().updateSword()
@@ -1278,7 +1270,7 @@ SkinGroup:AddInput("SwordModelInput", {
 SkinGroup:AddInput("SwordAnimationInput", {
     Text = "Sword Animation",
     Placeholder = getgenv().config.anim,
-    Tooltip = "Animation name used for slash/parry",
+    Tooltip = "Animation name for sword",
     Callback = function(v)
         getgenv().config.anim = v
         getgenv().updateSword()
@@ -1288,7 +1280,7 @@ SkinGroup:AddInput("SwordAnimationInput", {
 SkinGroup:AddInput("SwordFXInput", {
     Text = "Sword FX",
     Placeholder = getgenv().config.fx,
-    Tooltip = "Slash effect name to inject",
+    Tooltip = "Slash visual effect",
     Callback = function(v)
         getgenv().config.fx = v
         getgenv().config.slash = getSlash(v)
@@ -1300,20 +1292,22 @@ SkinGroup:AddButton("Apply Skin", function()
     getgenv().updateSword()
 end)
 
---== Required Services ==
+--== SERVICES ==
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local LocalPlayer = Players.LocalPlayer
-local swords = require(ReplicatedStorage:WaitForChild("Shared", 9e9):WaitForChild("ReplicatedInstances", 9e9):WaitForChild("Swords", 9e9))
+local swords = require(ReplicatedStorage:WaitForChild("Shared", 9e9)
+    :WaitForChild("ReplicatedInstances", 9e9)
+    :WaitForChild("Swords", 9e9))
 
---== Get Slash Name ==
+--== Slash Name ==
 local function getSlash(name)
     local s = swords:GetSword(name)
     return (s and s.SlashName) or "SlashEffect"
 end
 getgenv().config.slash = getSlash(getgenv().config.fx)
 
---== Detect Sword Controller ==
+--== Controller Detection ==
 local ctrl
 for _, conn in ipairs(getconnections(ReplicatedStorage.Remotes.FireSwordInfo.OnClientEvent)) do
     if conn.Function and islclosure(conn.Function) then
@@ -1325,7 +1319,7 @@ for _, conn in ipairs(getconnections(ReplicatedStorage.Remotes.FireSwordInfo.OnC
     end
 end
 
---== Equip Sword ==
+--== Equip Function ==
 local function setSword()
     if not getgenv().config.enabled then return end
     setupvalue(rawget(swords, "EquipSwordTo"), 2, false)
@@ -1340,7 +1334,7 @@ getgenv().updateSword = function()
     setSword()
 end
 
---== Hook ParrySuccessAll for FX injection ==
+--== FX Hook ==
 local playFx
 for _, conn in ipairs(getconnections(ReplicatedStorage.Remotes.ParrySuccessAll.OnClientEvent)) do
     if conn.Function and debug.getinfo(conn.Function).name == "parrySuccessAll" then
@@ -1358,7 +1352,7 @@ ReplicatedStorage.Remotes.ParrySuccessAll.OnClientEvent:Connect(function(...)
     return playFx(unpack(a))
 end)
 
---== Auto Reapply Loop ==
+--== Reapply Loop ==
 task.spawn(function()
     while task.wait(1) do
         if getgenv().config.enabled then
