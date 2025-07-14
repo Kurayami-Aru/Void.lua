@@ -2199,3 +2199,69 @@ ESPGroup:AddToggle("BallStatsToggle", {
 	end
 })
 
+BoosterGroup:AddToggle("FPSBoosterToggle", {
+    Text = "FPS Booster",
+    Default = false,
+    Tooltip = "Optimize performance by disabling heavy effects",
+    Callback = function(state)
+    if state then
+	task.spawn(function()
+	local Lighting = game:GetService("Lighting")
+
+	Lighting.Ambient = Color3.fromRGB(80, 80, 80)
+	Lighting.OutdoorAmbient = Color3.fromRGB(80, 80, 80)
+	Lighting.Brightness = 0.5
+	Lighting.FogColor = Color3.fromRGB(80, 80, 80)
+	Lighting.FogStart = 0
+	Lighting.FogEnd = 1000
+	Lighting.GlobalShadows = false
+	Lighting.EnvironmentSpecularScale = 0
+	Lighting.EnvironmentDiffuseScale = 0
+
+	for _, v in ipairs(Lighting:GetChildren()) do
+		if v:IsA("PostEffect") or v:IsA("Sky") or v:IsA("Atmosphere") then
+			pcall(function() v:Destroy() end)
+		end
+	end
+
+	game.DescendantAdded:Connect(function(obj)
+		if obj:IsA("Sky") or obj:IsA("Atmosphere") then
+			task.wait()
+			pcall(function() obj:Destroy() end)
+		end
+	end)
+end)
+
+BoosterGroup:AddToggle("NoRenderToggle", {
+    Text = "No Render",
+    Default = false,
+    Tooltip = "Disable object rendering for max FPS",
+    Callback = function(state)
+         if Player:FindFirstChild("PlayerScripts") and Player.PlayerScripts:FindFirstChild("EffectScripts") then
+            Player.PlayerScripts.EffectScripts.ClientFX.Disabled = state												
+        if state then
+            Connections_Manager['No Render'] = workspace.Runtime.ChildAdded:Connect(function(child)
+                Debris:AddItem(child, 0)
+            end)
+
+            for _, v in pairs(workspace:GetDescendants()) do
+                if v:IsA("ParticleEmitter") or v:IsA("Trail") or v:IsA("Beam") or v:IsA("Explosion") or v:IsA("Smoke") or v:IsA("Fire") then
+                    v.Enabled = false
+                end
+            end
+
+            for _, v in pairs(workspace:GetDescendants()) do
+                if v:IsA("Decal") or v:IsA("Texture") then
+                    v.Transparency = 1
+                elseif v:IsA("PointLight") or v:IsA("SpotLight") or v:IsA("SurfaceLight") then
+                    v.Enabled = false
+                end
+            end
+        else
+            if Connections_Manager['No Render'] then
+                Connections_Manager['No Render']:Disconnect()
+                Connections_Manager['No Render'] = nil
+            end
+        end
+    end
+})
