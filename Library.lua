@@ -2199,6 +2199,8 @@ ESPGroup:AddToggle("BallStatsToggle", {
 	end
 })
 
+local BoosterGroup = WorldTab:AddRightGroupbox("Booster")
+
 BoosterGroup:AddToggle("FPSBoosterToggle", {
     Text = "FPS Booster",
     Default = false,
@@ -2208,6 +2210,7 @@ BoosterGroup:AddToggle("FPSBoosterToggle", {
 	task.spawn(function()
 	local Lighting = game:GetService("Lighting")
 
+	-- Làm trời xám tối nhẹ
 	Lighting.Ambient = Color3.fromRGB(80, 80, 80)
 	Lighting.OutdoorAmbient = Color3.fromRGB(80, 80, 80)
 	Lighting.Brightness = 0.5
@@ -2218,12 +2221,14 @@ BoosterGroup:AddToggle("FPSBoosterToggle", {
 	Lighting.EnvironmentSpecularScale = 0
 	Lighting.EnvironmentDiffuseScale = 0
 
+	-- Xoá post-effect
 	for _, v in ipairs(Lighting:GetChildren()) do
 		if v:IsA("PostEffect") or v:IsA("Sky") or v:IsA("Atmosphere") then
 			pcall(function() v:Destroy() end)
 		end
 	end
 
+	-- Ngăn tái tạo sky
 	game.DescendantAdded:Connect(function(obj)
 		if obj:IsA("Sky") or obj:IsA("Atmosphere") then
 			task.wait()
@@ -2231,14 +2236,16 @@ BoosterGroup:AddToggle("FPSBoosterToggle", {
 		end
 	end)
 end)
-
+										
 BoosterGroup:AddToggle("NoRenderToggle", {
     Text = "No Render",
     Default = false,
     Tooltip = "Disable object rendering for max FPS",
     Callback = function(state)
          if Player:FindFirstChild("PlayerScripts") and Player.PlayerScripts:FindFirstChild("EffectScripts") then
-            Player.PlayerScripts.EffectScripts.ClientFX.Disabled = state												
+            Player.PlayerScripts.EffectScripts.ClientFX.Disabled = state
+        end
+
         if state then
             Connections_Manager['No Render'] = workspace.Runtime.ChildAdded:Connect(function(child)
                 Debris:AddItem(child, 0)
