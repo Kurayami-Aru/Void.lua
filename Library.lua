@@ -2226,26 +2226,7 @@ SkyboxGroup:AddToggle("SkyboxToggle", {
     })
 						
 SkyboxGroup:AddDropdown("SkyboxDropdown", {
-    Values = { "Default",
-            "Vaporwave",
-            "Redshift",
-            "Desert",
-            "DaBaby",
-            "Minecraft",
-            "SpongeBob",
-            "Skibidi",
-            "Blaze",
-            "Pussy Cat",
-            "Among Us",
-            "Space Wave",
-            "Space Wave2",
-            "Turquoise Wave",
-            "Dark Night",
-            "Bright Pink",
-            "White Galaxy",
-            "Blue Galaxy"
-	}
-								
+    Values = { "Default", "Vaporwave", "Redshift", "Desert", "DaBaby", "Minecraft", "SpongeBob", "Skibidi", "Blaze", "Pussy Cat", "Among Us", "Space Wave", "Space Wave2", "Turquoise Wave", "Dark Night", "Bright Pink", "White Galaxy", "Blue Galaxy" }						
     Default = "Default",					
     Tooltip = "Choose your skybox preset",
     Callback = function(selectedOption)
