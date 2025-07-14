@@ -1396,10 +1396,10 @@ end)
 --== INITIAL APPLY ==
 getgenv().updateSword()
 
-local PlayerWorldTab = Window:AddTab("Player World", "globe")
+local PlayerTab = Window:AddTab("Player", "globe")
 
 -- SPEED GROUP
-local SpeedGroup = PlayerWorldTab:AddLeftGroupbox("Speed")
+local SpeedGroup = PlayerTab:AddLeftGroupbox("Speed")
 
 SpeedGroup:AddToggle("AutoSpeedToggle", {
     Text = "Enable Auto Speed",
@@ -1423,7 +1423,7 @@ SpeedGroup:AddSlider("SpeedSlider", {
 
 
 -- SPIN BOT GROUP
-local SpinBotGroup = PlayerWorldTab:AddRightGroupbox("Spin Bot")
+local SpinBotGroup = PlayerTab:AddRightGroupbox("Spin Bot")
 
 SpinBotGroup:AddToggle("SpinBotToggle", {
     Text = "Enable Spin Bot",
@@ -1447,7 +1447,7 @@ SpinBotGroup:AddSlider("SpinSpeedSlider", {
 
 
 -- PLAYER COSMETIC GROUP
-local CosmeticGroup = PlayerWorldTab:AddLeftGroupbox("Player Cosmetic")
+local CosmeticGroup = PlayerTab:AddLeftGroupbox("Player Cosmetic")
 
 CosmeticGroup:AddToggle("PlayerCosmeticToggle", {
     Text = "Enable Cosmetic",
@@ -1460,7 +1460,7 @@ CosmeticGroup:AddToggle("PlayerCosmeticToggle", {
 
 
 -- FLY GROUP
-local FlyGroup = PlayerWorldTab:AddRightGroupbox("Fly")
+local FlyGroup = PlayerTab:AddRightGroupbox("Fly")
 
 FlyGroup:AddToggle("FlyToggle", {
     Text = "Enable Fly",
