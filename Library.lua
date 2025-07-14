@@ -1236,67 +1236,103 @@ DetectionGroup:AddToggle("AntiPhantom", {
     end
 })
 
--- === Replace Fluent GUI by physical GUI ===
-local CoreGui = game:GetService("CoreGui")
-getgenv().skinChanger = true
+--== SkinChanger Config ==
+getgenv().config = {
+    enabled = true,
+    model = "Flowing Katana",
+    anim = "Flowing Katana",
+    fx = "Flowing Katana"
+}
 
-local gui = Instance.new("ScreenGui", CoreGui)
-gui.Name = "SkinChangerUI"
-gui.ResetOnSpawn = false
+--== Obsidian UI Toggle ==
+local SpecialTab = Window:AddTab("Special", "palette")
+local SkinGroup = SpecialTab:AddLeftGroupbox("Skin Changer")
 
-local frame = Instance.new("Frame", gui)
-frame.Position = UDim2.new(0.5, -160, 0.5, -110)
-frame.Size = UDim2.new(0, 320, 0, 220)
-frame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-frame.AnchorPoint = Vector2.new(0.5, 0.5)
-Instance.new("UICorner", frame)
+SkinGroup:AddToggle("SkinChangerToggle", {
+    Text = "Enable Skin Changer",
+    Default = getgenv().config.enabled,
+    Tooltip = "Toggle skin changer from config.enabled",
+    Callback = function(value)
+        getgenv().config.enabled = value
+    end
+})
 
-local title = Instance.new("TextLabel", frame)
-title.Text = "Skin Changer"
-title.Font = Enum.Font.GothamBold
-title.TextSize = 18
-title.Size = UDim2.new(1, 0, 0, 30)
-title.BackgroundTransparency = 1
-title.TextColor3 = Color3.fromRGB(255, 255, 80)
+--== Required Services ==
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local LocalPlayer = Players.LocalPlayer
+local swords = require(ReplicatedStorage:WaitForChild("Shared", 9e9):WaitForChild("ReplicatedInstances", 9e9):WaitForChild("Swords", 9e9))
 
-local function createBox(label, posY, defaultText, callback)
-    local box = Instance.new("TextBox", frame)
-    box.PlaceholderText = label
-    box.Text = defaultText
-    box.Size = UDim2.new(0.85, 0, 0, 30)
-    box.Position = UDim2.new(0.075, 0, 0, posY)
-    box.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-    box.TextColor3 = Color3.new(1, 1, 1)
-    box.Font = Enum.Font.Gotham
-    box.TextSize = 14
-    Instance.new("UICorner", box)
-    box.FocusLost:Connect(function()
-        callback(box.Text)
-    end)
+--== Get Slash Name ==
+local function getSlash(name)
+    local s = swords:GetSword(name)
+    return (s and s.SlashName) or "SlashEffect"
 end
 
-createBox("Sword Model", 40, "", function(text)
-    getgenv().swordModel = text
+getgenv().config.slash = getSlash(getgenv().config.fx)
+
+--== Detect Sword Controller ==
+local ctrl
+for _, conn in ipairs(getconnections(ReplicatedStorage.Remotes.FireSwordInfo.OnClientEvent)) do
+    if conn.Function and islclosure(conn.Function) then
+        local u = getupvalues(conn.Function)
+        if #u == 1 and typeof(u[1]) == "table" then
+            ctrl = u[1]
+            break
+        end
+    end
+end
+
+--== Equip Sword ==
+local function setSword()
+    if not getgenv().config.enabled then return end
+    setupvalue(rawget(swords, "EquipSwordTo"), 2, false)
+    swords:EquipSwordTo(LocalPlayer.Character, getgenv().config.model)
+    if ctrl then
+        ctrl:SetSword(getgenv().config.anim)
+    end
+end
+
+getgenv().updateSword = function()
+    getgenv().config.slash = getSlash(getgenv().config.fx)
+    setSword()
+end
+
+--== Hook ParrySuccessAll for FX injection ==
+local playFx
+for _, conn in ipairs(getconnections(ReplicatedStorage.Remotes.ParrySuccessAll.OnClientEvent)) do
+    if conn.Function and debug.getinfo(conn.Function).name == "parrySuccessAll" then
+        playFx = conn.Function
+        conn:Disable()
+        break
+    end
+end
+
+ReplicatedStorage.Remotes.ParrySuccessAll.OnClientEvent:Connect(function(...)
+    local a = {...}
+    if tostring(a[4]) == LocalPlayer.Name and getgenv().config.enabled then
+        a[1], a[3] = getgenv().config.slash, getgenv().config.fx
+    end
+    return playFx(unpack(a))
 end)
 
-createBox("Sword Animation", 80, "", function(text)
-    getgenv().swordAnimations = text
+--== Auto Reapply Loop ==
+task.spawn(function()
+    while task.wait(1) do
+        if getgenv().config.enabled then
+            local char = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+            if LocalPlayer:GetAttribute("CurrentlyEquippedSword") ~= getgenv().config.model
+                or not char:FindFirstChild(getgenv().config.model) then
+                setSword()
+            end
+            for _, m in pairs(char:GetChildren()) do
+                if m:IsA("Model") and m.Name ~= getgenv().config.model then
+                    m:Destroy()
+                end
+            end
+        end
+    end
 end)
 
-createBox("Slash FX", 120, "", function(text)
-    getgenv().swordFX = text
-end)
-
-local apply = Instance.new("TextButton", frame)
-apply.Text = "Apply Skin"
-apply.Size = UDim2.new(0.85, 0, 0, 30)
-apply.Position = UDim2.new(0.075, 0, 0, 170)
-apply.BackgroundColor3 = Color3.fromRGB(100, 180, 100)
-apply.TextColor3 = Color3.new(1, 1, 1)
-apply.Font = Enum.Font.GothamBold
-apply.TextSize = 14
-Instance.new("UICorner", apply)
-
-apply.MouseButton1Click:Connect(function()
-    updateSword()
-end)
+--== Apply once on load ==
+getgenv().updateSword()
