@@ -1245,10 +1245,10 @@ DetectionGroup:AddToggle("AntiPhantom", {
 
 --== CONFIG ==
 getgenv().config = {
-    enabled = true,
-    model = "Flowing Katana",
-    anim = "Flowing Katana",
-    fx = "Flowing Katana"
+    enabled = false,
+    model = "",
+    anim = "",
+    fx = ""
 }
 
 --== SERVICES ==
@@ -1395,3 +1395,483 @@ end)
 
 --== INITIAL APPLY ==
 getgenv().updateSword()
+
+local PlayerWorldTab = Window:AddTab("Player", "globe", {
+local SpeedGroup = PlayerTab:AddLeftGroupbox("Speed")
+
+SpeedGroup:AddToggle("Strafe", {
+    Text = "Strafe",
+    Default = false,
+    Tooltip = "Custom Player Speed",
+    Callback = function(value)
+        if value then
+            Connections_Manager['Strafe'] = game:GetService("RunService").PreSimulation:Connect(function()
+                local character = game.Players.LocalPlayer.Character
+                if character and character:FindFirstChild("Humanoid") then
+                    character.Humanoid.WalkSpeed = StrafeSpeed
+                end
+            end)
+        else
+            local character = game.Players.LocalPlayer.Character
+            if character and character:FindFirstChild("Humanoid") then
+                character.Humanoid.WalkSpeed = 36
+            end
+            
+            if Connections_Manager['Strafe'] then
+                Connections_Manager['Strafe']:Disconnect()
+                Connections_Manager['Strafe'] = nil
+            end
+        end
+    end
+})
+
+SpeedGroup:AddSlider("SpeedSlider", {
+    Text = "Walk Speed",
+    Default = 36,
+    Min = 36,
+    Max = 200,
+    Tooltip = "Adjust player walk speed",
+    Callback = function(value)
+        StrafeSpeed = value
+    end
+})
+
+
+-- SPIN BOT GROUP
+local SpinBotGroup = PlayerTab:AddRightGroupbox("Spin Bot")
+
+SpinBotGroup:AddToggle("SpinBotToggle", {
+    Text = "Spin Bot",
+    Default = false,
+    Tooltip = "automatic spinning",
+    Callback = function(value)
+        getgenv().Spinbot = value
+        if value then
+            getgenv().spin = true
+            getgenv().spinSpeed = getgenv().spinSpeed or 1 
+            local Players = game:GetService("Players")
+            local RunService = game:GetService("RunService")
+            local Client = Players.LocalPlayer
+
+            
+            local function spinCharacter()
+                while getgenv().spin do
+                    RunService.Heartbeat:Wait()
+                    local char = Client.Character
+                    local funcHRP = char and char:FindFirstChild("HumanoidRootPart")
+                    
+                    if char and funcHRP then
+                        funcHRP.CFrame *= CFrame.Angles(0, getgenv().spinSpeed, 0)
+                    end
+                end
+            end
+
+            
+            if not getgenv().spinThread then
+                getgenv().spinThread = coroutine.create(spinCharacter)
+                coroutine.resume(getgenv().spinThread)
+            end
+
+        else
+            getgenv().spin = false
+
+            
+            if getgenv().spinThread then
+                getgenv().spinThread = nil
+            end
+        end
+    end
+})
+
+SpinBotGroup:AddSlider("SpinSpeedSlider", {
+    Text = "Spin Speed",
+    Default = 1,
+    Min = 1,
+    Max = 100,
+    Tooltip = "Rotation speed of spin bot",
+    Callback = function(value)
+        getgenv().spinSpeed = math.rad(value)
+    end
+})
+
+
+-- PLAYER COSMETIC GROUP
+local CosmeticGroup = PlayerTab:AddLeftGroupbox("Player Cosmetic")
+
+_G.PlayerCosmeticsCleanup = {}
+								
+CosmeticGroup:AddToggle("PlayerCosmeticToggle", {
+    Text = "Player Cosmetic",
+    Default = false,
+    Tooltip = "Apply Korblox and Headless",
+    Callback = function(value)
+        local players = game:GetService("Players")
+        local lp = players.LocalPlayer
+
+        local function applyKorblox(character)
+            local rightLeg = character:FindFirstChild("RightLeg") or character:FindFirstChild("Right Leg")
+            if not rightLeg then
+                warn("Right leg not found on character")
+                return
+            end
+            
+            for _, child in pairs(rightLeg:GetChildren()) do
+                if child:IsA("SpecialMesh") then
+                    child:Destroy()
+                end
+            end
+            local specialMesh = Instance.new("SpecialMesh")
+            specialMesh.MeshId = "rbxassetid://101851696"
+            specialMesh.TextureId = "rbxassetid://115727863"
+            specialMesh.Scale = Vector3.new(1, 1, 1)
+            specialMesh.Parent = rightLeg
+        end
+
+        local function saveRightLegProperties(char)
+            if char then
+                local rightLeg = char:FindFirstChild("RightLeg") or char:FindFirstChild("Right Leg")
+                if rightLeg then
+                    local originalMesh = rightLeg:FindFirstChildOfClass("SpecialMesh")
+                    if originalMesh then
+                        _G.PlayerCosmeticsCleanup.originalMeshId = originalMesh.MeshId
+                        _G.PlayerCosmeticsCleanup.originalTextureId = originalMesh.TextureId
+                        _G.PlayerCosmeticsCleanup.originalScale = originalMesh.Scale
+                    else
+                        _G.PlayerCosmeticsCleanup.hadNoMesh = true
+                    end
+                    
+                    _G.PlayerCosmeticsCleanup.rightLegChildren = {}
+                    for _, child in pairs(rightLeg:GetChildren()) do
+                        if child:IsA("SpecialMesh") then
+                            table.insert(_G.PlayerCosmeticsCleanup.rightLegChildren, {
+                                ClassName = child.ClassName,
+                                Properties = {
+                                    MeshId = child.MeshId,
+                                    TextureId = child.TextureId,
+                                    Scale = child.Scale
+                                }
+                            })
+                        end
+                    end
+                end
+            end
+        end
+        
+        local function restoreRightLeg(char)
+            if char then
+                local rightLeg = char:FindFirstChild("RightLeg") or char:FindFirstChild("Right Leg")
+                if rightLeg and _G.PlayerCosmeticsCleanup.rightLegChildren then
+                    for _, child in pairs(rightLeg:GetChildren()) do
+                        if child:IsA("SpecialMesh") then
+                            child:Destroy()
+                        end
+                    end
+                    
+                    if _G.PlayerCosmeticsCleanup.hadNoMesh then
+                        return
+                    end
+                    
+                    for _, childData in ipairs(_G.PlayerCosmeticsCleanup.rightLegChildren) do
+                        if childData.ClassName == "SpecialMesh" then
+                            local newMesh = Instance.new("SpecialMesh")
+                            newMesh.MeshId = childData.Properties.MeshId
+                            newMesh.TextureId = childData.Properties.TextureId
+                            newMesh.Scale = childData.Properties.Scale
+                            newMesh.Parent = rightLeg
+                        end
+                    end
+                end
+            end
+        end
+
+        if value then
+            CosmeticsActive = true
+
+            getgenv().Config = {
+                Headless = true
+            }
+            
+            if lp.Character then
+                local head = lp.Character:FindFirstChild("Head")
+                if head and getgenv().Config.Headless then
+                    _G.PlayerCosmeticsCleanup.headTransparency = head.Transparency
+                    
+                    local decal = head:FindFirstChildOfClass("Decal")
+                    if decal then
+                        _G.PlayerCosmeticsCleanup.faceDecalId = decal.Texture
+                        _G.PlayerCosmeticsCleanup.faceDecalName = decal.Name
+                    end
+                end
+                
+                saveRightLegProperties(lp.Character)
+                applyKorblox(lp.Character)
+            end
+            
+            _G.PlayerCosmeticsCleanup.characterAddedConn = lp.CharacterAdded:Connect(function(char)
+                local head = char:FindFirstChild("Head")
+                if head and getgenv().Config.Headless then
+                    _G.PlayerCosmeticsCleanup.headTransparency = head.Transparency
+                    
+                    local decal = head:FindFirstChildOfClass("Decal")
+                    if decal then
+                        _G.PlayerCosmeticsCleanup.faceDecalId = decal.Texture
+                        _G.PlayerCosmeticsCleanup.faceDecalName = decal.Name
+                    end
+                end
+                
+                saveRightLegProperties(char)
+                applyKorblox(char)
+            end)
+            
+            if getgenv().Config.Headless then
+                headLoop = task.spawn(function()
+                    while CosmeticsActive do
+                        local char = lp.Character
+                        if char then
+                            local head = char:FindFirstChild("Head")
+                            if head then
+                                head.Transparency = 1
+                                local decal = head:FindFirstChildOfClass("Decal")
+                                if decal then
+                                    decal:Destroy()
+                                end
+                            end
+                        end
+                        task.wait(0.1)
+                    end
+                end)
+            end
+
+        else
+            CosmeticsActive = false
+
+            if _G.PlayerCosmeticsCleanup.characterAddedConn then
+                _G.PlayerCosmeticsCleanup.characterAddedConn:Disconnect()
+                _G.PlayerCosmeticsCleanup.characterAddedConn = nil
+            end
+
+            if headLoop then
+                task.cancel(headLoop)
+                headLoop = nil
+            end
+
+            local char = lp.Character
+            if char then
+                local head = char:FindFirstChild("Head")
+                if head and _G.PlayerCosmeticsCleanup.headTransparency ~= nil then
+                    head.Transparency = _G.PlayerCosmeticsCleanup.headTransparency
+                    
+                    if _G.PlayerCosmeticsCleanup.faceDecalId then
+                        local newDecal = head:FindFirstChildOfClass("Decal") or Instance.new("Decal", head)
+                        newDecal.Name = _G.PlayerCosmeticsCleanup.faceDecalName or "face"
+                        newDecal.Texture = _G.PlayerCosmeticsCleanup.faceDecalId
+                        newDecal.Face = Enum.NormalId.Front
+                    end
+                end
+                
+                restoreRightLeg(char)
+            end
+
+            _G.PlayerCosmeticsCleanup = {}
+        end
+    end
+})
+
+
+-- FLY GROUP
+local FlyGroup = PlayerTab:AddRightGroupbox("Fly")
+
+FlyGroup:AddToggle("FlyToggle", {
+    Text = "Fly",
+    Default = false,
+    Tooltip = "fly mode",
+    Callback = function(value)
+        if value then
+            getgenv().FlyEnabled = true
+            local char = Player.Character or Player.CharacterAdded:Wait()
+            local hrp = char:WaitForChild("HumanoidRootPart")
+            local humanoid = char:WaitForChild("Humanoid")
+            
+            getgenv().OriginalStateType = humanoid:GetState()
+            
+            getgenv().RagdollHandler = humanoid.StateChanged:Connect(function(oldState, newState)
+                if getgenv().FlyEnabled then
+                    if newState == Enum.HumanoidStateType.Physics or newState == Enum.HumanoidStateType.Ragdoll then
+                        task.defer(function()
+                            humanoid:ChangeState(Enum.HumanoidStateType.GettingUp)
+                            humanoid:ChangeState(Enum.HumanoidStateType.Running)
+                        end)
+                    end
+                end
+            end)
+            
+            local bodyGyro = Instance.new("BodyGyro")
+            bodyGyro.P = 90000
+            bodyGyro.MaxTorque = Vector3.new(9e9, 9e9, 9e9)
+            bodyGyro.Parent = hrp
+            
+            local bodyVelocity = Instance.new("BodyVelocity")
+            bodyVelocity.Velocity = Vector3.new(0, 0, 0)
+            bodyVelocity.MaxForce = Vector3.new(9e9, 9e9, 9e9)
+            bodyVelocity.Parent = hrp
+            
+            humanoid.PlatformStand = true
+            
+            getgenv().ResetterConnection = RunService.Heartbeat:Connect(function()
+                if not getgenv().FlyEnabled then return end
+                
+                if bodyGyro and bodyGyro.Parent then
+                    bodyGyro.P = 90000
+                    bodyGyro.MaxTorque = Vector3.new(9e9, 9e9, 9e9)
+                end
+                
+                if bodyVelocity and bodyVelocity.Parent then
+                    bodyVelocity.MaxForce = Vector3.new(9e9, 9e9, 9e9)
+                end
+                
+                humanoid.PlatformStand = true
+                
+                if not bodyGyro.Parent or not bodyVelocity.Parent then
+                    if bodyGyro then bodyGyro:Destroy() end
+                    if bodyVelocity then bodyVelocity:Destroy() end
+                    
+                    bodyGyro = Instance.new("BodyGyro")
+                    bodyGyro.P = 90000
+                    bodyGyro.MaxTorque = Vector3.new(9e9, 9e9, 9e9)
+                    bodyGyro.Parent = hrp
+                    
+                    bodyVelocity = Instance.new("BodyVelocity")
+                    bodyVelocity.Velocity = Vector3.new(0, 0, 0)
+                    bodyVelocity.MaxForce = Vector3.new(9e9, 9e9, 9e9)
+                    bodyVelocity.Parent = hrp
+                end
+            end)
+            
+            getgenv().FlyConnection = RunService.RenderStepped:Connect(function()
+                if not getgenv().FlyEnabled then return end
+                local camCF = workspace.CurrentCamera.CFrame
+                local moveDir = Vector3.new(0, 0, 0)
+                
+                if UserInputService:IsKeyDown(Enum.KeyCode.W) then
+                    moveDir = moveDir + camCF.LookVector
+                end
+                if UserInputService:IsKeyDown(Enum.KeyCode.S) then
+                    moveDir = moveDir - camCF.LookVector
+                end
+                if UserInputService:IsKeyDown(Enum.KeyCode.A) then
+                    moveDir = moveDir - camCF.RightVector
+                end
+                if UserInputService:IsKeyDown(Enum.KeyCode.D) then
+                    moveDir = moveDir + camCF.RightVector
+                end
+                if UserInputService:IsKeyDown(Enum.KeyCode.E) then
+                    moveDir = moveDir + Vector3.new(0, 1, 0)
+                end
+                if UserInputService:IsKeyDown(Enum.KeyCode.Q) then
+                    moveDir = moveDir - Vector3.new(0, 1, 0)
+                end
+                
+                if moveDir.Magnitude > 0 then
+                    moveDir = moveDir.Unit
+                end
+                bodyVelocity.Velocity = moveDir * (getgenv().FlySpeed or 50)
+                bodyGyro.CFrame = camCF
+            end)
+        else
+            getgenv().FlyEnabled = false
+            
+            if getgenv().FlyConnection then
+                getgenv().FlyConnection:Disconnect()
+                getgenv().FlyConnection = nil
+            end
+            
+            if getgenv().RagdollHandler then
+                getgenv().RagdollHandler:Disconnect()
+                getgenv().RagdollHandler = nil
+            end
+            
+            if getgenv().ResetterConnection then
+                getgenv().ResetterConnection:Disconnect()
+                getgenv().ResetterConnection = nil
+            end
+            
+            local char = Player.Character
+            if char then
+                local hrp = char:FindFirstChild("HumanoidRootPart")
+                local humanoid = char:FindFirstChild("Humanoid")
+                
+                if humanoid then
+                    humanoid.PlatformStand = false
+                    if getgenv().OriginalStateType then
+                        humanoid:ChangeState(getgenv().OriginalStateType)
+                    end
+                end
+                
+                if hrp then
+                    for _, v in ipairs(hrp:GetChildren()) do
+                        if v:IsA("BodyGyro") or v:IsA("BodyVelocity") then
+                            v:Destroy()
+                        end
+                    end
+                end
+            end
+        end
+    end
+})
+
+FlyGroup:AddSlider("FlySpeedSlider", {
+    Text = "Fly Speed",
+    Default = 50,
+    Min = 10,
+    Max = 100,
+    Tooltip = "Adjust flying movement speed",
+    Callback = function(value)
+        getgenv().FlySpeed = value
+    end
+})
+
+local FOVGroup = PlayerTab:AddLeftGroupbox("FOV")
+
+FOVGroup:AddToggle("FOVToggle", {
+    Text = "Field Of View",
+    Default = false,
+    Tooltip = "FOV Controller",
+    Callback = function(value)
+	getgenv().CameraEnabled = value
+        local Camera = game:GetService("Workspace").CurrentCamera
+
+        if value then
+            getgenv().CameraFOV = getgenv().CameraFOV or 70
+            Camera.FieldOfView = getgenv().CameraFOV
+            
+            if not getgenv().FOVLoop then
+                getgenv().FOVLoop = game:GetService("RunService").RenderStepped:Connect(function()
+                    if getgenv().CameraEnabled then
+                        Camera.FieldOfView = getgenv().CameraFOV
+                    end
+                end)
+            end
+        else
+            Camera.FieldOfView = 70
+            
+            if getgenv().FOVLoop then
+                getgenv().FOVLoop:Disconnect()
+                getgenv().FOVLoop = nil
+            end
+        end
+    end
+})
+
+FOVGroup:AddSlider("FOVControllerSlider", {
+    Text = "FOV Controller",
+    Default = 70,
+    Min = 50,
+    Max = 150,
+    Tooltip = "FOV Controller",
+    Callback = function(value)
+        getgenv().CameraFOV = value
+        if getgenv().CameraEnabled then
+            game:GetService("Workspace").CurrentCamera.FieldOfView = value
+        end
+    end
+})						
