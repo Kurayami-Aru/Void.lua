@@ -1236,122 +1236,67 @@ DetectionGroup:AddToggle("AntiPhantom", {
     end
 })
 
---=== CORE SETUP ===--
-local Players = game:GetService("Players")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
+-- === Replace Fluent GUI by physical GUI ===
+local CoreGui = game:GetService("CoreGui")
+getgenv().skinChanger = true
 
-local swordInstances = require(
-    ReplicatedStorage:WaitForChild("Shared", 9e9)
-        :WaitForChild("ReplicatedInstances", 9e9)
-        :WaitForChild("Swords", 9e9)
-)
+local gui = Instance.new("ScreenGui", CoreGui)
+gui.Name = "SkinChangerUI"
+gui.ResetOnSpawn = false
 
--- Auto-detect swordsController
-local swordsController
-while task.wait() and not swordsController do
-    for _, conn in getconnections(ReplicatedStorage.Remotes.FireSwordInfo.OnClientEvent) do
-        if conn.Function and islclosure(conn.Function) then
-            local ups = getupvalues(conn.Function)
-            if #ups == 1 and typeof(ups[1]) == "table" then
-                swordsController = ups[1]
-                break
-            end
-        end
-    end
-end
-getgenv().swordsController = swordsController
+local frame = Instance.new("Frame", gui)
+frame.Position = UDim2.new(0.5, -160, 0.5, -110)
+frame.Size = UDim2.new(0, 320, 0, 220)
+frame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+frame.AnchorPoint = Vector2.new(0.5, 0.5)
+Instance.new("UICorner", frame)
 
--- Slash FX getter
-local function getSlashName(skin)
-    local data = swordInstances:GetSword(skin)
-    return (data and data.SlashName) or "SlashEffect"
-end
+local title = Instance.new("TextLabel", frame)
+title.Text = "Skin Changer"
+title.Font = Enum.Font.GothamBold
+title.TextSize = 18
+title.Size = UDim2.new(1, 0, 0, 30)
+title.BackgroundTransparency = 1
+title.TextColor3 = Color3.fromRGB(255, 255, 80)
 
--- Main skin function
-function updateSword()
-    local player = Players.LocalPlayer
-    local char = player.Character or player.CharacterAdded:Wait()
-    if not char then return end
-
-    getgenv().slashName = getSlashName(getgenv().swordFX or "")
-
-    setupvalue(rawget(swordInstances, "EquipSwordTo"), 2, false)
-    if getgenv().swordModel then
-        swordInstances:EquipSwordTo(char, getgenv().swordModel)
-    end
-
-    if getgenv().swordsController and getgenv().swordAnimations then
-        getgenv().swordsController:SetSword(getgenv().swordAnimations)
-    end
+local function createBox(label, posY, defaultText, callback)
+    local box = Instance.new("TextBox", frame)
+    box.PlaceholderText = label
+    box.Text = defaultText
+    box.Size = UDim2.new(0.85, 0, 0, 30)
+    box.Position = UDim2.new(0.075, 0, 0, posY)
+    box.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+    box.TextColor3 = Color3.new(1, 1, 1)
+    box.Font = Enum.Font.Gotham
+    box.TextSize = 14
+    Instance.new("UICorner", box)
+    box.FocusLost:Connect(function()
+        callback(box.Text)
+    end)
 end
 
--- Auto-monitor
-task.spawn(function()
-    while task.wait(1) do
-        if getgenv().skinChanger then
-            local player = Players.LocalPlayer
-            local char = player.Character
-            if not char then continue end
-
-            if player:GetAttribute("CurrentlyEquippedSword") ~= getgenv().swordModel then
-                updateSword()
-            elseif not char:FindFirstChild(getgenv().swordModel or "") then
-                updateSword()
-            end
-
-            for _, v in char:GetChildren() do
-                if v:IsA("Model") and v.Name ~= getgenv().swordModel then
-                    v:Destroy()
-                end
-                task.wait()
-            end
-        end
-    end
+createBox("Sword Model", 40, "", function(text)
+    getgenv().swordModel = text
 end)
 
-local SpecialTab = Window:AddTab("Special", "palette")
-local SkinGroup = SpecialTab:AddLeftGroupbox("Skin Changer")
+createBox("Sword Animation", 80, "", function(text)
+    getgenv().swordAnimations = text
+end)
 
-SkinGroup:AddToggle("SkinChangerToggle", {
-    Text = "Enable Skin Changer",
-    Default = false,
-    Tooltip = "Toggle skin changer",
-    Callback = function(v)
-        getgenv().skinChanger = v
-        if v then updateSword() end
-    end
-})
+createBox("Slash FX", 120, "", function(text)
+    getgenv().swordFX = text
+end)
 
-SkinGroup:AddInput("SwordModel", {
-    Text = "Sword Model",
-    Tooltip = "The model name of the sword",
-    Placeholder = "VoidBlade",
-    Callback = function(v)
-        getgenv().swordModel = v
-        if getgenv().skinChanger then updateSword() end
-    end
-})
+local apply = Instance.new("TextButton", frame)
+apply.Text = "Apply Skin"
+apply.Size = UDim2.new(0.85, 0, 0, 30)
+apply.Position = UDim2.new(0.075, 0, 0, 170)
+apply.BackgroundColor3 = Color3.fromRGB(100, 180, 100)
+apply.TextColor3 = Color3.new(1, 1, 1)
+apply.Font = Enum.Font.GothamBold
+apply.TextSize = 14
+Instance.new("UICorner", apply)
 
-SkinGroup:AddInput("SwordAnimation", {
-    Text = "Sword Animation",
-    Tooltip = "Animation name used for the sword",
-    Placeholder = "VoidBlade",
-    Callback = function(v)
-        getgenv().swordAnimations = v
-        if getgenv().skinChanger then updateSword() end
-    end
-})
-
-SkinGroup:AddInput("SwordFX", {
-    Text = "Sword FX",
-    Tooltip = "Slash visual effect name",
-    Placeholder = "VoidBlade",
-    Callback = function(v)
-        getgenv().swordFX = v
-        if getgenv().skinChanger then updateSword() end
-    end
-})
-
-SkinGroup:AddButton("Apply Skin", function()
-    if getgenv().skinChanger then updateSword() end
+apply.MouseButton1Click:Connect(function()
+    updateSword()
 end)
