@@ -1876,3 +1876,80 @@ FOVGroup:AddSlider("FOVSlider", {
         end
     end
 })
+
+local VisualGroup = PlayerTab:AddRightGroupbox("Visualize")
+
+VisualGroup:AddToggle("VisualiseToggle", {
+    Text = "Visualiser",
+    Default = false,
+    Tooltip = "visual effects",
+    Callback = function(value)
+         if value then
+                if not visualPart then
+                    visualPart = Instance.new("Part")
+                    visualPart.Name = "VisualiserPart"
+                    visualPart.Shape = Enum.PartType.Ball
+                    visualPart.Material = Enum.Material.ForceField
+                    visualPart.Color = Color3.fromRGB(255, 255, 255)
+                    visualPart.Transparency = 0  
+                    visualPart.CastShadow = false 
+                    visualPart.Anchored = true
+                    visualPart.CanCollide = false
+                    visualPart.Parent = workspace
+                end
+    
+                Connections_Manager['Visualiser'] = game:GetService("RunService").RenderStepped:Connect(function()
+                    local character = Player.Character
+                    local HumanoidRootPart = character and character:FindFirstChild("HumanoidRootPart")
+                    if HumanoidRootPart and visualPart then
+                        visualPart.CFrame = HumanoidRootPart.CFrame  
+                    end
+    
+                    if getgenv().VisualiserRainbow then
+                        local hue = (tick() % 5) / 5
+                        visualPart.Color = Color3.fromHSV(hue, 1, 1)
+                    else
+                        local hueVal = getgenv().VisualiserHue or 0
+                        visualPart.Color = Color3.fromHSV(hueVal / 360, 1, 1)
+                    end
+    
+                    local speed = 0
+                    local maxSpeed = 350 
+                    local Balls = Auto_Parry.Get_Balls()
+    
+                    for _, Ball in pairs(Balls) do
+                        if Ball and Ball:FindFirstChild("zoomies") then
+                            local Velocity = Ball.AssemblyLinearVelocity
+                            speed = math.min(Velocity.Magnitude, maxSpeed) / 6.5  
+                            break
+                        end
+                    end
+    
+                    local size = math.max(speed, 6.5)
+                    if visualPart then
+                        visualPart.Size = Vector3.new(size, size, size)
+                    end
+                end)
+            else
+                if Connections_Manager['Visualiser'] then
+                    Connections_Manager['Visualiser']:Disconnect()
+                    Connections_Manager['Visualiser'] = nil
+                end
+    
+                if visualPart then
+                    visualPart:Destroy()
+                    visualPart = nil
+                end
+            end
+        end
+    })
+
+VisualGroup:AddToggle("VisualiseToggle", {
+    Text = "Rainbow",
+    Default = false,
+    Tooltip = "Rainbow Visualiser",
+    Callback = function(value)
+	getgenv().VisualiserRainbow = value
+    end
+})
+
