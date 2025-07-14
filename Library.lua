@@ -1244,43 +1244,53 @@ getgenv().config = {
     fx = "Flowing Katana"
 }
 
---== UI: Obsidian Integration ==
-local SpecialTab = Window:AddTab("Special", "palette")
-local SkinGroup = SpecialTab:AddLeftGroupbox("Skin Changer")
+--== SERVICES ==
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local LocalPlayer = Players.LocalPlayer
 
-SkinGroup:AddToggle("SkinChangerToggle", {
+local swords = require(ReplicatedStorage:WaitForChild("Shared", 9e9)
+    :WaitForChild("ReplicatedInstances", 9e9)
+    :WaitForChild("Swords", 9e9))
+
+--== UI: Obsidian Setup ==
+local Tab = Window:AddTab("Special", "palette")
+local Box = Tab:AddLeftGroupbox("Skin Changer")
+
+Box:AddToggle("SkinChangerToggle", {
     Text = "Enable Skin Changer",
     Default = getgenv().config.enabled,
     Tooltip = "Toggle skin changer logic",
-    Callback = function(value)
-        getgenv().config.enabled = value
+    Callback = function(v)
+        getgenv().config.enabled = v
+        getgenv().updateSword()
     end
 })
 
-SkinGroup:AddInput("SwordModelInput", {
+Box:AddInput("SwordModelInput", {
     Text = "Sword Model",
     Placeholder = getgenv().config.model,
-    Tooltip = "Model name of the sword",
+    Tooltip = "Name of sword model",
     Callback = function(v)
         getgenv().config.model = v
         getgenv().updateSword()
     end
 })
 
-SkinGroup:AddInput("SwordAnimationInput", {
+Box:AddInput("SwordAnimationInput", {
     Text = "Sword Animation",
     Placeholder = getgenv().config.anim,
-    Tooltip = "Animation name for sword",
+    Tooltip = "Slash/parry animation",
     Callback = function(v)
         getgenv().config.anim = v
         getgenv().updateSword()
     end
 })
 
-SkinGroup:AddInput("SwordFXInput", {
+Box:AddInput("SwordFXInput", {
     Text = "Sword FX",
     Placeholder = getgenv().config.fx,
-    Tooltip = "Slash visual effect",
+    Tooltip = "Visual FX name",
     Callback = function(v)
         getgenv().config.fx = v
         getgenv().config.slash = getSlash(v)
@@ -1288,26 +1298,19 @@ SkinGroup:AddInput("SwordFXInput", {
     end
 })
 
-SkinGroup:AddButton("Apply Skin", function()
+Box:AddButton("Apply Skin", function()
     getgenv().updateSword()
 end)
 
---== SERVICES ==
-local Players = game:GetService("Players")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local LocalPlayer = Players.LocalPlayer
-local swords = require(ReplicatedStorage:WaitForChild("Shared", 9e9)
-    :WaitForChild("ReplicatedInstances", 9e9)
-    :WaitForChild("Swords", 9e9))
-
---== Slash Name ==
+--== GET SLASH EFFECT ==
 local function getSlash(name)
     local s = swords:GetSword(name)
     return (s and s.SlashName) or "SlashEffect"
 end
+
 getgenv().config.slash = getSlash(getgenv().config.fx)
 
---== Controller Detection ==
+--== DETECT CONTROLLER ==
 local ctrl
 for _, conn in ipairs(getconnections(ReplicatedStorage.Remotes.FireSwordInfo.OnClientEvent)) do
     if conn.Function and islclosure(conn.Function) then
@@ -1319,14 +1322,15 @@ for _, conn in ipairs(getconnections(ReplicatedStorage.Remotes.FireSwordInfo.OnC
     end
 end
 
---== Equip Function ==
+--== EQUIP FUNCTION ==
 local function setSword()
     if not getgenv().config.enabled then return end
+    local char = LocalPlayer.Character
+    if not char then return end
+
     setupvalue(rawget(swords, "EquipSwordTo"), 2, false)
-    swords:EquipSwordTo(LocalPlayer.Character, getgenv().config.model)
-    if ctrl then
-        ctrl:SetSword(getgenv().config.anim)
-    end
+    swords:EquipSwordTo(char, getgenv().config.model)
+    if ctrl then ctrl:SetSword(getgenv().config.anim) end
 end
 
 getgenv().updateSword = function()
@@ -1334,7 +1338,7 @@ getgenv().updateSword = function()
     setSword()
 end
 
---== FX Hook ==
+--== HOOK PARRY FX ==
 local playFx
 for _, conn in ipairs(getconnections(ReplicatedStorage.Remotes.ParrySuccessAll.OnClientEvent)) do
     if conn.Function and debug.getinfo(conn.Function).name == "parrySuccessAll" then
@@ -1352,23 +1356,35 @@ ReplicatedStorage.Remotes.ParrySuccessAll.OnClientEvent:Connect(function(...)
     return playFx(unpack(a))
 end)
 
---== Reapply Loop ==
-task.spawn(function()
-    while task.wait(1) do
+--== APPLY AFTER DEATH ==
+Players.LocalPlayer.CharacterAdded:Connect(function()
+    task.delay(1, function()
         if getgenv().config.enabled then
-            local char = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+            getgenv().updateSword()
+        end
+    end)
+end)
+
+--== LIGHTWEIGHT LOOP ==
+task.spawn(function()
+    while task.wait(1.5) do
+        if getgenv().config.enabled then
+            local char = LocalPlayer.Character
+            if not char then continue end
+
             if LocalPlayer:GetAttribute("CurrentlyEquippedSword") ~= getgenv().config.model
             or not char:FindFirstChild(getgenv().config.model) then
                 setSword()
             end
-            for _, m in pairs(char:GetChildren()) do
-                if m:IsA("Model") and m.Name ~= getgenv().config.model then
-                    m:Destroy()
+
+            for _, obj in char:GetChildren() do
+                if obj:IsA("Model") and obj.Name ~= getgenv().config.model then
+                    obj:Destroy()
                 end
             end
         end
     end
 end)
 
---== Initial Apply ==
+--== INITIAL APPLY ==
 getgenv().updateSword()
