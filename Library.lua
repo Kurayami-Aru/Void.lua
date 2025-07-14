@@ -2238,39 +2238,45 @@ BoosterGroup:AddToggle("NoRenderToggle", {
 })
 
 BoosterGroup:AddToggle("FPSBoosterToggle", {
-	Text = "FPS Booster",
-	Default = false,
-	Tooltip = "Darkens sky and removes lighting effects to improve FPS"
-        Callback = function(value)
-	local Lighting = game:GetService("Lighting")
+    Text = "FPS Booster",
+    Default = false,
+    Tooltip = "Darkens sky and removes lighting effects to improve FPS"
+}):OnChanged(function(enabled)
+    local Lighting = game:GetService("Lighting")
 
-	if value then
-		Lighting.Ambient = Color3.fromRGB(80, 80, 80)
-		Lighting.OutdoorAmbient = Color3.fromRGB(80, 80, 80)
-		Lighting.Brightness = 0.5
-		Lighting.FogColor = Color3.fromRGB(80, 80, 80)
-		Lighting.FogStart = 0
-		Lighting.FogEnd = 1000
-		Lighting.GlobalShadows = false
-		Lighting.EnvironmentSpecularScale = 0
-		Lighting.EnvironmentDiffuseScale = 0
+    if enabled then
+        Lighting.Ambient = Color3.fromRGB(80, 80, 80)
+        Lighting.OutdoorAmbient = Color3.fromRGB(80, 80, 80)
+        Lighting.Brightness = 0.5
+        Lighting.FogColor = Color3.fromRGB(80, 80, 80)
+        Lighting.FogStart = 0
+        Lighting.FogEnd = 1000
+        Lighting.GlobalShadows = false
+        Lighting.EnvironmentSpecularScale = 0
+        Lighting.EnvironmentDiffuseScale = 0
 
-		for _, v in ipairs(Lighting:GetChildren()) do
-			if v:IsA("Sky") or v:IsA("Atmosphere") or v:IsA("PostEffect") then
-				pcall(function() v:Destroy() end)
-			end
-		end
+        for _, obj in ipairs(Lighting:GetChildren()) do
+            if obj:IsA("Sky") or obj:IsA("Atmosphere") or obj:IsA("PostEffect") then
+                pcall(function() obj:Destroy() end)
+            end
+        end
 
-		game.DescendantAdded:Connect(function(obj)
-			if obj:IsA("Sky") or obj:IsA("Atmosphere") then
-				task.wait()
-				pcall(function() obj:Destroy() end)
-			end
-		end)
-	else
-		Lighting.Ambient = Color3.fromRGB(127, 127, 127)
-		Lighting.OutdoorAmbient = Color3.fromRGB(127, 127, 127)
-		Lighting.Brightness = 2
-		Lighting.FogEnd = 100000
-	end
+        -- Chặn việc thêm lại Sky hoặc Atmosphere
+        game.DescendantAdded:Connect(function(desc)
+            if desc:IsA("Sky") or desc:IsA("Atmosphere") then
+                task.wait()
+                pcall(function() desc:Destroy() end)
+            end
+        end)
+    else
+        Lighting.Ambient = Color3.fromRGB(127, 127, 127)
+        Lighting.OutdoorAmbient = Color3.fromRGB(127, 127, 127)
+        Lighting.Brightness = 2
+        Lighting.FogColor = Color3.fromRGB(255, 255, 255)
+        Lighting.FogStart = 0
+        Lighting.FogEnd = 100000
+        Lighting.GlobalShadows = true
+        Lighting.EnvironmentSpecularScale = 1
+        Lighting.EnvironmentDiffuseScale = 1
+    end
 end)
