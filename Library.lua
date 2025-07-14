@@ -1830,3 +1830,49 @@ FlyGroup:AddSlider("FlySpeedSlider", {
         getgenv().FlySpeed = val
     end
 })
+
+local FOVGroup = PlayerTab:AddLeftGroupbox("FOV")
+
+FOVGroup:AddToggle("FOVToggle", {
+    Text = "Field Of View",
+    Default = false,
+    Tooltip = "custom cam field of view",
+    Callback = function(value)
+        getgenv().CameraEnabled = value
+        local Camera = game:GetService("Workspace").CurrentCamera
+
+        if value then
+            getgenv().CameraFOV = getgenv().CameraFOV or 70
+            Camera.FieldOfView = getgenv().CameraFOV
+            
+            if not getgenv().FOVLoop then
+                getgenv().FOVLoop = game:GetService("RunService").RenderStepped:Connect(function()
+                    if getgenv().CameraEnabled then
+                        Camera.FieldOfView = getgenv().CameraFOV
+                    end
+                end)
+            end
+        else
+            Camera.FieldOfView = 70
+            
+            if getgenv().FOVLoop then
+                getgenv().FOVLoop:Disconnect()
+                getgenv().FOVLoop = nil
+            end
+        end
+    end
+})
+						
+FOVGroup:AddSlider("FOVSlider", {
+    Text = "FOV Controller",
+    Default = 70,
+    Min = 50,
+    Max = 150,
+    Tooltip = "Adjust the zoom level of your camera",
+    Callback = function(value)
+        getgenv().CameraFOV = value
+        if getgenv().CameraEnabled then
+            game:GetService("Workspace").CurrentCamera.FieldOfView = value
+        end
+    end
+})
