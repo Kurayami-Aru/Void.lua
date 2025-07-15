@@ -822,7 +822,7 @@ AutoParryGroup:AddToggle("AutoParry", {
 
                         local cappedSpeedDiff = math.min(math.max(Speed - 9.5, 0), 650)
 
-                        local speed_divisor_base = 1.2 + cappedSpeedDiff * 0.00175
+                        local speed_divisor_base = 1.2 + cappedSpeedDiff * 0.0013
 
                         local effectiveMultiplier = Speed_Divisor_Multiplier
 
@@ -988,7 +988,7 @@ AutoParryGroup:AddSlider("ParryAccuracy", {
 
     Callback = function(value)
 
-        Speed_Divisor_Multiplier = 0.8 + (value - 1) * (0.22 / 99)
+        Speed_Divisor_Multiplier = 0.9 + (value - 1) * (0.2 / 99)
 
         end
 
