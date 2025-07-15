@@ -1127,8 +1127,6 @@ else
         Connections_Manager['Auto Spam'] = nil
     end
 end
-
-})
 		
 AutoSpamGroup:AddDropdown("ParryType", {
 
@@ -1329,8 +1327,6 @@ else
         Connections_Manager['Manual Spam'] = nil
     end
 end
-
-})
 
 if game:GetService("UserInputService").TouchEnabled then
 
