@@ -768,7 +768,7 @@ AutoParryGroup:AddToggle("AutoParry", {
 
     Default = false,
 
-    Callback = function(v)
+    Callback = function(value)
 
         if value then
 
@@ -986,7 +986,7 @@ AutoParryGroup:AddSlider("ParryAccuracy", {
 
     Max = 100,
 
-    Callback = function(v)
+    Callback = function(value)
 
         Speed_Divisor_Multiplier = 0.8 + (value - 1) * (0.22 / 99)
 
@@ -1022,7 +1022,7 @@ AutoParryGroup:AddDropdown("CurveDirection", {
 
     Text = "Curve Direction",
 
-    Callback = function(v)
+    Callback = function(value)
 
         Selected_Parry_Type = parryTypeMap[value] or value
 
@@ -1036,7 +1036,7 @@ AutoParryGroup:AddToggle("RandomAccuracy", {
 
     Default = false,
 
-    Callback = function(v) 
+    Callback = function(value) 
 
         getgenv().RandomParryAccuracyEnabled = value
 
@@ -1050,7 +1050,7 @@ AutoParryGroup:AddToggle("AutoParryKeypress", {
 
     Default = false,
 
-    Callback = function(v)
+    Callback = function(value)
 
         getgenv().AutoParryKeypress = value
 
@@ -1066,7 +1066,7 @@ AutoSpamGroup:AddToggle("AutoSpamParry", {
 
     Default = false,
 
-    Callback = function(v)
+    Callback = function(value)
 
         if value then
 
@@ -1174,7 +1174,7 @@ AutoSpamGroup:AddDropdown("ParryType", {
 
     Text = "Parry Type",
 
-    Callback = function(v) 
+    Callback = function(value) 
 
     end
 
@@ -1190,7 +1190,7 @@ AutoSpamGroup:AddSlider("ParryThreshold", {
 
     Max = 3,
 
-    Callback = function(v)
+    Callback = function(value)
 
         ParryThreshold = value
 
@@ -1206,7 +1206,7 @@ if not game:GetService("UserInputService").TouchEnabled then
 
         Default = false,
 
-        Callback = function(v)
+        Callback = function(value)
 
             if value then
 
@@ -1322,7 +1322,7 @@ AutoSpamGroup:AddToggle("AutoSpamKeypress", {
 
     Default = false,
 
-    Callback = function(v)
+    Callback = function(value)
 
         getgenv().SpamParryKeypress = value
 
@@ -1338,7 +1338,7 @@ ManualSpamGroup:AddToggle("ManualSpam", {
 
     Default = false,
 
-    Callback = function(v)
+    Callback = function(value)
 
         if value then
 
@@ -1394,7 +1394,7 @@ if game:GetService("UserInputService").TouchEnabled then
 
         Default = false,
 
-        Callback = function(v)
+        Callback = function(value)
 
             getgenv().spamui = value
 
@@ -1526,7 +1526,7 @@ ManualSpamGroup:AddToggle("ManualSpamKeypress", {
 
     Default = false,
 
-    Callback = function(v)
+    Callback = function(value)
 
         getgenv().ManualSpamKeypress = value
 
@@ -1542,7 +1542,7 @@ DetectionGroup:AddToggle("Infinity", {
 
     Default = false,
 
-    Callback = function(v)
+    Callback = function(value)
 
         getgenv().InfinityDetection = value
 
@@ -1556,7 +1556,7 @@ DetectionGroup:AddToggle("AntiPhantom", {
 
     Default = false,
 
-    Callback = function(v)
+    Callback = function(value)
 
         PhantomV2Detection = value
 
