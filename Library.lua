@@ -1289,32 +1289,28 @@ ManualSpamGroup:AddToggle("ManualSpam", {
     Default = false,
     Callback = function(value)
         if value then
-            getgenv().ManualSpamRunning = true
-
-            lastManualSpam = lastManualSpam or 0
-
-            task.spawn(function()
-                while getgenv().ManualSpamRunning do
-                    local now = tick()
-                    if not lastManualSpam then lastManualSpam = 0 end
-                    if now - lastManualSpam < (getgenv().ManualSpamCooldown or 0.001) then
-                        continue
-                    end
-                    lastManualSpam = now
-
-                    if getgenv().spamui then
-                        continue
-                    end
-
-                    if getgenv().ManualSpamKeypress then
-                        VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.F, false, game) 
-                    else
-                        Auto_Parry.Parry(Selected_Parry_Type)
-                    end
+            Connections_Manager['Manual Spam'] = RunService.Heartbeat:Connect(function()
+                local now = tick()
+                if not lastManualSpam then lastManualSpam = 0 end
+                if now - lastManualSpam < (getgenv().ManualSpamCooldown or 0.005) then return end
+                lastManualSpam = now
+ 
+                if getgenv().spamui then
+                    return
                 end
+ 
+                if getgenv().ManualSpamKeypress then
+                    VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.F, false, game) 
+                else
+                    Auto_Parry.Parry(Selected_Parry_Type)
+                end
+ 
             end)
         else
-            getgenv().ManualSpamRunning = false
+            if Connections_Manager['Manual Spam'] then
+                Connections_Manager['Manual Spam']:Disconnect()
+                Connections_Manager['Manual Spam'] = nil
+            end
         end
     end
 })
