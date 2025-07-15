@@ -1285,37 +1285,36 @@ AutoSpamGroup:AddToggle("AutoSpamKeypress", {
 local ManualSpamGroup = BlatantTab:AddLeftGroupbox("Manual Spam")
 
 ManualSpamGroup:AddToggle("ManualSpam", {
-
     Text = "Manual Spam",
-
     Default = false,
-
     Callback = function(value)
-
         if value then
+            getgenv().ManualSpamRunning = true
 
-            Connections_Manager['Manual Spam'] = RunService.Heartbeat:Connect(function()
-                local now = tick()
-                if not lastManualSpam then lastManualSpam = 0 end
-                if now - lastManualSpam < (getgenv().ManualSpamCooldown or 0.005) then return end
-                lastManualSpam = now
- 
-                if getgenv().spamui then
-                    return
+            lastManualSpam = lastManualSpam or 0
+
+            task.spawn(function()
+                while getgenv().ManualSpamRunning do
+                    local now = tick()
+                    if not lastManualSpam then lastManualSpam = 0 end
+                    if now - lastManualSpam < (getgenv().ManualSpamCooldown or 0.001) then
+                        continue
+                    end
+                    lastManualSpam = now
+
+                    if getgenv().spamui then
+                        continue
+                    end
+
+                    if getgenv().ManualSpamKeypress then
+                        VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.F, false, game) 
+                    else
+                        Auto_Parry.Parry(Selected_Parry_Type)
+                    end
                 end
- 
-                if getgenv().ManualSpamKeypress then
-                    VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.F, false, game) 
-                else
-                    Auto_Parry.Parry(Selected_Parry_Type)
-                end
- 
             end)
         else
-            if Connections_Manager['Manual Spam'] then
-                Connections_Manager['Manual Spam']:Disconnect()
-                Connections_Manager['Manual Spam'] = nil
-            end
+            getgenv().ManualSpamRunning = false
         end
     end
 })
