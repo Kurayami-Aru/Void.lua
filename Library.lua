@@ -738,7 +738,7 @@ function Library:create_ui()
     function self:load()
         local content = {}
     
-        for _, object in March:GetDescendants() do
+        for _, object in Null:GetDescendants() do
             if not object:IsA('ImageLabel') then
                 continue
             end
@@ -1052,7 +1052,7 @@ function Library:create_ui()
                 ModuleName.Text = settings.title or "Skibidi"
             else
                 ModuleName.RichText = true
-                ModuleName.Text = settings.richtext or "<font color='rgb(255,0,0)'>March</font> user"
+                ModuleName.Text = settings.richtext or "<font color='rgb(255,0,0)'>Null</font> user"
             end;
             ModuleName.Name = 'ModuleName'
             ModuleName.Size = UDim2.new(0, 205, 0, 13)
@@ -1400,7 +1400,7 @@ function Library:create_ui()
                     Body.Text = settings.text or "Skibidi"
                 else
                     Body.RichText = true
-                    Body.Text = settings.richtext or "<font color='rgb(255,0,0)'>March</font> user"
+                    Body.Text = settings.richtext or "<font color='rgb(255,0,0)'>Null</font> user"
                 end
                 
                 Body.Size = UDim2.new(1, -10, 0, 20)
@@ -1470,7 +1470,7 @@ function Library:create_ui()
                     Body.Text = settings.text or "Skibidi" -- Default text
                 else
                     Body.RichText = true
-                    Body.Text = settings.richtext or "<font color='rgb(255,0,0)'>March</font> user" -- Default rich text
+                    Body.Text = settings.richtext or "<font color='rgb(255,0,0)'>Null</font> user" -- Default rich text
                 end
             
                 Body.Size = UDim2.new(1, -10, 1, 0)
@@ -1501,7 +1501,7 @@ function Library:create_ui()
                         Body.Text = new_settings.text or "Skibidi" -- Default text
                     else
                         Body.RichText = true
-                        Body.Text = new_settings.richtext or "<font color='rgb(255,0,0)'>March</font> user" -- Default rich text
+                        Body.Text = new_settings.richtext or "<font color='rgb(255,0,0)'>Null</font> user" -- Default rich text
                     end
                 end;
             
