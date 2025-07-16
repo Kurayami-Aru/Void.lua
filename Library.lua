@@ -5270,56 +5270,6 @@ workspace.Balls.ChildRemoved:Connect(function(Value)
     end
 end)
 
-local FPSBooster = misc:create_module({
-        title = 'FPS Booster',
-        flag = 'FPS_Booster',
-        description = 'Boost  your FPS',
-        section = 'left',
-        callback = function(enabled)
-            local Lighting = game:GetService("Lighting")
- 
-    if enabled then
-        -- Ãp dá»¥ng cáº¥u hÃ¬nh tá»‘i Æ°u FPS
-        Lighting.Ambient = Color3.fromRGB(80, 80, 80)
-        Lighting.OutdoorAmbient = Color3.fromRGB(80, 80, 80)
-        Lighting.Brightness = 0.5
-        Lighting.FogColor = Color3.fromRGB(80, 80, 80)
-        Lighting.FogStart = 0
-        Lighting.FogEnd = 1000
-        Lighting.GlobalShadows = false
-        Lighting.EnvironmentSpecularScale = 0
-        Lighting.EnvironmentDiffuseScale = 0
- 
-        -- XoÃ¡ Sky, Atmosphere, PostEffect
-        for _, obj in ipairs(Lighting:GetChildren()) do
-            if obj:IsA("Sky") or obj:IsA("Atmosphere") or obj:IsA("PostEffect") then
-                pcall(function() obj:Destroy() end)
-            end
-        end
- 
-        -- NgÄƒn spawn láº¡i hiá»‡u á»©ng Lighting
-        if not getgenv().fpsBoosterDescHooked then
-            getgenv().fpsBoosterDescHooked = true
-            game.DescendantAdded:Connect(function(obj)
-                if obj:IsA("Sky") or obj:IsA("Atmosphere") then
-                    task.defer(function()
-                        pcall(function() obj:Destroy() end)
-                    end)
-                end
-            end)
-        end
-    else
-        -- KhÃ´i phá»¥c cáº¥u hÃ¬nh Lighting máº·c Ä‘á»‹nh
-        Lighting.Ambient = Color3.fromRGB(127, 127, 127)
-        Lighting.OutdoorAmbient = Color3.fromRGB(127, 127, 127)
-        Lighting.Brightness = 2
-        Lighting.FogColor = Color3.fromRGB(255, 255, 255)
-        Lighting.FogStart = 0
-        Lighting.FogEnd = 100000
-        Lighting.GlobalShadows = true
-        Lighting.EnvironmentSpecularScale = 1
-        Lighting.EnvironmentDiffuseScale = 1
-    end
-end)
 
+						
 main:load()  
