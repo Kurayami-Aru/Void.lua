@@ -2298,7 +2298,7 @@ local SetCurveModule = rage:create_module({
             frame.Name = "MainFrame"
             frame.Position = UDim2.new(0, 20, 0, 20)
             frame.Size = UDim2.new(0, 200, 0, 100)
-            frame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+            frame.BackgroundColor3 = Color3.fromRGB(90, 60, 180)
             frame.BackgroundTransparency = 0.25
             frame.BorderSizePixel = 0
             frame.Active = true
@@ -2311,15 +2311,15 @@ local SetCurveModule = rage:create_module({
 
             local uiStroke = Instance.new("UIStroke")
             uiStroke.Thickness = 2
-            uiStroke.Color = Color3.fromRGB(0, 0, 0)
+            uiStroke.Color = Color3.fromRGB(190, 150, 255)
             uiStroke.Transparency = 0.2
             uiStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
             uiStroke.Parent = frame
 
             local uiGradient = Instance.new("UIGradient")
             uiGradient.Color = ColorSequence.new{
-                ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 255, 255)),
-                ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 0, 0))
+                ColorSequenceKeypoint.new(0, Color3.fromRGB(90, 60, 180)),
+                ColorSequenceKeypoint.new(1, Color3.fromRGB(15, 10, 25))
             }
             uiGradient.Rotation = 0
             uiGradient.Parent = frame
@@ -2349,6 +2349,7 @@ local SetCurveModule = rage:create_module({
                 end
 
                 button.Text = newType
+													
 
                 if getgenv().HotkeyParryTypeNotify then
                     Library.SendNotification({
