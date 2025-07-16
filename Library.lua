@@ -1433,7 +1433,7 @@ do
         round_number = true,
 
         callback = function(value: boolean)
-            Speed_Divisor_Multiplier = 0.7 + (value - 1) * (0.35 / 99)
+            Speed_Divisor_Multiplier = math.random(970, 1000) / 1000
         end
     })
 
@@ -1549,70 +1549,38 @@ do
             end
 
             if value then
-                Connections_Manager['Auto Spam'] = RunService.Heartbeat:Connect(function()
-    local now = tick()
-    if not lastAutoSpam then lastAutoSpam = 0 end
-    if now - lastAutoSpam < 0.0167 then return end
-    lastAutoSpam = now
+                Connections_Manager['Auto Spam'] = RunService.PreSimulation:Connect(function()
+                local now = tick()
+                if not lastAutoSpam then lastAutoSpam = 0 end
+                if now - lastAutoSpam < (getgenv().SpamCooldown or 0.0008) then return end
+                lastAutoSpam = now
                 local Ball = Auto_Parry.Get_Ball()
-
-                if not Ball then
-                    return
-                end
-
+                if not Ball then return end
                 local Zoomies = Ball:FindFirstChild('zoomies')
-
-                if not Zoomies then
-                    return
-                end
-
+                if not Zoomies then return end
                 Auto_Parry.Closest_Player()
-
                 local Ping = game:GetService('Stats').Network.ServerStatsItem['Data Ping']:GetValue()
-
                 local Ping_Threshold = math.clamp(Ping / 10, 1, 16)
-
                 local Ball_Target = Ball:GetAttribute('target')
-
                 local Ball_Properties = Auto_Parry:Get_Ball_Properties()
                 local Entity_Properties = Auto_Parry:Get_Entity_Properties()
-
                 local Spam_Accuracy = Auto_Parry.Spam_Service({
                     Ball_Properties = Ball_Properties,
                     Entity_Properties = Entity_Properties,
                     Ping = Ping_Threshold
                 })
-
                 local Target_Position = Closest_Entity.PrimaryPart.Position
                 local Target_Distance = Player:DistanceFromCharacter(Target_Position)
-
                 local Direction = (Player.Character.PrimaryPart.Position - Ball.Position).Unit
                 local Ball_Direction = Zoomies.VectorVelocity.Unit
-
                 local Dot = Direction:Dot(Ball_Direction)
-
                 local Distance = Player:DistanceFromCharacter(Ball.Position)
-
-                if not Ball_Target then
-                    return
-                end
-
-                if Target_Distance > Spam_Accuracy or Distance > Spam_Accuracy then
-                    return
-                end
-                
+                if not Ball_Target then return end
+                if Target_Distance > Spam_Accuracy or Distance > Spam_Accuracy then return end
                 local Pulsed = Player.Character:GetAttribute('Pulsed')
-
-                if Pulsed then
-                    return
-                end
-
-                if Ball_Target == tostring(Player) and Target_Distance > 30 and Distance > 30 then
-                    return
-                end
-
+                if Pulsed then return end
+                if Ball_Target == tostring(Player) and Target_Distance > 80 and Distance > 60 then return end
                 local threshold = ParryThreshold
-
                 if Distance <= Spam_Accuracy and Parries > threshold then
                     if getgenv().SpamParryKeypress then
                         VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.F, false, game) 
@@ -1786,21 +1754,22 @@ Last_Parry = tick()
                 end
             end
             if value then
-                Connections_Manager['Manual Spam'] = RunService.Heartbeat:Connect(function()
-    local now = tick()
-    if not lastManualSpam then lastManualSpam = 0 end
-    if now - lastManualSpam < 0.0167 then return end
-    lastManualSpam = now
+                Connections_Manager['Manual Spam'] = RunService.PreSimulation:Connect(function()
+                local now = tick()
+                if not lastManualSpam then lastManualSpam = 0 end
+                if now - lastManualSpam < (getgenv().ManualSpamCooldown or 0.001) then return end
+                lastManualSpam = now
+ 
                 if getgenv().spamui then
                     return
                 end
-
+ 
                 if getgenv().ManualSpamKeypress then
-                    VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.F, false, game) 
+                    VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.E, false, game) 
                 else
                     Auto_Parry.Parry(Selected_Parry_Type)
                 end
-
+ 
             end)
         else
             if Connections_Manager['Manual Spam'] then
@@ -1830,7 +1799,7 @@ if value then
     frame.Name = "MainFrame"
     frame.Position = UDim2.new(0, 20, 0, 20)
     frame.Size = UDim2.new(0, 200, 0, 100)
-    frame.BackgroundColor3 = Color3.fromRGB(90, 60, 180) -- roxo elegante
+    frame.BackgroundColor3 = Color3.fromRGB(255, 255, 255) -- roxo elegante
     frame.BackgroundTransparency = 0.25 -- mais transparente
     frame.BorderSizePixel = 0
     frame.Active = true
@@ -1843,15 +1812,15 @@ if value then
 
     local uiStroke = Instance.new("UIStroke")
     uiStroke.Thickness = 2
-    uiStroke.Color = Color3.fromRGB(190, 150, 255) -- borda lilás suave
+    uiStroke.Color = Color3.fromRGB(0, 0, 0) -- borda lilás suave
     uiStroke.Transparency = 0.2 -- leve transparência na borda também
     uiStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
     uiStroke.Parent = frame
 
     local uiGradient = Instance.new("UIGradient")
     uiGradient.Color = ColorSequence.new{
-        ColorSequenceKeypoint.new(0, Color3.fromRGB(90, 60, 180)),  -- roxo médio
-        ColorSequenceKeypoint.new(1, Color3.fromRGB(15, 10, 25))    -- quase preto
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 255, 255)),  -- roxo médio
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 0, 0))    -- quase preto
     }
     uiGradient.Rotation = 0
     uiGradient.Parent = frame
@@ -1864,7 +1833,7 @@ if value then
     button.BackgroundTransparency = 1
     button.BorderSizePixel = 0
     button.Font = Enum.Font.GothamSemibold
-    button.TextColor3 = Color3.fromRGB(235, 215, 255) -- lilás claro com ótimo contraste
+    button.TextColor3 = Color3.fromRGB(255, 255, 255) -- lilás claro com ótimo contraste
     button.TextSize = 22
     button.Parent = frame
 
@@ -1919,9 +1888,9 @@ if value then
     })
 
 local Module = rage:create_module({
-    title = 'Idk What is this',
-    flag = 'Idkwhatisthis',
-    description = 'HEH!!',
+    title = '??????????',
+    flag = '??????????',
+    description = 'Secret!',
     section = 'left',
     callback = (function()
         local Players = game:GetService("Players")
@@ -2288,7 +2257,7 @@ local SetCurveModule = rage:create_module({
             frame.Name = "MainFrame"
             frame.Position = UDim2.new(0, 20, 0, 20)
             frame.Size = UDim2.new(0, 200, 0, 100)
-            frame.BackgroundColor3 = Color3.fromRGB(90, 60, 180)
+            frame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
             frame.BackgroundTransparency = 0.25
             frame.BorderSizePixel = 0
             frame.Active = true
@@ -2301,15 +2270,15 @@ local SetCurveModule = rage:create_module({
 
             local uiStroke = Instance.new("UIStroke")
             uiStroke.Thickness = 2
-            uiStroke.Color = Color3.fromRGB(190, 150, 255)
+            uiStroke.Color = Color3.fromRGB(0, 0, 0)
             uiStroke.Transparency = 0.2
             uiStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
             uiStroke.Parent = frame
 
             local uiGradient = Instance.new("UIGradient")
             uiGradient.Color = ColorSequence.new{
-                ColorSequenceKeypoint.new(0, Color3.fromRGB(90, 60, 180)),
-                ColorSequenceKeypoint.new(1, Color3.fromRGB(15, 10, 25))
+                ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 255, 255)),
+                ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 0, 0))
             }
             uiGradient.Rotation = 0
             uiGradient.Parent = frame
@@ -2447,7 +2416,7 @@ local SetCurveModule = rage:create_module({
         value = 100,
         round_number = true,
         callback = function(value: number)
-            LobbyAP_Speed_Divisor_Multiplier = 0.7 + (value - 1) * (0.35 / 99)
+            Speed_Divisor_Multiplier = math.random(970, 1000) / 1000
         end
     })
 
@@ -4919,54 +4888,85 @@ local BallStats = misc:create_module({
     section = "left",
     callback = function(value)
         if value then
-            if not ballStatsUI then
-                local player = game.Players.LocalPlayer
-                ballStatsUI = Instance.new("ScreenGui")
-                ballStatsUI.Name = "BallStatsUI"
-                ballStatsUI.ResetOnSpawn = false
-                ballStatsUI.DisplayOrder = 9999 -- 🧠 prioridade máxima
-                ballStatsUI.ZIndexBehavior = Enum.ZIndexBehavior.Global -- 🔼 permite sobreposição visual
-                ballStatsUI.Parent = player:WaitForChild("PlayerGui") -- ✅ continua no PlayerGui
-
-                local textLabel = Instance.new("TextLabel")
-                textLabel.Name = "SpeedDisplay"
-                textLabel.Size = UDim2.new(0, 180, 0, 24)
-                textLabel.Position = UDim2.new(0, 10, 0, 10) -- ⚠️ EXATO MESMO LUGAR
-                textLabel.BackgroundTransparency = 1
-                textLabel.TextColor3 = Color3.new(1, 1, 1)
-                textLabel.Font = Enum.Font.Gotham
-                textLabel.TextSize = 15 -- só um pouco maior
-                textLabel.Text = "0.0"
-                textLabel.ZIndex = 9999 -- 🧠 por cima de tudo
-                textLabel.Parent = ballStatsUI
-
-                updateConn = game:GetService("RunService").RenderStepped:Connect(function()
-                    local Balls = Auto_Parry.Get_Balls() or {}
-                    local speedShown = false
-
-                    for _, Ball in ipairs(Balls) do
-                        local zoomies = Ball:FindFirstChild("zoomies")
-                        if zoomies then
-                            local speed = zoomies.VectorVelocity.Magnitude
-                            textLabel.Text = ("%.12f"):format(speed)
-                            speedShown = true
-                            break
+            local Players = game:GetService("Players")
+            local RunService = game:GetService("RunService")
+            local player = Players.LocalPlayer
+            local peakSpeed = 0
+ 
+            statsGui = Instance.new("ScreenGui")
+            statsGui.Name = "BallSpeedGui"
+            statsGui.ResetOnSpawn = false
+            statsGui.Parent = player:WaitForChild("PlayerGui")
+ 
+            local label = Instance.new("TextLabel")
+            label.Size = UDim2.new(0, 320, 0, 100)
+            label.Position = UDim2.new(0, 10, 0, 10)
+            label.BackgroundTransparency = 1
+            label.TextColor3 = Color3.new(1, 1, 1)
+            label.Font = Enum.Font.GothamBold
+            label.TextSize = 28
+            label.Text = "velocity: ...\npeak: ...\nstatus: ..."
+            label.TextXAlignment = Enum.TextXAlignment.Left
+            label.TextYAlignment = Enum.TextYAlignment.Top
+            label.TextWrapped = true
+            label.Parent = statsGui
+ 
+            local function findFastestBall()
+                local ballsFolder = workspace:FindFirstChild("Balls")
+                if not ballsFolder then return nil end
+                local bestBall, maxSpeed = nil, 0
+                for _, obj in ipairs(ballsFolder:GetChildren()) do
+                    if obj:IsA("BasePart") then
+                        local speed = obj.Velocity.Magnitude
+                        if speed > maxSpeed then
+                            maxSpeed = speed
+                            bestBall = obj
                         end
                     end
-
-                    if not speedShown then
-                        textLabel.Text = "0.0"
-                    end
+                end
+                return bestBall
+            end
+ 
+            local function trackHumanoid(hum)
+                if hum:GetAttribute("__Tracked") then return end
+                hum:SetAttribute("__Tracked", true)
+                hum.Died:Connect(function()
+                    peakSpeed = 0
                 end)
             end
-        else
-            if updateConn then
-                updateConn:Disconnect()
-                updateConn = nil
+ 
+            for _, v in ipairs(workspace:GetDescendants()) do
+                if v:IsA("Humanoid") then
+                    trackHumanoid(v)
+                end
             end
-            if ballStatsUI then
-                ballStatsUI:Destroy()
-                ballStatsUI = nil
+ 
+            workspace.DescendantAdded:Connect(function(obj)
+                if obj:IsA("Humanoid") then
+                    trackHumanoid(obj)
+                end
+            end)
+ 
+            ballStatsConn = RunService.RenderStepped:Connect(function()
+                local ball = findFastestBall()
+                local status = "Stopped"
+                if ball and ball:IsDescendantOf(workspace) then
+                    local speed = math.floor(ball.Velocity.Magnitude + 0.5)
+                    if speed > peakSpeed then peakSpeed = speed end
+                    if speed > 1 and not ball.Anchored then status = "Moving" end
+                    label.Text = "velocity: " .. speed .. "\npeak: " .. peakSpeed .. "\nstatus: " .. status
+                else
+                    label.Text = "velocity: not found\npeak: " .. peakSpeed .. "\nstatus: Stopped"
+                end
+            end)
+        else
+            if statsGui then
+                statsGui:Destroy()
+                statsGui = nil
+            end
+            if ballStatsConn then
+                ballStatsConn:Disconnect()
+                ballStatsConn = nil
             end
         end
     end
@@ -5270,6 +5270,56 @@ workspace.Balls.ChildRemoved:Connect(function(Value)
     end
 end)
 
-
+local FPSBooster = misc:create_module({
+        title = 'FPS Booster',
+        flag = 'FPS_Booster',
+        description = 'Boost  your FPS',
+        section = 'left',
+        callback = function(enabled)
+            local Lighting = game:GetService("Lighting")
+ 
+    if enabled then
+        -- Ãp dá»¥ng cáº¥u hÃ¬nh tá»‘i Æ°u FPS
+        Lighting.Ambient = Color3.fromRGB(80, 80, 80)
+        Lighting.OutdoorAmbient = Color3.fromRGB(80, 80, 80)
+        Lighting.Brightness = 0.5
+        Lighting.FogColor = Color3.fromRGB(80, 80, 80)
+        Lighting.FogStart = 0
+        Lighting.FogEnd = 1000
+        Lighting.GlobalShadows = false
+        Lighting.EnvironmentSpecularScale = 0
+        Lighting.EnvironmentDiffuseScale = 0
+ 
+        -- XoÃ¡ Sky, Atmosphere, PostEffect
+        for _, obj in ipairs(Lighting:GetChildren()) do
+            if obj:IsA("Sky") or obj:IsA("Atmosphere") or obj:IsA("PostEffect") then
+                pcall(function() obj:Destroy() end)
+            end
+        end
+ 
+        -- NgÄƒn spawn láº¡i hiá»‡u á»©ng Lighting
+        if not getgenv().fpsBoosterDescHooked then
+            getgenv().fpsBoosterDescHooked = true
+            game.DescendantAdded:Connect(function(obj)
+                if obj:IsA("Sky") or obj:IsA("Atmosphere") then
+                    task.defer(function()
+                        pcall(function() obj:Destroy() end)
+                    end)
+                end
+            end)
+        end
+    else
+        -- KhÃ´i phá»¥c cáº¥u hÃ¬nh Lighting máº·c Ä‘á»‹nh
+        Lighting.Ambient = Color3.fromRGB(127, 127, 127)
+        Lighting.OutdoorAmbient = Color3.fromRGB(127, 127, 127)
+        Lighting.Brightness = 2
+        Lighting.FogColor = Color3.fromRGB(255, 255, 255)
+        Lighting.FogStart = 0
+        Lighting.FogEnd = 100000
+        Lighting.GlobalShadows = true
+        Lighting.EnvironmentSpecularScale = 1
+        Lighting.EnvironmentDiffuseScale = 1
+    end
+end)
 
 main:load()  
