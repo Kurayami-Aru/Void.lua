@@ -1788,88 +1788,129 @@ Last_Parry = tick()
             flag = "Manual_Spam_UI",
             callback = function(value: boolean)
                 getgenv().spamui = value
-        
-if value then
-    local gui = Instance.new("ScreenGui")
-    gui.Name = "ManualSpamUI"
-    gui.ResetOnSpawn = false
-    gui.Parent = game.CoreGui
-
-    local frame = Instance.new("Frame")
-    frame.Name = "MainFrame"
-    frame.Position = UDim2.new(0, 20, 0, 20)
-    frame.Size = UDim2.new(0, 200, 0, 100)
-    frame.BackgroundColor3 = Color3.fromRGB(255, 255, 255) -- roxo elegante
-    frame.BackgroundTransparency = 0.25 -- mais transparente
-    frame.BorderSizePixel = 0
-    frame.Active = true
-    frame.Draggable = true
-    frame.Parent = gui
-
-    local uiCorner = Instance.new("UICorner")
-    uiCorner.CornerRadius = UDim.new(0, 12)
-    uiCorner.Parent = frame
-
-    local uiStroke = Instance.new("UIStroke")
-    uiStroke.Thickness = 2
-    uiStroke.Color = Color3.fromRGB(0, 0, 0) -- borda lilás suave
-    uiStroke.Transparency = 0.2 -- leve transparência na borda também
-    uiStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-    uiStroke.Parent = frame
-
-    local uiGradient = Instance.new("UIGradient")
-    uiGradient.Color = ColorSequence.new{
-        ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 255, 255)),  -- roxo médio
-        ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 0, 0))    -- quase preto
-    }
-    uiGradient.Rotation = 0
-    uiGradient.Parent = frame
-
-    local button = Instance.new("TextButton")
-    button.Name = "ClashModeButton"
-    button.Text = "Clash Mode"
-    button.Size = UDim2.new(0, 160, 0, 40)
-    button.Position = UDim2.new(0.5, -80, 0.5, -20)
-    button.BackgroundTransparency = 1
-    button.BorderSizePixel = 0
-    button.Font = Enum.Font.GothamSemibold
-    button.TextColor3 = Color3.fromRGB(255, 255, 255) -- lilás claro com ótimo contraste
-    button.TextSize = 22
-    button.Parent = frame
-
-
-        
-                    local activated = false
-        
-                    local function toggle()
-                        activated = not activated
-                        button.Text = activated and "Stop" or "Clash Mode"
-                        if activated then
-                            Connections_Manager['Manual Spam UI'] = game:GetService("RunService").Heartbeat:Connect(function()
-                                Auto_Parry.Parry(Selected_Parry_Type)
-                            end)
-                        else
-                            if Connections_Manager['Manual Spam UI'] then
-                                Connections_Manager['Manual Spam UI']:Disconnect()
-                                Connections_Manager['Manual Spam UI'] = nil
-                            end
-                        end
-                    end
-        
-                    button.MouseButton1Click:Connect(toggle)
+ 
+        if value then
+ 
+            local gui = Instance.new("ScreenGui")
+ 
+            gui.Name = "ManualSpamUI"
+ 
+            gui.ResetOnSpawn = false
+ 
+            gui.Parent = game.CoreGui
+ 
+            local frame = Instance.new("Frame")
+ 
+            frame.Name = "MainFrame"
+ 
+            frame.Position = UDim2.new(0, 20, 0, 20)
+ 
+            frame.Size = UDim2.new(0, 200, 0, 100)
+ 
+            frame.BackgroundColor3 = Color3.fromRGB(0, 153, 255)
+ 
+            frame.BackgroundTransparency = 0.2
+ 
+            frame.BorderSizePixel = 0
+ 
+            frame.Active = true
+ 
+            frame.Draggable = true
+ 
+            frame.Parent = gui
+ 
+            local uiCorner = Instance.new("UICorner")
+ 
+            uiCorner.CornerRadius = UDim.new(0, 12)
+ 
+            uiCorner.Parent = frame
+ 
+            local uiStroke = Instance.new("UIStroke")
+ 
+            uiStroke.Thickness = 2
+ 
+            uiStroke.Color = Color3.new(15, 115, 255)
+ 
+            uiStroke.Parent = frame
+ 
+            local button = Instance.new("TextButton")
+ 
+            button.Name = "ClashModeButton"
+ 
+            button.Text = "Clash Mode"
+ 
+            button.Size = UDim2.new(0, 170, 0, 50)
+ 
+            button.Position = UDim2.new(0.5, -80, 0.5, -20)
+ 
+            button.BackgroundTransparency = 1
+ 
+            button.BorderSizePixel = 0
+ 
+            button.Font = Enum.Font.GothamSemibold
+ 
+            button.TextColor3 = Color3.new(255, 255, 255)
+ 
+            button.TextSize = 22
+ 
+            button.Parent = frame
+ 
+            local activated = false
+ 
+            local function toggle()
+ 
+                activated = not activated
+ 
+                button.Text = activated and "Stop" or "Clash Mode"
+ 
+                if activated then
+ 
+                    Connections_Manager['Manual Spam UI'] = game:GetService("RunService").Heartbeat:Connect(function()
+ 
+                        Auto_Parry.Parry(Selected_Parry_Type)
+ 
+                    end)
+ 
                 else
-                    if game.CoreGui:FindFirstChild("ManualSpamUI") then
-                        game.CoreGui:FindFirstChild("ManualSpamUI"):Destroy()
-                    end
-        
+ 
                     if Connections_Manager['Manual Spam UI'] then
+ 
                         Connections_Manager['Manual Spam UI']:Disconnect()
+ 
                         Connections_Manager['Manual Spam UI'] = nil
+ 
                     end
+ 
                 end
+ 
             end
-        })
+ 
+            button.MouseButton1Click:Connect(toggle)
+ 
+        else
+ 
+            if game.CoreGui:FindFirstChild("ManualSpamUI") then
+ 
+                game.CoreGui:FindFirstChild("ManualSpamUI"):Destroy()
+ 
+            end
+ 
+            if Connections_Manager['Manual Spam UI'] then
+ 
+                Connections_Manager['Manual Spam UI']:Disconnect()
+ 
+                Connections_Manager['Manual Spam UI'] = nil
+ 
+            end
+ 
+        end
+ 
     end
+ 
+    })
+ 
+end
+ 
     
     ManualSpam:create_checkbox({
         title = "Keypress",
