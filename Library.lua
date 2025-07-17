@@ -1433,10 +1433,10 @@ do
         round_number = true,
 
         callback = function(value: boolean)
-           Speed_Divisor_Multiplier = math.random(970, 1005) / 1000
+           Speed_Divisor_Multiplier = 0.7 + (value - 1) * (0.35 / 99)
         end
     })
-
+							
     module:create_divider({
     })
 
@@ -2795,7 +2795,7 @@ local SetCurveModule = rage:create_module({
         title = 'Camera FOV',
         flag = 'Camera_FOV',
     
-        maximum_value = 120,
+        maximum_value = 150,
         minimum_value = 50,
         value = 70,
     
@@ -4204,12 +4204,12 @@ qolPlayerNameVisibility()
     SkinChanger:change_state(false)
 
     SkinChanger:create_paragraph({
-        title = "âš ï¸EVERYONE CAN SEE ANIMATIONS",
+        title = "EVERYONE CAN SEE ANIMATIONS",
         text = "IF YOU USE SKIN CHANGER BACKSWORD YOU MUST EQUIP AN ACTUAL BACKSWORD"
     })
 
     local skinchangertextbox = SkinChanger:create_textbox({
-        title = "ï¿¬ Skin Name (Case Sensitive) ï¿¬",
+        title = "Skin Name (Case Sensitive)",
         placeholder = "Enter Sword Skin Name... ",
         flag = "SkinChangerTextbox",
         callback = function(text)
