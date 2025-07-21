@@ -1432,9 +1432,9 @@ do
         round_number = true,
 
         callback = function(value: boolean)
-           Speed_Divisor_Multiplier = math.random(110, 125) / 100
-        end
-    })
+           Speed_Divisor_Multiplier = 0.6 + (value - 1) * (0.53 / 99)
+	end
+})
 							
     module:create_divider({
     })
