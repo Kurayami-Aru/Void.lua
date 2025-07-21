@@ -1645,20 +1645,114 @@ local dropdown2 = SpamParry:create_dropdown({
         end
     })
 
-    SpamParry:create_slider({
-        title = "Parry Threshold",
-        flag = "Parry_Threshold",
-        maximum_value = 3,
-        minimum_value = 1,
-        value = 2.5,
-        round_number = false,
-        callback = function(value: number)
-            ParryThreshold = value
-        end
-    })
+SpamParry:create_checkbox({
+        title = "Manual Spam",
+        flag = "Manual_Spam_Toggle",
+        callback = function(value: boolean)
+            Connections_Manager['Manual Spam'] = RunService.PreSimulation:Connect(function()
+    local now = tick()
+    if not lastManualSpam then lastManualSpam = 0 end
+    if now - lastManualSpam < 0.005 then return end
+    lastManualSpam = now
+                if getgenv().spamui then
+                    return
+                end
 
-    SpamParry:create_divider({
+                if getgenv().ManualSpamKeypress then
+                    VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.F, false, game) 
+                else
+                    Auto_Parry.Parry(Selected_Parry_Type)
+                end
+
+            end)
+        else
+            if Connections_Manager['Manual Spam'] then
+                Connections_Manager['Manual Spam']:Disconnect()
+                Connections_Manager['Manual Spam'] = nil
+            end
+        end
+    end
+})
+    
+ ManualSpam:change_state(false)
+						
+if isMobile then						
+SpamParry:create_checkbox({
+        title = "Manual Spam UI",
+        flag = "Manual_Spam_UI",
+        callback = function(value: boolean)
+	    getgenv().spamui = value
+
+        if value then
+            local gui = Instance.new("ScreenGui")
+            gui.Name = "ManualSpamUI"
+            gui.ResetOnSpawn = false
+            gui.Parent = game.CoreGui
+
+            local frame = Instance.new("Frame")
+            frame.Name = "MainFrame"
+            frame.Position = UDim2.new(0, 20, 0, 20)
+            frame.Size = UDim2.new(0, 200, 0, 100)
+            frame.BackgroundColor3 = Color3.fromRGB(10, 10, 50)
+            frame.BackgroundTransparency = 0.3
+            frame.BorderSizePixel = 0
+            frame.Active = true
+            frame.Draggable = true
+            frame.Parent = gui
+
+            local uiCorner = Instance.new("UICorner")
+            uiCorner.CornerRadius = UDim.new(0, 12)
+            uiCorner.Parent = frame
+
+            local uiStroke = Instance.new("UIStroke")
+            uiStroke.Thickness = 2
+            uiStroke.Color = Color3.new(0, 0, 0)
+            uiStroke.Parent = frame
+
+            local button = Instance.new("TextButton")
+            button.Name = "ClashModeButton"
+            button.Text = "Clash Mode"
+            button.Size = UDim2.new(0, 160, 0, 40)
+            button.Position = UDim2.new(0.5, -80, 0.5, -20)
+            button.BackgroundTransparency = 1
+            button.BorderSizePixel = 0
+            button.Font = Enum.Font.GothamSemibold
+            button.TextColor3 = Color3.new(1, 1, 1)
+            button.TextSize = 22
+            button.Parent = frame
+
+            local activated = false
+
+            local function toggle()
+                activated = not activated
+                button.Text = activated and "Stop" or "Clash Mode"
+                if activated then
+                    Connections_Manager['Manual Spam UI'] = game:GetService("RunService").Heartbeat:Connect(function()
+                        Auto_Parry.Parry(Selected_Parry_Type)
+                    end)
+                else
+                    if Connections_Manager['Manual Spam UI'] then
+                        Connections_Manager['Manual Spam UI']:Disconnect()
+                        Connections_Manager['Manual Spam UI'] = nil
+                    end
+                end
+            end
+
+            button.MouseButton1Click:Connect(toggle)
+        else
+            if game.CoreGui:FindFirstChild("ManualSpamUI") then
+                game.CoreGui:FindFirstChild("ManualSpamUI"):Destroy()
+            end
+
+            if Connections_Manager['Manual Spam UI'] then
+                Connections_Manager['Manual Spam UI']:Disconnect()
+                Connections_Manager['Manual Spam UI'] = nil
+            end
+        end
+    end
     })
+end
+						
 if not isMobile then
         local AnimationFix = SpamParry:create_checkbox({
             title = "Animation Fix",
@@ -1744,14 +1838,6 @@ Last_Parry = tick()
         })
              AnimationFix:change_state(true)
 end  
-
-    SpamParry:create_checkbox({
-        title = "Keypress",
-        flag = "Auto_Spam_Parry_Keypress",
-        callback = function(value: boolean)
-            getgenv().SpamParryKeypress = value
-        end
-    })
 
     SpamParry:create_checkbox({
         title = "Notify",
