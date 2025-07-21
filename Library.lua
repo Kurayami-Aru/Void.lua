@@ -1432,7 +1432,7 @@ do
         round_number = true,
 
         callback = function(value: boolean)
-           Speed_Divisor_Multiplier = 0.7 + (value - 1) * (0.25 / 99)
+           Speed_Divisor_Multiplier = 0.7 + (value - 1) * (0.30 / 99)
 	end
 })
 							
@@ -3443,8 +3443,8 @@ qolPlayerNameVisibility()
     })
 
     local SkinChanger = misc:create_module({
-        title = 'Skin Changer',
-        flag = 'SkinChanger',
+        title = 'Skin Changer (Custom)',
+        flag = 'SkinChanger(Custom)',
         description = 'Skin Changer',
         section = 'left',
         callback = function(value: boolean)
@@ -3463,7 +3463,7 @@ qolPlayerNameVisibility()
     })
 
     local skinchangertextbox = SkinChanger:create_textbox({
-        title = "Skin Name",
+        title = "Skin Model",
         placeholder = "Enter Sword Skin Model... ",
         flag = "SkinChangerTextbox",
         callback = function(text)
@@ -3475,7 +3475,7 @@ qolPlayerNameVisibility()
     })
 
     local skinchangertextbox = SkinChanger:create_textbox({
-        title = "Skin Name",
+        title = "Skin Animation",
         placeholder = "Enter Sword Skin Animation... ",
         flag = "SkinChangerTextbox",
         callback = function(text)
@@ -3487,11 +3487,45 @@ qolPlayerNameVisibility()
     })
 
     local skinchangertextbox = SkinChanger:create_textbox({
-        title = "Skin Name",
+        title = "Skin FX",
         placeholder = "Enter Sword Skin FX... ",
         flag = "SkinChangerTextbox",
         callback = function(text)
             getgenv().swordFX = text
+            if getgenv().skinChanger then
+                getgenv().updateSword()
+            end
+        end
+    })
+
+local SkinChanger = misc:create_module({
+        title = 'Skin Changer (Normal)',
+        flag = 'SkinChanger(Normal)',
+        description = 'Skin Changer',
+        section = 'right',
+        callback = function(value: boolean)
+            getgenv().skinChanger = value
+            if value then
+                getgenv().updateSword()
+            end
+        end
+    })
+
+       SkinChanger:change_state(false)
+
+    SkinChanger:create_paragraph({
+        title = "*NOTICE",
+        text = "Dont use normal with custom or No Render because it will had Error"
+    })
+
+local skinchangertextbox = SkinChanger:create_textbox({
+        title = "Skin Name",
+        placeholder = "Enter Sword Skin Name... ",
+        flag = "SkinChangerTextbox",
+        callback = function(text)
+	    getgenv().swordModel = text
+            getgenv().swordFX = text
+	    getgenv().swordAnimations = text				
             if getgenv().skinChanger then
                 getgenv().updateSword()
             end
