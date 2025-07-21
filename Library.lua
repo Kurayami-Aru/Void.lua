@@ -4,7 +4,6 @@ local main = Library.new()
 local rage = main:create_tab('Blatant', 'rbxassetid://76499042599127')
 local player = main:create_tab('Player', 'rbxassetid://126017907477623')
 local world = main:create_tab('World', 'rbxassetid://85168909131990')
-local farm = main:create_tab('Farm', 'rbxassetid://132243429647479')
 local misc = main:create_tab('Misc', 'rbxassetid://132243429647479')
 
 repeat task.wait() until game:IsLoaded()
@@ -4086,106 +4085,6 @@ qolPlayerNameVisibility()
         end
     })
 
-    local autoDuelsRequeueEnabled = false
-
-    local AutoDuelsRequeue = farm:create_module({
-        title = 'Auto Duels Requeue',
-        flag = 'AutoDuelsRequeue',
-    
-        description = 'Automatically requeues duels',
-        section = 'left',
-    
-        callback = function(value)
-            autoDuelsRequeueEnabled = value
-
-            if autoDuelsRequeueEnabled then
-                task.spawn(function()
-                    while autoDuelsRequeueEnabled do
-                        game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.1.0"):WaitForChild("net"):WaitForChild("RE/PlayerWantsRematch"):FireServer()
-                        task.wait(5)
-                    end
-                end)
-            end
-        end
-    })
-
-    local validRankedPlaceIds = {
-        13772394625,
-        14915220621,
-    }
-
-    local selectedQueue = "FFA"
-    local autoRequeueEnabled = false
-
-    local AutoRankedRequeue = farm:create_module({
-        title = 'Auto Ranked Requeue',
-        flag = 'AutoRankedRequeue',
-    
-        description = 'Automatically requeues Ranked',
-        section = 'right',
-    
-        callback = function(value)
-            autoRequeueEnabled = value
-
-            if autoRequeueEnabled then
-                if not table.find(validRankedPlaceIds, game.PlaceId) then
-                    autoRequeueEnabled = false
-                    return
-                end
-
-                task.spawn(function()
-                    while autoRequeueEnabled do
-                        game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("JoinQueue"):FireServer("Ranked", selectedQueue, "Normal")
-                        task.wait(5)
-                    end
-                end)
-            end
-        end
-    })
-
-    AutoRankedRequeue:create_dropdown({
-        title = 'Select Queue Type',
-        flag = 'QueueType',
-        options = { 
-            "FFA",
-            "Duo" 
-        },
-        multi_dropdown = false,
-        maximum_options = 2,
-        callback = function(selectedOption)
-            selectedQueue = selectedOption
-        end
-    })
-
-    local autoLTMRequeueEnabled = false
-    local validLTMPlaceId = 13772394625
-
-    local AutoLTMRequeue = farm:create_module({
-        title = 'Auto LTM Requeue',
-        flag = 'AutoLTMRequeue',
-    
-        description = 'Automatically requeues LTM',
-        section = 'left',
-    
-        callback = function(value)
-            autoLTMRequeueEnabled = value
-
-            if autoLTMRequeueEnabled then
-                if game.PlaceId ~= validLTMPlaceId then
-                    autoLTMRequeueEnabled = false
-                    return
-                end
-
-                task.spawn(function()
-                    while autoLTMRequeueEnabled do
-                        game:GetService("ReplicatedStorage"):WaitForChild("Packages"):WaitForChild("_Index"):WaitForChild("sleitnick_net@0.1.0"):WaitForChild("net"):WaitForChild("RF/JoinTournamentEventQueue"):InvokeServer({})
-                        task.wait(5)
-                    end
-                end)
-            end
-        end
-    })
-
     local SkinChanger = misc:create_module({
         title = 'Skin Changer',
         flag = 'SkinChanger',
@@ -4207,19 +4106,41 @@ qolPlayerNameVisibility()
     })
 
     local skinchangertextbox = SkinChanger:create_textbox({
-        title = "Skin Name (Case Sensitive)",
-        placeholder = "Enter Sword Skin Name... ",
+        title = "Skin Name",
+        placeholder = "Enter Sword Skin Model... ",
         flag = "SkinChangerTextbox",
         callback = function(text)
             getgenv().swordModel = text
+            if getgenv().skinChanger then
+                getgenv().updateSword()
+            end
+        end
+    })
+
+    local skinchangertextbox = SkinChanger:create_textbox({
+        title = "Skin Name",
+        placeholder = "Enter Sword Skin Animation... ",
+        flag = "SkinChangerTextbox",
+        callback = function(text)
             getgenv().swordAnimations = text
+            if getgenv().skinChanger then
+                getgenv().updateSword()
+            end
+        end
+    })
+
+    local skinchangertextbox = SkinChanger:create_textbox({
+        title = "Skin Name",
+        placeholder = "Enter Sword Skin FX... ",
+        flag = "SkinChangerTextbox",
+        callback = function(text)
             getgenv().swordFX = text
             if getgenv().skinChanger then
                 getgenv().updateSword()
             end
         end
     })
-    
+							
     local AutoPlayModule = {}
     AutoPlayModule.CONFIG = {
         DEFAULT_DISTANCE = 30,
