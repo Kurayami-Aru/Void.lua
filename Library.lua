@@ -1769,31 +1769,7 @@ end
                 end
             end
             if value then
-                Connections_Manager['Manual Spam'] = RunService.PreSimulation:Connect(function()
-    local now = tick()
-    if not lastManualSpam then lastManualSpam = 0 end
-    if now - lastManualSpam < 0.0005 then return end
-    lastManualSpam = now
-                if getgenv().spamui then
-                    return
-                end
-
-                if getgenv().ManualSpamKeypress then
-                    VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.F, false, game) 
-                else
-                    Auto_Parry.Parry(Selected_Parry_Type)
-                end
-
-            end)
-        else
-            if Connections_Manager['Manual Spam'] then
-                Connections_Manager['Manual Spam']:Disconnect()
-                Connections_Manager['Manual Spam'] = nil
-            end
-        end
-    end
-})
-    
+                
  ManualSpam:change_state(false)
 
     if isMobile then
