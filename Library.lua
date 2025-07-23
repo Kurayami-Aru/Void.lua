@@ -3498,6 +3498,40 @@ qolPlayerNameVisibility()
         end
     })
 
+local SkinChanger = misc:create_module({
+        title = 'Skin Changer (Normal)',
+        flag = 'SkinChanger(Normal)',
+        description = 'Skin Changer',
+        section = 'right',
+        callback = function(value: boolean)
+            getgenv().skinChanger = value
+            if value then
+                getgenv().updateSword()
+            end
+        end
+    })
+
+       SkinChanger:change_state(false)
+
+    SkinChanger:create_paragraph({
+        title = "*NOTICE",
+        text = "Dont use normal with custom or No Render because it will had Error"
+    })
+
+local skinchangertextbox = SkinChanger:create_textbox({
+        title = "Skin Name",
+        placeholder = "Enter Sword Skin Name... ",
+        flag = "SkinChangerTextbox",
+        callback = function(text)
+	    getgenv().swordModel = text
+            getgenv().swordFX = text
+	    getgenv().swordAnimations = text				
+            if getgenv().skinChanger then
+                getgenv().updateSword()
+            end
+        end
+    })
+
 local ballStatsUI
 local updateConn
 
