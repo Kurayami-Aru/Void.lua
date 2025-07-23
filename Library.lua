@@ -1415,7 +1415,7 @@ do
         round_number = true,
 
         callback = function(value: boolean)
-           Speed_Divisor_Multiplier = 0.7 + (value - 1) * (0.34 / 99)
+           Speed_Divisor_Multiplier = 0.7 + (value - 1) * (0.335 / 99)
 	end
 })
 							
