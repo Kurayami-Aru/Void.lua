@@ -3729,6 +3729,68 @@ workspace.Balls.ChildRemoved:Connect(function(Value)
     end
 end)
 
+local FPS_Booster = misc:create_module({
+    title = 'FPS Booster',
+    flag = 'FPS_Booster',
+    description = 'Boost your FPS',
+    section = 'right',
+    callback = function(state)
+        if state then
+			local Players = game:GetService("Players")
+			local Lighting = game:GetService("Lighting")
+			local Terrain = workspace:FindFirstChildOfClass("Terrain")
+			local LocalPlayer = Players.LocalPlayer
+
+			Lighting.GlobalShadows = false
+			Lighting.FogEnd = 1e10
+			Lighting.FogStart = 0
+			Lighting.Brightness = 0.7
+			Lighting.ExposureCompensation = 0.5
+			Lighting.EnvironmentDiffuseScale = 0
+			Lighting.EnvironmentSpecularScale = 0
+
+			if Terrain then
+				Terrain.WaterWaveSize = 0
+				Terrain.WaterWaveSpeed = 0
+				Terrain.WaterReflectance = 0
+				Terrain.WaterTransparency = 1
+			end
+
+			for _, v in ipairs(Lighting:GetChildren()) do
+				if v:IsA("BloomEffect") or v:IsA("BlurEffect") or v:IsA("ColorCorrectionEffect")
+				or v:IsA("SunRaysEffect") or v:IsA("DepthOfFieldEffect") then
+					v:Destroy()
+				end
+			end
+
+			for _, obj in ipairs(workspace:GetDescendants()) do
+				if obj:IsA("Decal") or obj:IsA("Texture") or obj:IsA("Trail") or obj:IsA("ParticleEmitter")
+				or obj:IsA("Beam") or obj:IsA("Smoke") or obj:IsA("Fire") then
+					obj:Destroy()
+				end
+			end
+
+			for _, obj in ipairs(workspace:GetDescendants()) do
+				if obj:IsA("BasePart") and obj.CastShadow == true then
+					if not obj:IsDescendantOf(LocalPlayer.Character) then
+						obj.CastShadow = false
+					end
+				end
+			end
+
+			settings().Rendering.QualityLevel = Enum.QualityLevel.Level01
+			settings().Rendering.EditQualityLevel = Enum.QualityLevel.Level01
+
+			collectgarbage("collect")
+		else
+			local Lighting = game:GetService("Lighting")
+			Lighting.GlobalShadows = true
+			Lighting.FogEnd = 1000
+			Lighting.Brightness = 2
+			Lighting.ExposureCompensation = 0
+		end
+	end
+})
 
 
 main:load()  
