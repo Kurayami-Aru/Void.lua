@@ -1861,7 +1861,7 @@ end
         end
     })
 
-    local module = detection:create_module({
+    local Infinity = detection:create_module({
         title = 'Infinity',
         flag = 'Inf_detectiom',
         description = 'Stop Parry when turn on infinity',
