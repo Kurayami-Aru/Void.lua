@@ -1435,6 +1435,16 @@ do
     })
 
     module:create_checkbox({
+        title = "Infinity Detection",
+        flag = "Infinity_Detection",
+        callback = function(value: boolean)
+            if value then
+                getgenv().InfinityDetection = value
+            end
+        end
+    })
+
+    module:create_checkbox({
         title = "Death Slash Detection",
         flag = "DeathSlash_Detection",
         callback = function(value: boolean)
@@ -1885,37 +1895,6 @@ end
         end
     })
 
-local Infinity = detection:create_module({
-        title = 'Infinity Detection',
-        flag = 'Inf_detectiom',
-        description = 'Stop parry when turn on infinity',
-        section = 'right',
-        callback = function(value: boolean)
-            getgenv().InfinityDetection = value
-            end
-        end
-    })
-
-local AntiPhantom = detection:create_module({
-        title = 'Anti Phantom',
-        flag = 'Anti_Phantom',
-        description = 'Dont move when phantom target you',
-        section = 'left',
-        callback = function(value: boolean)
-	    getgenv().PhantomV2Detection = value
-        end
-    })
-
-local SlashesOfFury = detection:create_module({
-        title = 'Slashes Of Fury Detection',
-        flag = 'Slashes_Of_Fury',
-        description = 'Stop parry when turn on slashes of fury',
-        section = 'left',
-        callback = function(value: boolean)
-	    getgenv().SlashOfFuryDetection = value
-        end
-    })
-			
     local StrafeSpeed = 36
 
     local Strafe = player:create_module({
