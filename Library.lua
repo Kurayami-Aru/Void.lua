@@ -2,7 +2,6 @@ local Library = loadstring(game:HttpGet("https://pastebin.com/raw/HwSW29pK"))()
 
 local main = Library.new()
 local rage = main:create_tab('Blatant', 'rbxassetid://76499042599127')
-local detection = main:create_tab('Detection', 'rbxassetid://76499042599127')
 local player = main:create_tab('Player', 'rbxassetid://126017907477623')
 local world = main:create_tab('World', 'rbxassetid://85168909131990')
 local misc = main:create_tab('Misc', 'rbxassetid://132243429647479')
@@ -1435,12 +1434,30 @@ do
     })
 
     module:create_checkbox({
+        title = "Infinity Detection",
+        flag = "Infinity_Detection",
+        callback = function(value: boolean)
+            if value then
+                getgenv().InfinityDetection = value
+            end
+        end
+    })						
+
+    module:create_checkbox({
         title = "Cooldown Protection",
         flag = "CooldownProtection",
         callback = function(value: boolean)
             getgenv().CooldownProtection = value
         end
     })
+
+    module:create_checkbox({
+        title = "Anti Phantom",
+        flag = "Anti_Phantom",
+        callback = function(value: boolean)
+            getgenv().PhantomV2Detection = value
+        end
+    })						
 
     module:create_checkbox({
         title = "Auto Ability",
@@ -1858,17 +1875,6 @@ end
         flag = "Lobby_AP_Notify",
         callback = function(value: boolean)
             getgenv().LobbyAPNotify = value
-        end
-    })
-
-    local Infinity = detection:create_module({
-        title = 'Infinity',
-        flag = 'Inf_detectiom',
-        description = 'Stop Parry when turn on infinity',
-        section = 'left',
-        callback = function(value: boolean)
-	    if value then
-                getgenv().InfinityDetection = value
         end
     })
 							
