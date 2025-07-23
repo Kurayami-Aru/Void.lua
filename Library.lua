@@ -1747,57 +1747,8 @@ end
         end
     })
 
-    local ManualSpam = rage:create_module({
-        title = 'Manual Spam Parry',
-        flag = 'Manual_Spam_Parry',
-        description = 'Manually Spams Parry',
-        section = 'right',
-        callback = function(value: boolean)
-            if getgenv().ManualSpamNotify then
-                if value then
-                    Library.SendNotification({
-                        title = "Module Notification",
-                        text = "Manual Spam Parry turned ON",
-                        duration = 3
-                    })
-                else
-                    Library.SendNotification({
-                        title = "Module Notification",
-                        text = "Manual Spam Parry turned OFF",
-                        duration = 3
-                    })
-                end
-            end
-            if value then
-                Connections_Manager['Manual Spam'] = RunService.PreSimulation:Connect(function()
-    local now = tick()
-    if not lastManualSpam then lastManualSpam = 0 end
-    if now - lastManualSpam < 0.0005 then return end
-    lastManualSpam = now
-                if getgenv().spamui then
-                    return
-                end
-
-                if getgenv().ManualSpamKeypress then
-                    VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.F, false, game) 
-                else
-                    Auto_Parry.Parry(Selected_Parry_Type)
-                end
-
-            end)
-        else
-            if Connections_Manager['Manual Spam'] then
-                Connections_Manager['Manual Spam']:Disconnect()
-                Connections_Manager['Manual Spam'] = nil
-            end
-        end
-    end
-})
-							
- ManualSpam:change_state(false)
-
     if isMobile then
-        ManualSpam:create_checkbox({
+        SpamParry:create_checkbox({
             title = "UI",
             flag = "Manual_Spam_UI",
             callback = function(value: boolean)
@@ -1813,8 +1764,8 @@ end
             frame.Name = "MainFrame"
             frame.Position = UDim2.new(0, 20, 0, 20)
             frame.Size = UDim2.new(0, 200, 0, 100)
-            frame.BackgroundColor3 = Color3.fromRGB(10, 10, 50)
-            frame.BackgroundTransparency = 0.3
+            frame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+            frame.BackgroundTransparency = 0.1
             frame.BorderSizePixel = 0
             frame.Active = true
             frame.Draggable = true
@@ -1826,7 +1777,7 @@ end
 
             local uiStroke = Instance.new("UIStroke")
             uiStroke.Thickness = 2
-            uiStroke.Color = Color3.new(0, 0, 0)
+            uiStroke.Color = Color3.new(255, 255, 255)
             uiStroke.Parent = frame
 
             local button = Instance.new("TextButton")
@@ -1837,7 +1788,7 @@ end
             button.BackgroundTransparency = 1
             button.BorderSizePixel = 0
             button.Font = Enum.Font.GothamSemibold
-            button.TextColor3 = Color3.new(1, 1, 1)
+            button.TextColor3 = Color3.new(255, 255, 255)
             button.TextSize = 22
             button.Parent = frame
 
@@ -1872,22 +1823,6 @@ end
     end
     })
 end
-    
-    ManualSpam:create_checkbox({
-        title = "Keypress",
-        flag = "Manual_Spam_Keypress",
-        callback = function(value: boolean)
-            getgenv().ManualSpamKeypress = value
-        end
-    })
-    
-    ManualSpam:create_checkbox({
-        title = "Notify",
-        flag = "Manual_Spam_Parry_Notify",
-        callback = function(value: boolean)
-            getgenv().ManualSpamNotify = value
-        end
-    })
 
     local LobbyAP = rage:create_module({
         title = 'Lobby AP',
@@ -3456,11 +3391,6 @@ qolPlayerNameVisibility()
     })
 
     SkinChanger:change_state(false)
-
-    SkinChanger:create_paragraph({
-        title = "EVERYONE CAN SEE ANIMATIONS",
-        text = "IF YOU USE SKIN CHANGER BACKSWORD YOU MUST EQUIP AN ACTUAL BACKSWORD"
-    })
 
     local skinchangertextbox = SkinChanger:create_textbox({
         title = "Skin Model",
