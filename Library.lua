@@ -3513,25 +3513,6 @@ local SkinChanger = misc:create_module({
 
        SkinChanger:change_state(false)
 
-    SkinChanger:create_paragraph({
-        title = "*NOTICE",
-        text = "Dont use normal with custom or No Render because it will had Error"
-    })
-
-local skinchangertextbox = SkinChanger:create_textbox({
-        title = "Skin Name",
-        placeholder = "Enter Sword Skin Name... ",
-        flag = "SkinChangerTextbox",
-        callback = function(text)
-	    getgenv().swordModel = text
-            getgenv().swordFX = text
-	    getgenv().swordAnimations = text				
-            if getgenv().skinChanger then
-                getgenv().updateSword()
-            end
-        end
-    })
-
 local ballStatsUI
 local updateConn
 
@@ -3673,18 +3654,6 @@ local BallStats = misc:create_module({
         end
     })
 
-    Visualiser:create_slider({
-        title = 'Color Hue',
-        flag = 'VisualiserHue',
-        minimum_value = 0,
-        maximum_value = 360,
-        value = 0,
-        callback = function(value)
-            getgenv().VisualiserHue = value
-        end
-    })
-    
-
     local AutoClaimRewards = misc:create_module({
         title = 'Auto Claim Rewards',
         flag = 'AutoClaimRewards',
@@ -3749,26 +3718,22 @@ local BallStats = misc:create_module({
     section = 'left',
 
     callback = function(state)
-        -- Desativa scripts de efeitos
         if Player:FindFirstChild("PlayerScripts") and Player.PlayerScripts:FindFirstChild("EffectScripts") then
             Player.PlayerScripts.EffectScripts.ClientFX.Disabled = state
         end
-
-        -- ConexĂµes
+										
         if state then
             -- Bloqueia tudo novo em workspace.Runtime
             Connections_Manager['No Render'] = workspace.Runtime.ChildAdded:Connect(function(child)
                 Debris:AddItem(child, 0)
             end)
 
-            -- Deleta efeitos jĂ¡ existentes
             for _, v in pairs(workspace:GetDescendants()) do
                 if v:IsA("ParticleEmitter") or v:IsA("Trail") or v:IsA("Beam") or v:IsA("Explosion") or v:IsA("Smoke") or v:IsA("Fire") then
                     v.Enabled = false
                 end
             end
 
-            -- Remover decoraĂ§Ăµes e efeitos leves
             for _, v in pairs(workspace:GetDescendants()) do
                 if v:IsA("Decal") or v:IsA("Texture") then
                     v.Transparency = 1
@@ -3776,8 +3741,7 @@ local BallStats = misc:create_module({
                     v.Enabled = false
                 end
             end
-        else
-            -- Desliga a conexĂ£o se desativar o mĂ³dulo
+	end
             if Connections_Manager['No Render'] then
                 Connections_Manager['No Render']:Disconnect()
                 Connections_Manager['No Render'] = nil
