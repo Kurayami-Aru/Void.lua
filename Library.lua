@@ -1435,48 +1435,6 @@ do
     })
 
     module:create_checkbox({
-        title = "Infinity Detection",
-        flag = "Infinity_Detection",
-        callback = function(value: boolean)
-            if value then
-                getgenv().InfinityDetection = value
-            end
-        end
-    })
-
-    module:create_checkbox({
-        title = "Death Slash Detection",
-        flag = "DeathSlash_Detection",
-        callback = function(value: boolean)
-            getgenv().DeathSlashDetection = value
-        end
-    })
-
-    module:create_checkbox({
-        title = "Time Hole Detection",
-        flag = "TimeHole_Detection",
-        callback = function(value: boolean)
-            getgenv().TimeHoleDetection = value
-        end
-    })
-
-    module:create_checkbox({
-        title = "Slash Of Fury Detection",
-        flag = "SlashOfFuryDetection",
-        callback = function(value: boolean)
-            getgenv().SlashOfFuryDetection = value
-        end
-    })
-
-    module:create_checkbox({
-        title = "Anti Phantom",
-        flag = "Anti_Phantom",
-        callback = function(value: boolean)
-            getgenv().PhantomV2Detection = value
-        end
-    })
-
-    module:create_checkbox({
         title = "Cooldown Protection",
         flag = "CooldownProtection",
         callback = function(value: boolean)
@@ -1489,6 +1447,14 @@ do
         flag = "AutoAbility",
         callback = function(value: boolean)
             getgenv().AutoAbility = value
+        end
+    })
+
+    module:create_checkbox({
+        title = "Notify",
+        flag = "Auto_Parry_Notify",
+        callback = function(value: boolean)
+            getgenv().AutoParryNotify = value
         end
     })
 
@@ -1895,6 +1861,17 @@ end
         end
     })
 
+    local module = detection:create_module({
+        title = 'Infinity',
+        flag = 'Inf_detectiom',
+        description = 'Stop Parry when turn on infinity',
+        section = 'left',
+        callback = function(value: boolean)
+	    if value then
+                getgenv().InfinityDetection = value
+        end
+    })
+							
     local StrafeSpeed = 36
 
     local Strafe = player:create_module({
