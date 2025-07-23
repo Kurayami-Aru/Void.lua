@@ -3326,6 +3326,11 @@ qolPlayerNameVisibility()
 
     SkinChanger:change_state(false)
 
+    SkinChanger:create_paragraph({
+        title = "•NOTICE",
+        text = "DONT USE WITH NO RENDER"
+    })							
+
     local skinchangertextbox = SkinChanger:create_textbox({
         title = "Skin Model",
         placeholder = "Enter Sword Skin Model... ",
@@ -3336,11 +3341,6 @@ qolPlayerNameVisibility()
                 getgenv().updateSword()
             end
         end
-    })
-
-    SkinChanger:create_paragraph({
-        title = "EVERYONE CAN SEE ANIMATIONS",
-        text = "IF YOU USE SKIN CHANGER BACKSWORD YOU MUST EQUIP AN ACTUAL BACKSWORD AND DON'T USE WITH NO RENDER BECAUSE IT WILL HAD BUG"
     })
 
     local skinchangertextbox = SkinChanger:create_textbox({
