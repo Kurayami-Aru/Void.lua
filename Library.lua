@@ -2,6 +2,7 @@ local Library = loadstring(game:HttpGet("https://pastebin.com/raw/HwSW29pK"))()
 
 local main = Library.new()
 local rage = main:create_tab('Blatant', 'rbxassetid://76499042599127')
+local detection = main:create_tab('Detection', 'rbxassetid://76499042599127')
 local player = main:create_tab('Player', 'rbxassetid://126017907477623')
 local world = main:create_tab('World', 'rbxassetid://85168909131990')
 local misc = main:create_tab('Misc', 'rbxassetid://132243429647479')
@@ -27,8 +28,8 @@ local firstParryType = 'F_Key'
 local Previous_Positions = {}
 local VirtualInputManager = game:GetService("VirtualInputManager")
 local VirtualInputService = game:GetService("VirtualInputManager")
-local parryCooldown = 0.0001
-local lastParryTime = 0.0001
+local parryCooldown = 0.0
+local lastParryTime = 0.0
 
 local GuiService = game:GetService('GuiService')
 
@@ -1329,23 +1330,6 @@ do
         end
     })
 
-    local dropdown3 = module:create_dropdown({
-        title = 'First Parry Type',
-        flag = 'First_Parry_Type',
-
-        options = {
-            'F_Key',
-            'Left_Click',
-            'Navigation'
-        },
-
-        multi_dropdown = false,
-        maximum_options = 3,
-        callback = function(value)
-            firstParryType = value
-        end
-    })
-
     local parryTypeMap = {
         ["Camera"] = "Camera",
         ["Slowball"] = "Slowball",
@@ -1451,16 +1435,6 @@ do
     })
 
     module:create_checkbox({
-        title = "Infinity Detection",
-        flag = "Infinity_Detection",
-        callback = function(value: boolean)
-            if value then
-                getgenv().InfinityDetection = value
-            end
-        end
-    })
-
-    module:create_checkbox({
         title = "Death Slash Detection",
         flag = "DeathSlash_Detection",
         callback = function(value: boolean)
@@ -1505,23 +1479,6 @@ do
         flag = "AutoAbility",
         callback = function(value: boolean)
             getgenv().AutoAbility = value
-        end
-    })
-
-    module:create_checkbox({
-        title = "Keypress",
-        flag = "Auto_Parry_Keypress",
-        callback = function(value: boolean)
-            getgenv().AutoParryKeypress = value
-        end
-    })
-
-
-    module:create_checkbox({
-        title = "Notify",
-        flag = "Auto_Parry_Notify",
-        callback = function(value: boolean)
-            getgenv().AutoParryNotify = value
         end
     })
 
@@ -1629,21 +1586,82 @@ do
     end
 })
 
-local dropdown2 = SpamParry:create_dropdown({
-        title = 'Parry Type',
-        flag = 'Spam_Parry_Type',
+if isMobile then
+        SpamParry:create_checkbox({
+            title = "UI",
+            flag = "Spam_UI",
+            callback = function(value: boolean)
+                getgenv().spamui = value
 
-        options = {
-            'Legit',
-            'Blatant'
-        },
+        if value then
+            local gui = Instance.new("ScreenGui")
+            gui.Name = "ManualSpamUI"
+            gui.ResetOnSpawn = false
+            gui.Parent = game.CoreGui
 
-        multi_dropdown = false,
-        maximum_options = 2,
+            local frame = Instance.new("Frame")
+            frame.Name = "MainFrame"
+            frame.Position = UDim2.new(0, 20, 0, 20)
+            frame.Size = UDim2.new(0, 200, 0, 100)
+            frame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+            frame.BackgroundTransparency = 0.1
+            frame.BorderSizePixel = 0
+            frame.Active = true
+            frame.Draggable = true
+            frame.Parent = gui
 
-        callback = function(value: string)
+            local uiCorner = Instance.new("UICorner")
+            uiCorner.CornerRadius = UDim.new(0, 12)
+            uiCorner.Parent = frame
+
+            local uiStroke = Instance.new("UIStroke")
+            uiStroke.Thickness = 2
+            uiStroke.Color = Color3.new(255, 255, 255)
+            uiStroke.Parent = frame
+
+            local button = Instance.new("TextButton")
+            button.Name = "ClashModeButton"
+            button.Text = "Clash Mode"
+            button.Size = UDim2.new(0, 160, 0, 40)
+            button.Position = UDim2.new(0.5, -80, 0.5, -20)
+            button.BackgroundTransparency = 1
+            button.BorderSizePixel = 0
+            button.Font = Enum.Font.GothamSemibold
+            button.TextColor3 = Color3.new(255, 255, 255)
+            button.TextSize = 22
+            button.Parent = frame
+
+            local activated = false
+
+            local function toggle()
+                activated = not activated
+                button.Text = activated and "Stop" or "Clash Mode"
+                if activated then
+                    Connections_Manager['Manual Spam UI'] = game:GetService("RunService").Heartbeat:Connect(function()
+                        Auto_Parry.Parry(Selected_Parry_Type)
+                    end)
+                else
+                    if Connections_Manager['Manual Spam UI'] then
+                        Connections_Manager['Manual Spam UI']:Disconnect()
+                        Connections_Manager['Manual Spam UI'] = nil
+                    end
+                end
+            end
+
+            button.MouseButton1Click:Connect(toggle)
+        else
+            if game.CoreGui:FindFirstChild("ManualSpamUI") then
+                game.CoreGui:FindFirstChild("ManualSpamUI"):Destroy()
+            end
+
+            if Connections_Manager['Manual Spam UI'] then
+                Connections_Manager['Manual Spam UI']:Disconnect()
+                Connections_Manager['Manual Spam UI'] = nil
+            end
         end
+    end
     })
+end
 							
 if not isMobile then
         local AnimationFix = SpamParry:create_checkbox({
@@ -1747,83 +1765,6 @@ end
         end
     })
 
-    if isMobile then
-        SpamParry:create_checkbox({
-            title = "UI",
-            flag = "Manual_Spam_UI",
-            callback = function(value: boolean)
-                getgenv().spamui = value
-
-        if value then
-            local gui = Instance.new("ScreenGui")
-            gui.Name = "ManualSpamUI"
-            gui.ResetOnSpawn = false
-            gui.Parent = game.CoreGui
-
-            local frame = Instance.new("Frame")
-            frame.Name = "MainFrame"
-            frame.Position = UDim2.new(0, 20, 0, 20)
-            frame.Size = UDim2.new(0, 200, 0, 100)
-            frame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-            frame.BackgroundTransparency = 0.1
-            frame.BorderSizePixel = 0
-            frame.Active = true
-            frame.Draggable = true
-            frame.Parent = gui
-
-            local uiCorner = Instance.new("UICorner")
-            uiCorner.CornerRadius = UDim.new(0, 12)
-            uiCorner.Parent = frame
-
-            local uiStroke = Instance.new("UIStroke")
-            uiStroke.Thickness = 2
-            uiStroke.Color = Color3.new(255, 255, 255)
-            uiStroke.Parent = frame
-
-            local button = Instance.new("TextButton")
-            button.Name = "ClashModeButton"
-            button.Text = "Clash Mode"
-            button.Size = UDim2.new(0, 160, 0, 40)
-            button.Position = UDim2.new(0.5, -80, 0.5, -20)
-            button.BackgroundTransparency = 1
-            button.BorderSizePixel = 0
-            button.Font = Enum.Font.GothamSemibold
-            button.TextColor3 = Color3.new(255, 255, 255)
-            button.TextSize = 22
-            button.Parent = frame
-
-            local activated = false
-
-            local function toggle()
-                activated = not activated
-                button.Text = activated and "Stop" or "Clash Mode"
-                if activated then
-                    Connections_Manager['Manual Spam UI'] = game:GetService("RunService").Heartbeat:Connect(function()
-                        Auto_Parry.Parry(Selected_Parry_Type)
-                    end)
-                else
-                    if Connections_Manager['Manual Spam UI'] then
-                        Connections_Manager['Manual Spam UI']:Disconnect()
-                        Connections_Manager['Manual Spam UI'] = nil
-                    end
-                end
-            end
-
-            button.MouseButton1Click:Connect(toggle)
-        else
-            if game.CoreGui:FindFirstChild("ManualSpamUI") then
-                game.CoreGui:FindFirstChild("ManualSpamUI"):Destroy()
-            end
-
-            if Connections_Manager['Manual Spam UI'] then
-                Connections_Manager['Manual Spam UI']:Disconnect()
-                Connections_Manager['Manual Spam UI'] = nil
-            end
-        end
-    end
-    })
-end
-
     local LobbyAP = rage:create_module({
         title = 'Lobby AP',
         flag = 'Lobby_AP',
@@ -1913,7 +1854,7 @@ end
         value = 100,
         round_number = true,
         callback = function(value: number)
-            LobbyAP_Speed_Divisor_Multiplier = 0.7 + (value - 1) * (0.35 / 99)
+            LobbyAP_Speed_Divisor_Multiplier = 0.7 + (value - 1) * (0.25 / 99)
         end
     })
 
@@ -1944,6 +1885,37 @@ end
         end
     })
 
+local Infinity = detection:create_module({
+        title = 'Infinity Detection',
+        flag = 'Inf_detectiom',
+        description = 'Stop parry when turn on infinity',
+        section = 'right',
+        callback = function(value: boolean)
+            getgenv().InfinityDetection = value
+            end
+        end
+    })
+
+local AntiPhantom = detection:create_module({
+        title = 'Anti Phantom',
+        flag = 'Anti_Phantom',
+        description = 'Dont move when phantom target you',
+        section = 'left',
+        callback = function(value: boolean)
+	    getgenv().PhantomV2Detection = value
+        end
+    })
+
+local SlashesOfFury = detection:create_module({
+        title = 'Slashes Of Fury Detection',
+        flag = 'Slashes_Of_Fury',
+        description = 'Stop parry when turn on slashes of fury',
+        section = 'left',
+        callback = function(value: boolean)
+	    getgenv().SlashOfFuryDetection = value
+        end
+    })
+			
     local StrafeSpeed = 36
 
     local Strafe = player:create_module({
