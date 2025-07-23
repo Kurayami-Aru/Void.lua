@@ -1,4 +1,4 @@
-
+local Library = loadstring(game:HttpGet("https://pastefy.app/vF50VgPd/raw"))()
 
 local main = Library.new()
 local rage = main:create_tab('Blatant', 'rbxassetid://76499042599127')
