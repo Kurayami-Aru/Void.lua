@@ -1216,7 +1216,7 @@ do
                         local speed_divisor = speed_divisor_base * effectiveMultiplier
                         local Parry_Accuracy = Ping_Threshold + math.max(Speed / speed_divisor, 9.5)
 
-                        local Curved = Auto_Parry.Is_Curved(ball)
+                        local Curved = Auto_Parry.Is_Curved(ball, speed)
 
                         if Ball:FindFirstChild('AeroDynamicSlashVFX') then
                             Debris:AddItem(Ball.AeroDynamicSlashVFX, 0)
@@ -1375,14 +1375,14 @@ do
         title = 'Parry Accuracy',
         flag = 'Parry_Accuracy',
 
-        maximum_value = 100,
+        maximum_value = 150,
         minimum_value = 1,
         value = 100,
 
         round_number = true,
 
         callback = function(value: boolean)
-           Speed_Divisor_Multiplier = 0.8 + (value - 1) * (0.35 / 99)
+           Speed_Divisor_Multiplier = 0.75 + (value - 1) * (0.35 / 149)
 	end
 })
 							
