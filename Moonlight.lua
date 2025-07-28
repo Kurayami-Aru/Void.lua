@@ -1402,3 +1402,7 @@ local module = rage:create_module({
 
     module:create_divider({
     })
+
+
+
+main:load()
