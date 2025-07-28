@@ -1,13 +1,10 @@
-local Library = loadstring(game:HttpGet("https://pastefy.app/Ntt9ayWF/raw"))()
+local Library = loadstring(game:HttpGet("https://pastefy.app/vF50VgPd/raw"))()
 
 local main = Library.new()
-
 local rage = main:create_tab('Blatant', 'rbxassetid://76499042599127')
 local player = main:create_tab('Player', 'rbxassetid://126017907477623')
 local world = main:create_tab('World', 'rbxassetid://85168909131990')
 local misc = main:create_tab('Misc', 'rbxassetid://132243429647479')
-
-
 
 repeat task.wait() until game:IsLoaded()
 local Players = game:GetService('Players')
@@ -24,14 +21,14 @@ local Remotes = {}
 local Parry_Key = nil
 local Speed_Divisor_Multiplier = 1.1
 local LobbyAP_Speed_Divisor_Multiplier = 1.1
-local firstParryFired = false
-local ParryThreshold = 2.5
+local firstParryFired = true
+local ParryThreshold = 1.0
 local firstParryType = 'F_Key'
 local Previous_Positions = {}
 local VirtualInputManager = game:GetService("VirtualInputManager")
 local VirtualInputService = game:GetService("VirtualInputManager")
 local parryCooldown = 0.0
-local lastParryTime = 0
+local lastParryTime = 0.0
 
 local GuiService = game:GetService('GuiService')
 
@@ -775,7 +772,7 @@ if Distance < Ball_Distance_Threshold then
     return false
 end
 
-local adjustedReachTime = Reach_Time + 0.03 -- compensação real de ping
+local adjustedReachTime = Reach_Time + 0.03 -- compensaÄ‚Â§Ä‚Â£o real de ping
 
 if Speed < 300 then
     if (tick() - Curving) < (adjustedReachTime / 1.2) then return true end
@@ -787,7 +784,7 @@ else
     if (tick() - Curving) < (adjustedReachTime / 1.5) then return true end
 end
 
--- 🧠 Correção por ângulo invertido (dot reverso)
+-- Ä‘Å¸Â§  CorreÄ‚Â§Ä‚Â£o por Ä‚Â¢ngulo invertido (dot reverso)
 local Dot_Threshold = (0 - Ping / 1000)
 local Direction_Difference = (Ball_Direction - Velocity.Unit)
 local Direction_Similarity = Direction:Dot(Direction_Difference.Unit)
@@ -797,7 +794,7 @@ if Dot_Difference < Dot_Threshold then
     return true
 end
 
--- 🎯 Detecção angular (curva real)
+-- Ä‘Å¸ÂÂ¯ DetecÄ‚Â§Ä‚Â£o angular (curva real)
 local Clamped_Dot = math.clamp(Dot, -1, 1)
 local Radians = math.deg(math.asin(Clamped_Dot))
 Lerp_Radians = Auto_Parry.Linear_Interpolation(Lerp_Radians, Radians, 0.8)
@@ -818,7 +815,7 @@ else
     end
 end
 
--- 🧪 Verificação de intenção (histórico de curva anterior)
+-- Ä‘Å¸Â§Âª VerificaÄ‚Â§Ä‚Â£o de intenÄ‚Â§Ä‚Â£o (histÄ‚Â³rico de curva anterior)
 if #Previous_Velocity == 4 then
     for i = 1, 2 do
         local prevDir = (Ball_Direction - Previous_Velocity[i].Unit).Unit
@@ -829,7 +826,7 @@ if #Previous_Velocity == 4 then
     end
 end
 
--- 🚨 Detecção de curva pra trás real
+-- Ä‘Å¸ÂÂ¨ DetecÄ‚Â§Ä‚Â£o de curva pra trÄ‚Â¡s real
 local backwardsCurveDetected = false
 local backwardsAngleThreshold = 60
 local horizDirection = Vector3.new(playerPos.X - ballPos.X, 0, playerPos.Z - ballPos.Z)
@@ -905,7 +902,7 @@ _G.In_Close_Contact = _G.In_Close_Contact or false
 
 local now = tick()
 
--- 🎯 Detecção de contato próximo
+-- Ä‘Å¸ÂÂ¯ DetecÄ‚Â§Ä‚Â£o de contato prÄ‚Â³ximo
 if Target_Distance <= 3 then
     _G.In_Close_Contact = true
 end
@@ -915,7 +912,7 @@ if _G.In_Close_Contact and Target_Distance > 3.3 then
     _G.Last_Close_Contact = now
 end
 
--- ⚠️ Mais rigoroso quando está fugindo ou não em combate
+-- Ă¢Â Ă¯Â¸Â Mais rigoroso quando estÄ‚Â¡ fugindo ou nÄ‚Â£o em combate
 local can_use_div10 = (not _G.In_Close_Contact) and ((now - _G.Last_Close_Contact) >= 1.5)
 
 if can_use_div10 and MoveDir.Magnitude > 0.2 and MoveDir:Dot(TargetDir) < -0.4 then
@@ -926,7 +923,7 @@ if can_use_div10 and TargetMoveDir.Magnitude > 0.2 and TargetMoveDir:Dot(-Target
     Movement_Factor = 10
 end
 
--- 📏 Limite de ativação baseado em ping e distância
+-- Ä‘Å¸â€œÂ Limite de ativaÄ‚Â§Ä‚Â£o baseado em ping e distÄ‚Â¢ncia
 local Maximum_Spam_Distance = self.Ping * 0.7 + math.min(Speed / (Movement_Factor * 1.2), 80)
 
 if self.Entity_Properties.Distance > Maximum_Spam_Distance then
@@ -941,7 +938,7 @@ if Target_Distance > Maximum_Spam_Distance then
     return Spam_Accuracy
 end
 
--- 🧠 Controle mais preciso do Dot para evitar ativação precoce
+-- Ä‘Å¸Â§  Controle mais preciso do Dot para evitar ativaÄ‚Â§Ä‚Â£o precoce
 local Dot_Reduction = math.clamp(-Dot, 0, 1) -- transforma em positivo
 local Dot_Impact = math.clamp(Dot_Reduction * (Speed / 40), 0, 4)
 
@@ -1130,14 +1127,49 @@ local function cooldownProtection()
     return false
 end
 
+local Camera = workspace.CurrentCamera
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Abilities = Player.Character:WaitForChild("Abilities")
+
+local function UseSwapAbility()
+    if Abilities:FindFirstChild("Swap") and Abilities.Swap.Enabled then
+        Parried = false
+
+        -- Executa Swap sem mexer na cÄ‚Â¢mera
+        ReplicatedStorage.Remotes.AbilityButtonPress:Fire()
+        return true
+    end
+    return false
+end
+
 local function AutoAbility()
     if isCooldownInEffect2(AbilityCD) then
-        if Player.Character.Abilities["Raging Deflection"].Enabled or Player.Character.Abilities["Rapture"].Enabled or Player.Character.Abilities["Calming Deflection"].Enabled or Player.Character.Abilities["Aerodynamic Slash"].Enabled or Player.Character.Abilities["Fracture"].Enabled or Player.Character.Abilities["Death Slash"].Enabled then
-            Parried = true
-            game:GetService("ReplicatedStorage").Remotes.AbilityButtonPress:Fire()
-            task.wait(2.432)
-            game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("DeathSlashShootActivation"):FireServer(true)
-            return true
+        -- Lista de habilidades que ativam Parried = true
+        local usableAbilities = {
+            "Raging Deflection",
+            "Rapture",
+            "Calming Deflection",
+            "Aerodynamic Slash",
+            "Fracture",
+            "Death Slash",
+            "Swap" -- Swap incluÄ‚Â­do na lista
+        }
+
+        for _, abilityName in ipairs(usableAbilities) do
+            local ability = Abilities:FindFirstChild(abilityName)
+            if ability and ability.Enabled then
+                if abilityName == "Swap" then
+                    -- Swap = Parried false
+                    return UseSwapAbility()
+                else
+                    -- Outras = Parried true + DeathSlashShoot
+                    Parried = true
+                    ReplicatedStorage.Remotes.AbilityButtonPress:Fire()
+                    task.wait(2.432)
+                    ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("DeathSlashShootActivation"):FireServer(true)
+                    return true
+                end
+            end
         end
     end
     return false
@@ -1383,10 +1415,10 @@ do
         round_number = true,
 
         callback = function(value: boolean)
-            Speed_Divisor_Multiplier = 0.7 + (value - 1) * (0.35 / 99)
-        end
-    })
-
+           Speed_Divisor_Multiplier = 0.8 + (value - 1) * (0.35 / 99)
+	end
+})
+							
     module:create_divider({
     })
 
@@ -1412,36 +1444,12 @@ do
     })
 
     module:create_checkbox({
-        title = "Death Slash Detection",
-        flag = "DeathSlash_Detection",
-        callback = function(value: boolean)
-            getgenv().DeathSlashDetection = value
-        end
-    })
-
-    module:create_checkbox({
-        title = "Time Hole Detection",
-        flag = "TimeHole_Detection",
-        callback = function(value: boolean)
-            getgenv().TimeHoleDetection = value
-        end
-    })
-
-    module:create_checkbox({
-        title = "Slash Of Fury Detection",
-        flag = "SlashOfFuryDetection",
-        callback = function(value: boolean)
-            getgenv().SlashOfFuryDetection = value
-        end
-    })
-
-    module:create_checkbox({
         title = "Anti Phantom",
         flag = "Anti_Phantom",
         callback = function(value: boolean)
             getgenv().PhantomV2Detection = value
         end
-    })
+    })		
 
     module:create_checkbox({
         title = "Cooldown Protection",
@@ -1449,7 +1457,7 @@ do
         callback = function(value: boolean)
             getgenv().CooldownProtection = value
         end
-    })
+    })				
 
     module:create_checkbox({
         title = "Auto Ability",
@@ -1458,15 +1466,6 @@ do
             getgenv().AutoAbility = value
         end
     })
-
-    module:create_checkbox({
-        title = "Keypress",
-        flag = "Auto_Parry_Keypress",
-        callback = function(value: boolean)
-            getgenv().AutoParryKeypress = value
-        end
-    })
-
 
     module:create_checkbox({
         title = "Notify",
@@ -1500,87 +1499,164 @@ do
 
             if value then
                 Connections_Manager['Auto Spam'] = RunService.PreSimulation:Connect(function()
-                    local Ball = Auto_Parry.Get_Ball()
+    local now = tick()
+    if not lastAutoSpam then lastAutoSpam = 0 end
+    if now - lastAutoSpam < 0.001 then return end
+    lastAutoSpam = now
+                local Ball = Auto_Parry.Get_Ball()
 
-                    if not Ball then
-                        return
-                    end
-
-                    local Zoomies = Ball:FindFirstChild('zoomies')
-
-                    if not Zoomies then
-                        return
-                    end
-
-                    Auto_Parry.Closest_Player()
-
-                    local Ping = game:GetService('Stats').Network.ServerStatsItem['Data Ping']:GetValue()
-
-local Ping_Threshold = math.clamp(Ping / 10, 1, 16)
-
-                    local Ball_Target = Ball:GetAttribute('target')
-
-                    local Ball_Properties = Auto_Parry:Get_Ball_Properties()
-                    local Entity_Properties = Auto_Parry:Get_Entity_Properties()
-
-                    local Spam_Accuracy = Auto_Parry.Spam_Service({
-                        Ball_Properties = Ball_Properties,
-                        Entity_Properties = Entity_Properties,
-                        Ping = Ping_Threshold
-                    })
-
-                    local Target_Position = Closest_Entity.PrimaryPart.Position
-                    local Target_Distance = Player:DistanceFromCharacter(Target_Position)
-
-                    local Direction = (Player.Character.PrimaryPart.Position - Ball.Position).Unit
-                    local Ball_Direction = Zoomies.VectorVelocity.Unit
-
-                    local Dot = Direction:Dot(Ball_Direction)
-                   
-
-                    local Distance = Player:DistanceFromCharacter(Ball.Position)
-
-                    if not Ball_Target then
-                        return
-                    end
-
-                    if Target_Distance > Spam_Accuracy or Distance > Spam_Accuracy then
-                        return
-                    end
-                    
-                    local Pulsed = Player.Character:GetAttribute('Pulsed')
-
-                    if Pulsed then
-                        return
-                    end
-
-                    if Ball_Target == tostring(Player) and Target_Distance > 30 and Distance > 30 then
-                        return
-                    end
-
-                    local threshold = ParryThreshold
-
-                    if Distance <= Spam_Accuracy and Parries > threshold then
-                        if getgenv().SpamParryKeypress then
-                        if Distance > Spam_Accuracy or Target_Distance > Spam_Accuracy then
-    return -- cancela se jÃ¡ tÃ¡ longe, evita falso spam
-end
-                            VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.F, false, game) 
-                        else
-                            Auto_Parry.Parry(Selected_Parry_Type)
-                        end
-                    end
-                end)
-            else
-                if Connections_Manager['Auto Spam'] then
-                    Connections_Manager['Auto Spam']:Disconnect()
-                    Connections_Manager['Auto Spam'] = nil
+                if not Ball then
+                    return
                 end
+
+                local Zoomies = Ball:FindFirstChild('zoomies')
+
+                if not Zoomies then
+                    return
+                end
+
+                Auto_Parry.Closest_Player()
+
+                local Ping = game:GetService('Stats').Network.ServerStatsItem['Data Ping']:GetValue()
+
+                local Ping_Threshold = math.clamp(Ping / 10, 1, 16)
+
+                local Ball_Target = Ball:GetAttribute('target')
+
+                local Ball_Properties = Auto_Parry:Get_Ball_Properties()
+                local Entity_Properties = Auto_Parry:Get_Entity_Properties()
+
+                local Spam_Accuracy = Auto_Parry.Spam_Service({
+                    Ball_Properties = Ball_Properties,
+                    Entity_Properties = Entity_Properties,
+                    Ping = Ping_Threshold
+                })
+
+                local Target_Position = Closest_Entity.PrimaryPart.Position
+                local Target_Distance = Player:DistanceFromCharacter(Target_Position)
+
+                local Direction = (Player.Character.PrimaryPart.Position - Ball.Position).Unit
+                local Ball_Direction = Zoomies.VectorVelocity.Unit
+
+                local Dot = Direction:Dot(Ball_Direction)
+
+                local Distance = Player:DistanceFromCharacter(Ball.Position)
+
+                if not Ball_Target then
+                    return
+                end
+
+                if Target_Distance > Spam_Accuracy or Distance > Spam_Accuracy then
+                    return
+                end
+                
+                local Pulsed = Player.Character:GetAttribute('Pulsed')
+
+                if Pulsed then
+                    return
+                end
+
+                if Ball_Target == tostring(Player) and Target_Distance > 100 and Distance > 70 then
+                    return
+                end
+
+                local threshold = ParryThreshold
+
+                if Distance <= Spam_Accuracy and Parries > threshold then
+                    if getgenv().SpamParryKeypress then
+                        VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.F, false, game) 
+                    else
+                        Auto_Parry.Parry(Selected_Parry_Type)
+                    end
+                end
+            end)
+        else
+            if Connections_Manager['Auto Spam'] then
+                Connections_Manager['Auto Spam']:Disconnect()
+                Connections_Manager['Auto Spam'] = nil
             end
         end
+    end
+})
+
+if isMobile then
+        SpamParry:create_checkbox({
+            title = "UI",
+            flag = "Spam_UI",
+            callback = function(value: boolean)
+                getgenv().spamui = value
+
+        if value then
+            local gui = Instance.new("ScreenGui")
+            gui.Name = "ManualSpamUI"
+            gui.ResetOnSpawn = false
+            gui.Parent = game.CoreGui
+
+            local frame = Instance.new("Frame")
+            frame.Name = "MainFrame"
+            frame.Position = UDim2.new(0, 20, 0, 20)
+            frame.Size = UDim2.new(0, 200, 0, 100)
+            frame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+            frame.BackgroundTransparency = 0.1
+            frame.BorderSizePixel = 0
+            frame.Active = true
+            frame.Draggable = true
+            frame.Parent = gui
+
+            local uiCorner = Instance.new("UICorner")
+            uiCorner.CornerRadius = UDim.new(0, 12)
+            uiCorner.Parent = frame
+
+            local uiStroke = Instance.new("UIStroke")
+            uiStroke.Thickness = 2
+            uiStroke.Color = Color3.new(255, 255, 255)
+            uiStroke.Parent = frame
+
+            local button = Instance.new("TextButton")
+            button.Name = "ClashModeButton"
+            button.Text = "Clash Mode"
+            button.Size = UDim2.new(0, 160, 0, 40)
+            button.Position = UDim2.new(0.5, -80, 0.5, -20)
+            button.BackgroundTransparency = 1
+            button.BorderSizePixel = 0
+            button.Font = Enum.Font.GothamSemibold
+            button.TextColor3 = Color3.new(255, 255, 255)
+            button.TextSize = 22
+            button.Parent = frame
+
+            local activated = false
+
+            local function toggle()
+                activated = not activated
+                button.Text = activated and "Stop" or "Clash Mode"
+                if activated then
+                    Connections_Manager['Manual Spam UI'] = game:GetService("RunService").Heartbeat:Connect(function()
+                        Auto_Parry.Parry(Selected_Parry_Type)
+                    end)
+                else
+                    if Connections_Manager['Manual Spam UI'] then
+                        Connections_Manager['Manual Spam UI']:Disconnect()
+                        Connections_Manager['Manual Spam UI'] = nil
+                    end
+                end
+            end
+
+            button.MouseButton1Click:Connect(toggle)
+        else
+            if game.CoreGui:FindFirstChild("ManualSpamUI") then
+                game.CoreGui:FindFirstChild("ManualSpamUI"):Destroy()
+            end
+
+            if Connections_Manager['Manual Spam UI'] then
+                Connections_Manager['Manual Spam UI']:Disconnect()
+                Connections_Manager['Manual Spam UI'] = nil
+            end
+        end
+    end
     })
+end
 							
-    if not isMobile then
+if not isMobile then
         local AnimationFix = SpamParry:create_checkbox({
             title = "Animation Fix",
             flag = "AnimationFix",
@@ -1648,9 +1724,9 @@ local Ping_Threshold = math.clamp(Ping / 10, 1, 16)
     
                         if Distance <= Spam_Accuracy and Parries > threshold then
 if Distance > Spam_Accuracy or Target_Distance > Spam_Accuracy then
-    return -- cancela se jÃ¡ tÃ¡ longe, evita falso spam
+    return -- cancela se jÄ‚Æ’Ă‚Â¡ tÄ‚Æ’Ă‚Â¡ longe, evita falso spam
 end
-if tick() - (Last_Parry or 0) < 0.1 then return end
+if tick() - (Last_Parry or 0) < 0.00001 then return end
 Last_Parry = tick()
                             VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.F, false, game) 
                         end
@@ -1663,9 +1739,8 @@ Last_Parry = tick()
                 end
             end
         })
-
-        AnimationFix:change_state(true)
-    end
+             AnimationFix:change_state(true)
+end  
 
     SpamParry:create_checkbox({
         title = "Keypress",
@@ -1772,7 +1847,7 @@ Last_Parry = tick()
         value = 100,
         round_number = true,
         callback = function(value: number)
-            LobbyAP_Speed_Divisor_Multiplier = 0.7 + (value - 1) * (0.35 / 99)
+            LobbyAP_Speed_Divisor_Multiplier = 0.7 + (value - 1) * (0.25 / 99)
         end
     })
 
@@ -1802,7 +1877,7 @@ Last_Parry = tick()
             getgenv().LobbyAPNotify = value
         end
     })
-
+							
     local StrafeSpeed = 36
 
     local Strafe = player:create_module({
@@ -1944,7 +2019,7 @@ Last_Parry = tick()
         title = 'Camera FOV',
         flag = 'Camera_FOV',
     
-        maximum_value = 120,
+        maximum_value = 150,
         minimum_value = 50,
         value = 70,
     
@@ -1957,7 +2032,7 @@ Last_Parry = tick()
             end
         end
     })
-
+							
     _G.PlayerCosmeticsCleanup = {}
     
     local PlayerCosmetics = player:create_module({
@@ -2138,93 +2213,188 @@ Last_Parry = tick()
         end
     })
 
-    local billboardLabels = {}
+    local HitSounds = player:create_module({
+        title = 'Hit Sounds',
+        flag = 'Hit_Sounds',
+        description = 'Toggles hit sounds',
+        section = 'right',
+        callback = function(value)
+            hit_Sound_Enabled = value
+        end
+    })
+    
+    local Folder = Instance.new("Folder")
+    Folder.Name = "Useful Utility"
+    Folder.Parent = workspace
+    
+    local hit_Sound = Instance.new('Sound', Folder)
+    hit_Sound.Volume = 6
+    
+    local hitSoundOptions = { 
+        "Medal", 
+        "Fatality", 
+        "Skeet",
+        "Switches",
+        "Rust Headshot", 
+        "Neverlose Sound", 
+        "Bubble", 
+        "Laser", 
+        "Steve", 
+        "Call of Duty", 
+        "Bat", 
+        "TF2 Critical", 
+        "Saber", 
+        "Bameware"
+    }
+    
+    local hitSoundIds = {
+        Medal = "rbxassetid://6607336718",
+        Fatality = "rbxassetid://6607113255",
+        Skeet = "rbxassetid://6607204501",
+        Switches = "rbxassetid://6607173363",
+        ["Rust Headshot"] = "rbxassetid://138750331387064",
+        ["Neverlose Sound"] = "rbxassetid://110168723447153",
+        Bubble = "rbxassetid://6534947588",
+        Laser = "rbxassetid://7837461331",
+        Steve = "rbxassetid://4965083997",
+        ["Call of Duty"] = "rbxassetid://5952120301",
+        Bat = "rbxassetid://3333907347",
+        ["TF2 Critical"] = "rbxassetid://296102734",
+        Saber = "rbxassetid://8415678813",
+        Bameware = "rbxassetid://3124331820"
+    }
 
-    local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
-local plr = Players.LocalPlayer
+    HitSounds:create_slider({
+        title = 'Volume',
+        flag = 'HitSoundVolume',
+        minimum_value = 1,
+        maximum_value = 10,
+        value = 5,
+        callback = function(value)
+            hit_Sound.Volume = value
+        end
+    })
 
-getgenv().AbilityESP = true
-local billboardLabels = {}
+    HitSounds:create_dropdown({
+        title = "Hit Sound Type",
+        flag = "hit_sound_type",
+        options = hitSoundOptions,
+        maximum_options = #hitSoundOptions,
+        multi_dropdown = false,
+        callback = function(selectedOption)
+            if hitSoundIds[selectedOption] then
+                hit_Sound.SoundId = hitSoundIds[selectedOption]
+            else
+                warn("Invalid hit sound selection: " .. tostring(selectedOption))
+            end
+        end
+    })
+    
+    ReplicatedStorage.Remotes.ParrySuccess.OnClientEvent:Connect(function()
+        if hit_Sound_Enabled then
+            hit_Sound:Play()
+        end
+    end)
 
-function qolPlayerNameVisibility()
-	local function createBillboardGui(p)
-		local character = p.Character
-		while not (character and character.Parent) do
-			task.wait()
-			character = p.Character
-		end
+    local soundOptions = {
+        ["Eeyuh"] = "rbxassetid://16190782181",
+        ["Sweep"] = "rbxassetid://103508936658553",
+        ["Bounce"] = "rbxassetid://134818882821660",
+        ["Everybody Wants To Rule The World"] = "rbxassetid://87209527034670",
+        ["Missing Money"] = "rbxassetid://134668194128037",
+        ["Sour Grapes"] = "rbxassetid://117820392172291",
+        ["Erwachen"] = "rbxassetid://124853612881772",
+        ["Grasp the Light"] = "rbxassetid://89549155689397",
+        ["Beyond the Shadows"] = "rbxassetid://120729792529978",
+        ["Rise to the Horizon"] = "rbxassetid://72573266268313",
+        ["Echoes of the Candy Kingdom"] = "rbxassetid://103040477333590",
+        ["Speed"] = "rbxassetid://125550253895893",
+        ["Lo-fi Chill A"] = "rbxassetid://9043887091",
+        ["Lo-fi Ambient"] = "rbxassetid://129775776987523",
+        ["Tears in the Rain"] = "rbxassetid://129710845038263"
+    }
+    
+    local currentSound = Instance.new("Sound")
+    currentSound.Volume = 3
+    currentSound.Looped = false
+    currentSound.Parent = game:GetService("SoundService")   
+    
+    local soundModule
+    
+    local function playSoundById(soundId)
+        currentSound:Stop()
+        currentSound.SoundId = soundId
+        currentSound:Play()
+    end
+    
+    local selectedSound = "Eeyuh"
+    
+    local soundModule = world:create_module({
+        title = 'Sound Controller',
+        flag = 'sound_controller',
+        description = 'Control background music and sounds',
+        section = 'left',
+        callback = function(value)
+            getgenv().soundmodule = value
+            if value then
+                playSoundById(soundOptions[selectedSound])
+            else
+                currentSound:Stop()
+            end
+        end
+    })
 
-		local head = character:WaitForChild("Head")
+    soundModule:create_checkbox({
+        title = "Loop Song",
+        flag = "LoopSong",
+        callback = function(value)
+            currentSound.Looped = value
+        end
+    })
 
-		-- 🧠 Criar o Billboard fixo
-		local billboardGui = Instance.new("BillboardGui")
-		billboardGui.Name = "AbilityBillboard"
-		billboardGui.Adornee = head
-		billboardGui.Size = UDim2.new(0, 200, 0, 25)
-		billboardGui.StudsOffset = Vector3.new(0, 3, 0)
-		billboardGui.AlwaysOnTop = true
-		billboardGui.Parent = head
+    soundModule:create_slider({
+        title = 'Volume',
+        flag = 'HitSoundVolume',
+        minimum_value = 1,
+        maximum_value = 10,
+        value = 3,
+        callback = function(value)
+            currentSound.Volume = value
+        end
+    })
 
-		local textLabel = Instance.new("TextLabel")
-		textLabel.Size = UDim2.new(1, 0, 1, 0)
-		textLabel.TextColor3 = Color3.fromRGB(0, 255, 255) -- ciano
-		textLabel.TextSize = 12
-		textLabel.Font = Enum.Font.SourceSansSemibold
-		textLabel.BackgroundTransparency = 1
-		textLabel.TextWrapped = false
-		textLabel.TextTruncate = Enum.TextTruncate.AtEnd
-		textLabel.TextXAlignment = Enum.TextXAlignment.Center
-		textLabel.TextYAlignment = Enum.TextYAlignment.Center
-		textLabel.TextScaled = false
-		textLabel.Text = ""
-		textLabel.Parent = billboardGui
-
-		billboardLabels[p] = textLabel
-
-		local humanoid = character:FindFirstChild("Humanoid")
-		if humanoid then
-			humanoid.DisplayDistanceType = Enum.HumanoidDisplayDistanceType.None
-		end
-
-		RunService.Heartbeat:Connect(function()
-			if not character or not character.Parent then
-				billboardGui:Destroy()
-				billboardLabels[p] = nil
-				return
-			end
-
-			if getgenv().AbilityESP then
-				textLabel.Visible = true
-				local abilityName = p:GetAttribute("EquippedAbility")
-				if abilityName then
-					textLabel.Text = p.DisplayName .. " [" .. tostring(abilityName) .. "]"
-				else
-					textLabel.Text = p.DisplayName .. " [???]"
-				end
-			else
-				textLabel.Visible = false
-			end
-		end)
-	end
-
-	for _, p in Players:GetPlayers() do
-		if p ~= plr then
-			p.CharacterAdded:Connect(function()
-				createBillboardGui(p)
-			end)
-			createBillboardGui(p)
-		end
-	end
-
-	Players.PlayerAdded:Connect(function(newPlayer)
-		newPlayer.CharacterAdded:Connect(function()
-			createBillboardGui(newPlayer)
-		end)
-	end)
-end
-
-qolPlayerNameVisibility()
+    soundModule:create_divider({
+    })
+    
+    soundModule:create_dropdown({
+        title = 'Select Sound',
+        flag = 'sound_selection',
+        options = {
+            "Eeyuh",
+            "Sweep", 
+            "Bounce",
+            "Everybody Wants To Rule The World",
+            "Missing Money",
+            "Sour Grapes",
+            "Erwachen",
+            "Grasp the Light",
+            "Beyond the Shadows",
+            "Rise to the Horizon",
+            "Echoes of the Candy Kingdom",
+            "Speed",
+            "Lo-fi Chill A",
+            "Lo-fi Ambient",
+            "Tears in the Rain"
+        },
+        multi_dropdown = false,
+        maximum_options = 15,
+        callback = function(value)
+            selectedSound = value
+            if getgenv().soundmodule then
+                playSoundById(soundOptions[value])
+            end
+        end
+    })
     
     local AbilityESP = world:create_module({
         title = 'Ability ESP',
@@ -2236,6 +2406,115 @@ qolPlayerNameVisibility()
             for _, label in pairs(billboardLabels) do
                 label.Visible = value
             end
+        end
+    })
+
+    local CustomSky = world:create_module({
+        title = 'Custom Sky',
+        flag = 'Custom_Sky',
+        description = 'Toggles a custom skybox',
+        section = 'left',
+        callback = function(value)
+            local Lighting = game.Lighting
+            local Sky = Lighting:FindFirstChildOfClass("Sky")
+            if value then
+                if not Sky then
+                    Sky = Instance.new("Sky", Lighting)
+                end
+            else
+                if Sky then
+                    local defaultSkyboxIds = {"591058823", "591059876", "591058104", "591057861", "591057625", "591059642"}
+                    local skyFaces = {"SkyboxBk", "SkyboxDn", "SkyboxFt", "SkyboxLf", "SkyboxRt", "SkyboxUp"}
+                    
+                    for index, face in ipairs(skyFaces) do
+                        Sky[face] = "rbxassetid://" .. defaultSkyboxIds[index]
+                    end
+                    Lighting.GlobalShadows = true
+                    
+                end
+            end
+        end
+    })
+    
+    CustomSky:create_dropdown({
+        title = 'Select Sky',
+        flag = 'custom_sky_selector',
+        options = {
+            "Default",
+            "Vaporwave",
+            "Redshift",
+            "Desert",
+            "DaBaby",
+            "Minecraft",
+            "SpongeBob",
+            "Skibidi",
+            "Blaze",
+            "Pussy Cat",
+            "Among Us",
+            "Space Wave",
+            "Space Wave2",
+            "Turquoise Wave",
+            "Dark Night",
+            "Bright Pink",
+            "White Galaxy",
+            "Blue Galaxy"
+        },
+        multi_dropdown = false,
+        maximum_options = 18,
+        callback = function(selectedOption)
+            local skyboxData = nil
+            if selectedOption == "Default" then
+                skyboxData = {"591058823", "591059876", "591058104", "591057861", "591057625", "591059642"}
+            elseif selectedOption == "Vaporwave" then
+                skyboxData = {"1417494030", "1417494146", "1417494253", "1417494402", "1417494499", "1417494643"}
+            elseif selectedOption == "Redshift" then
+                skyboxData = {"401664839", "401664862", "401664960", "401664881", "401664901", "401664936"}
+            elseif selectedOption == "Desert" then
+                skyboxData = {"1013852", "1013853", "1013850", "1013851", "1013849", "1013854"}
+            elseif selectedOption == "DaBaby" then
+                skyboxData = {"7245418472", "7245418472", "7245418472", "7245418472", "7245418472", "7245418472"}
+            elseif selectedOption == "Minecraft" then
+                skyboxData = {"1876545003", "1876544331", "1876542941", "1876543392", "1876543764", "1876544642"}
+            elseif selectedOption == "SpongeBob" then
+                skyboxData = {"7633178166", "7633178166", "7633178166", "7633178166", "7633178166", "7633178166"}
+            elseif selectedOption == "Skibidi" then
+                skyboxData = {"14952256113", "14952256113", "14952256113", "14952256113", "14952256113", "14952256113"}
+            elseif selectedOption == "Blaze" then
+                skyboxData = {"150939022", "150939038", "150939047", "150939056", "150939063", "150939082"}
+            elseif selectedOption == "Pussy Cat" then
+                skyboxData = {"11154422902", "11154422902", "11154422902", "11154422902", "11154422902", "11154422902"}
+            elseif selectedOption == "Among Us" then
+                skyboxData = {"5752463190", "5752463190", "5752463190", "5752463190", "5752463190", "5752463190"}
+            elseif selectedOption == "Space Wave" then
+                skyboxData = {"16262356578", "16262358026", "16262360469", "16262362003", "16262363873", "16262366016"}
+            elseif selectedOption == "Space Wave2" then
+                skyboxData = {"1233158420", "1233158838", "1233157105", "1233157640", "1233157995", "1233159158"}
+            elseif selectedOption == "Turquoise Wave" then
+                skyboxData = {"47974894", "47974690", "47974821", "47974776", "47974859", "47974909"}
+            elseif selectedOption == "Dark Night" then
+                skyboxData = {"6285719338", "6285721078", "6285722964", "6285724682", "6285726335", "6285730635"}
+            elseif selectedOption == "Bright Pink" then
+                skyboxData = {"271042516", "271077243", "271042556", "271042310", "271042467", "271077958"}
+            elseif selectedOption == "White Galaxy" then
+                skyboxData = {"5540798456", "5540799894", "5540801779", "5540801192", "5540799108", "5540800635"}
+            elseif selectedOption == "Blue Galaxy" then
+                skyboxData = {"14961495673", "14961494492", "14961492844", "14961491298", "14961490439", "14961489508"}
+            end
+    
+            if not skyboxData then
+                warn("Sky option not found: " .. tostring(selectedOption))
+                return
+            end
+    
+            local Lighting = game.Lighting
+            local Sky = Lighting:FindFirstChildOfClass("Sky") or Instance.new("Sky", Lighting)
+    
+            local skyFaces = {"SkyboxBk", "SkyboxDn", "SkyboxFt", "SkyboxLf", "SkyboxRt", "SkyboxUp"}
+            for index, face in ipairs(skyFaces) do
+                Sky[face] = "rbxassetid://" .. skyboxData[index]
+            end
+
+            Lighting.GlobalShadows = false
         end
     })
 
@@ -2290,8 +2569,8 @@ qolPlayerNameVisibility()
     })
 
     local SkinChanger = misc:create_module({
-        title = 'Skin Changer',
-        flag = 'SkinChanger',
+        title = 'Skin Changer (Custom)',
+        flag = 'SkinChanger(Custom)',
         description = 'Skin Changer',
         section = 'left',
         callback = function(value: boolean)
@@ -2305,18 +2584,41 @@ qolPlayerNameVisibility()
     SkinChanger:change_state(false)
 
     local skinchangertextbox = SkinChanger:create_textbox({
-        title = "Skin Name (Case Sensitive)",
-        placeholder = "Enter Sword Skin Name... ",
+        title = "Skin Model",
+        placeholder = "Enter Sword Skin Model... ",
         flag = "SkinChangerTextbox",
         callback = function(text)
             getgenv().swordModel = text
+            if getgenv().skinChanger then
+                getgenv().updateSword()
+            end
+        end
+    })
+
+    local skinchangertextbox = SkinChanger:create_textbox({
+        title = "Skin Animation",
+        placeholder = "Enter Sword Skin Animation... ",
+        flag = "SkinChangerTextbox",
+        callback = function(text)
             getgenv().swordAnimations = text
+            if getgenv().skinChanger then
+                getgenv().updateSword()
+            end
+        end
+    })
+
+    local skinchangertextbox = SkinChanger:create_textbox({
+        title = "Skin FX",
+        placeholder = "Enter Sword Skin FX... ",
+        flag = "SkinChangerTextbox",
+        callback = function(text)
             getgenv().swordFX = text
             if getgenv().skinChanger then
                 getgenv().updateSword()
             end
         end
     })
+
 
 local ballStatsUI
 local updateConn
@@ -2333,20 +2635,20 @@ local BallStats = misc:create_module({
                 ballStatsUI = Instance.new("ScreenGui")
                 ballStatsUI.Name = "BallStatsUI"
                 ballStatsUI.ResetOnSpawn = false
-                ballStatsUI.DisplayOrder = 9999 -- 🧠 prioridade máxima
-                ballStatsUI.ZIndexBehavior = Enum.ZIndexBehavior.Global -- 🔼 permite sobreposição visual
-                ballStatsUI.Parent = player:WaitForChild("PlayerGui") -- ✅ continua no PlayerGui
+                ballStatsUI.DisplayOrder = 9999 -- Ä‘Å¸Â§  prioridade mÄ‚Â¡xima
+                ballStatsUI.ZIndexBehavior = Enum.ZIndexBehavior.Global -- Ä‘Å¸â€Â¼ permite sobreposiÄ‚Â§Ä‚Â£o visual
+                ballStatsUI.Parent = player:WaitForChild("PlayerGui") -- Ă¢Å“â€¦ continua no PlayerGui
 
                 local textLabel = Instance.new("TextLabel")
                 textLabel.Name = "SpeedDisplay"
                 textLabel.Size = UDim2.new(0, 180, 0, 24)
-                textLabel.Position = UDim2.new(0, 10, 0, 10) -- ⚠️ EXATO MESMO LUGAR
+                textLabel.Position = UDim2.new(0, 10, 0, 10) -- Ă¢Â Ă¯Â¸Â EXATO MESMO LUGAR
                 textLabel.BackgroundTransparency = 1
                 textLabel.TextColor3 = Color3.new(1, 1, 1)
                 textLabel.Font = Enum.Font.Gotham
-                textLabel.TextSize = 15 -- só um pouco maior
+                textLabel.TextSize = 15 -- sÄ‚Â³ um pouco maior
                 textLabel.Text = "0.0"
-                textLabel.ZIndex = 9999 -- 🧠 por cima de tudo
+                textLabel.ZIndex = 9999 -- Ä‘Å¸Â§  por cima de tudo
                 textLabel.Parent = ballStatsUI
 
                 updateConn = game:GetService("RunService").RenderStepped:Connect(function()
@@ -2381,84 +2683,6 @@ local BallStats = misc:create_module({
     end
 })
 
-    local visualPart
-
-    local Visualiser = misc:create_module({
-        title = 'Visualiser',
-        flag = 'Visualiser',
-        description = 'Parry Range Visualiser',
-        section = 'right',
-        callback = function(value: boolean)
-            if value then
-                if not visualPart then
-                    visualPart = Instance.new("Part")
-                    visualPart.Name = "VisualiserPart"
-                    visualPart.Shape = Enum.PartType.Ball
-                    visualPart.Material = Enum.Material.ForceField
-                    -- Initial color; will be overridden by slider/checkbox callbacks
-                    visualPart.Color = Color3.fromRGB(255, 255, 255)
-                    visualPart.Transparency = 0  
-                    visualPart.CastShadow = false 
-                    visualPart.Anchored = true
-                    visualPart.CanCollide = false
-                    visualPart.Parent = workspace
-                end
-    
-                Connections_Manager['Visualiser'] = game:GetService("RunService").RenderStepped:Connect(function()
-                    local character = Player.Character
-                    local HumanoidRootPart = character and character:FindFirstChild("HumanoidRootPart")
-                    if HumanoidRootPart and visualPart then
-                        visualPart.CFrame = HumanoidRootPart.CFrame  
-                    end
-    
-                    if getgenv().VisualiserRainbow then
-                        local hue = (tick() % 5) / 5
-                        visualPart.Color = Color3.fromHSV(hue, 1, 1)
-                    else
-                        local hueVal = getgenv().VisualiserHue or 0
-                        visualPart.Color = Color3.fromHSV(hueVal / 360, 1, 1)
-                    end
-    
-                    local speed = 0
-                    local maxSpeed = 350 
-                    local Balls = Auto_Parry.Get_Balls()
-    
-                    for _, Ball in pairs(Balls) do
-                        if Ball and Ball:FindFirstChild("zoomies") then
-                            local Velocity = Ball.AssemblyLinearVelocity
-                            speed = math.min(Velocity.Magnitude, maxSpeed) / 6.5  
-                            break
-                        end
-                    end
-    
-                    local size = math.max(speed, 6.5)
-                    if visualPart then
-                        visualPart.Size = Vector3.new(size, size, size)
-                    end
-                end)
-            else
-                if Connections_Manager['Visualiser'] then
-                    Connections_Manager['Visualiser']:Disconnect()
-                    Connections_Manager['Visualiser'] = nil
-                end
-    
-                if visualPart then
-                    visualPart:Destroy()
-                    visualPart = nil
-                end
-            end
-        end
-    })
-
-
-    Visualiser:create_checkbox({
-        title = 'Rainbow',
-        flag = 'VisualiserRainbow',
-        callback = function(value)
-            getgenv().VisualiserRainbow = value
-        end
-    })
-
     local DisableQuantumEffects = misc:create_module({
         title = 'Disable Quantum Arena Effects',
         flag = 'NoQuantumEffects',
@@ -2481,54 +2705,110 @@ local BallStats = misc:create_module({
     })
 
     local No_Render = misc:create_module({
-        title = 'No Render',
-        flag = 'No_Render',
-        description = 'Disables rendering of effects',
-        section = 'left',
-        
-        callback = function(state)
-            Player.PlayerScripts.EffectScripts.ClientFX.Disabled = state
-    
-            if state then
-                Connections_Manager['No Render'] = workspace.Runtime.ChildAdded:Connect(function(Value)
-                    Debris:AddItem(Value, 0)
-                end)
-            else
-                if Connections_Manager['No Render'] then
-                    Connections_Manager['No Render']:Disconnect()
-                    Connections_Manager['No Render'] = nil
-                end
-            end
-        end
-    })
+    title = 'No Render',
+    flag = 'No_Render',
+    description = 'Disables rendering of effects',
+    section = 'left',
 
-    local CustomAnnouncer = misc:create_module({
-        title = 'Custom Announcer',
-        flag = 'Custom_Announcer',
-        description = 'Customize the game announcements',
-        section = 'right',
-        callback = function(value: boolean)
-            if value then
-                local Announcer = Player.PlayerGui:WaitForChild("announcer")
-                local Winner = Announcer:FindFirstChild("Winner")
-                if Winner then
-                    Winner.Text = Library._config._flags["announcer_text"] or "discord.gg/Riser"
+    callback = function(state)
+        -- Desativa scripts de efeitos
+        if Player:FindFirstChild("PlayerScripts") and Player.PlayerScripts:FindFirstChild("EffectScripts") then
+            Player.PlayerScripts.EffectScripts.ClientFX.Disabled = state
+        end
+
+        -- ConexÄ‚Âµes
+        if state then
+            -- Bloqueia tudo novo em workspace.Runtime
+            Connections_Manager['No Render'] = workspace.Runtime.ChildAdded:Connect(function(child)
+                Debris:AddItem(child, 0)
+            end)
+
+            -- Deleta efeitos jÄ‚Â¡ existentes
+            for _, v in pairs(workspace:GetDescendants()) do
+                if v:IsA("ParticleEmitter") or v:IsA("Trail") or v:IsA("Beam") or v:IsA("Explosion") or v:IsA("Smoke") or v:IsA("Fire") then
+                    v.Enabled = false
                 end
-                Announcer.ChildAdded:Connect(function(Value)
-                    if Value.Name == "Winner" then
-                        Value.Changed:Connect(function(Property)
-                            if Property == "Text" and Library._config._flags["Custom_Announcer"] then
-                                Value.Text = Library._config._flags["announcer_text"] or "discord.gg/Riser"
-                            end
-                        end)
-                        if Library._config._flags["Custom_Announcer"] then
-                            Value.Text = Library._config._flags["announcer_text"] or "discord.gg/Riser"
-                        end
-                    end
-                end)
+            end
+
+            -- Remover decoraÄ‚Â§Ä‚Âµes e efeitos leves
+            for _, v in pairs(workspace:GetDescendants()) do
+                if v:IsA("Decal") or v:IsA("Texture") then
+                    v.Transparency = 1
+                elseif v:IsA("PointLight") or v:IsA("SpotLight") or v:IsA("SurfaceLight") then
+                    v.Enabled = false
+                end
+            end
+        else
+            -- Desliga a conexÄ‚Â£o se desativar o mÄ‚Â³dulo
+            if Connections_Manager['No Render'] then
+                Connections_Manager['No Render']:Disconnect()
+                Connections_Manager['No Render'] = nil
             end
         end
-    })
+    end
+})
+
+ReplicatedStorage.Remotes.ParrySuccessAll.OnClientEvent:Connect(function(_, root)
+    if root.Parent and root.Parent ~= Player.Character then
+        if root.Parent.Parent ~= workspace.Alive then
+            return
+        end
+    end
+
+    Auto_Parry.Closest_Player()
+
+    local Ball = Auto_Parry.Get_Ball()
+
+    if not Ball then
+        return
+    end
+
+    local Target_Distance = (Player.Character.PrimaryPart.Position - Closest_Entity.PrimaryPart.Position).Magnitude
+    local Distance = (Player.Character.PrimaryPart.Position - Ball.Position).Magnitude
+    local Direction = (Player.Character.PrimaryPart.Position - Ball.Position).Unit
+    local Dot = Direction:Dot(Ball.AssemblyLinearVelocity.Unit)
+
+    local Curve_Detected = Auto_Parry.Is_Curved()
+
+    if Target_Distance < 15 and Distance < 15 and Dot > 0 then -- wtf ?? maybe the big issue
+        if Curve_Detected then
+            Auto_Parry.Parry(Selected_Parry_Type)
+        end
+    end
+
+    if not Grab_Parry then
+        return
+    end
+
+    Grab_Parry:Stop()
+end)
+
+ReplicatedStorage.Remotes.ParrySuccess.OnClientEvent:Connect(function()
+    if Player.Character.Parent ~= workspace.Alive then
+        return
+    end
+
+    if not Grab_Parry then
+        return
+    end
+
+    Grab_Parry:Stop()
+end)
+
+workspace.Balls.ChildAdded:Connect(function()
+    Parried = false
+end)
+
+workspace.Balls.ChildRemoved:Connect(function(Value)
+    Parries = 0
+    Parried = false
+
+    if Connections_Manager['Target Change'] then
+        Connections_Manager['Target Change']:Disconnect()
+        Connections_Manager['Target Change'] = nil
+    end
+end)
+
 
 
 main:load()  
