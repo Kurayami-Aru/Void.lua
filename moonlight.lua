@@ -1853,7 +1853,7 @@ end
         end
     })
 							
-    local StrafeSpeed = 36
+local StrafeSpeed = 36
 
     local Strafe = player:create_module({
         title = 'Speed',
@@ -2725,6 +2725,307 @@ Animations:create_checkbox({
         end
     })
 
+    local WorldFilter = world:create_module({
+        title = 'Filter',
+        flag = 'Filter',
+    
+        description = 'Toggles custom world filter effects',
+        section = 'right',
+    
+        callback = function(value)
+            getgenv().WorldFilterEnabled = value
+    
+            if not value then
+
+                if game.Lighting:FindFirstChild("CustomAtmosphere") then
+                    game.Lighting.CustomAtmosphere:Destroy()
+                end
+                game.Lighting.FogEnd = 100000
+                game.Lighting.ColorCorrection.TintColor = Color3.new(1, 1, 1)
+                game.Lighting.ColorCorrection.Saturation = 0
+            end
+        end
+    })
+    
+    WorldFilter:create_checkbox({
+        title = 'Enable Atmosphere',
+        flag = 'World_Filter_Atmosphere',
+    
+        callback = function(value)
+            getgenv().AtmosphereEnabled = value
+    
+            if value then
+                if not game.Lighting:FindFirstChild("CustomAtmosphere") then
+                    local atmosphere = Instance.new("Atmosphere")
+                    atmosphere.Name = "CustomAtmosphere"
+                    atmosphere.Parent = game.Lighting
+                end
+            else
+                if game.Lighting:FindFirstChild("CustomAtmosphere") then
+                    game.Lighting.CustomAtmosphere:Destroy()
+                end
+            end
+        end
+    })
+
+    WorldFilter:create_slider({
+        title = 'Atmosphere Density',
+        flag = 'World_Filter_Atmosphere_Slider',
+    
+        minimum_value = 0,
+        maximum_value = 1,
+        value = 0.5,
+    
+        callback = function(value)
+            if getgenv().AtmosphereEnabled and game.Lighting:FindFirstChild("CustomAtmosphere") then
+                game.Lighting.CustomAtmosphere.Density = value
+            end
+        end
+    })
+
+    WorldFilter:create_checkbox({
+        title = 'Enable Fog',
+        flag = 'World_Filter_Fog',
+    
+        callback = function(value)
+            getgenv().FogEnabled = value
+    
+            if not value then
+                game.Lighting.FogEnd = 100000
+            end
+        end
+    })
+
+    WorldFilter:create_slider({
+        title = 'Fog Distance',
+        flag = 'World_Filter_Fog_Slider',
+    
+        minimum_value = 50,
+        maximum_value = 10000,
+        value = 1000,
+    
+        callback = function(value)
+            if getgenv().FogEnabled then
+                game.Lighting.FogEnd = value
+            end
+        end
+    })
+
+    WorldFilter:create_checkbox({
+        title = 'Enable Saturation',
+        flag = 'World_Filter_Saturation',
+    
+        callback = function(value)
+            getgenv().SaturationEnabled = value
+    
+            if not value then
+                game.Lighting.ColorCorrection.Saturation = 0
+            end
+        end
+    })
+
+    WorldFilter:create_slider({
+        title = 'Saturation Level',
+        flag = 'World_Filter_Saturation_Slider',
+    
+        minimum_value = -1,
+        maximum_value = 1,
+        value = 0,
+    
+        callback = function(value)
+            if getgenv().SaturationEnabled then
+                game.Lighting.ColorCorrection.Saturation = value
+            end
+        end
+    })
+
+    WorldFilter:create_checkbox({
+        title = 'Enable Hue',
+        flag = 'World_Filter_Hue',
+    
+        callback = function(value)
+            getgenv().HueEnabled = value
+    
+            if not value then
+                game.Lighting.ColorCorrection.TintColor = Color3.new(1, 1, 1)
+            end
+        end
+    })
+    
+    WorldFilter:create_slider({
+        title = 'Hue Shift',
+        flag = 'World_Filter_Hue_Slider',
+    
+        minimum_value = -1,
+        maximum_value = 1,
+        value = 0,
+    
+        callback = function(value)
+            if getgenv().HueEnabled then
+                game.Lighting.ColorCorrection.TintColor = Color3.fromHSV(value, 1, 1)
+            end
+        end
+    })
+
+    local BallTrail = world:create_module({
+	title = "Ball Trail",
+	flag = "Ball_Trail",
+	description = "Toggles ball trail effects",
+	section = "left",
+	callback = function(value)
+		getgenv().BallTrailEnabled = value
+	end
+})
+
+BallTrail:create_slider({
+	title = "Ball Trail Hue",
+	flag = "Ball_Trail_Hue",
+	minimum_value = 0,
+	maximum_value = 360,
+	value = 0,
+	round_number = true,
+	callback = function(value)
+		if not getgenv().BallTrailRainbowEnabled then
+			local newColor = Color3.fromHSV(value / 360, 1, 1)
+			getgenv().BallTrailColor = newColor
+		end
+	end
+})
+
+BallTrail:create_checkbox({
+	title = "Rainbow Trail",
+	flag = "Ball_Trail_Rainbow",
+	callback = function(value)
+		getgenv().BallTrailRainbowEnabled = value
+	end
+})
+
+BallTrail:create_checkbox({
+	title = "Particle Emitter",
+	flag = "Ball_Trail_Particle",
+	callback = function(value)
+		getgenv().BallTrailParticleEnabled = value
+	end
+})
+
+BallTrail:create_checkbox({
+	title = "Glow Effect",
+	flag = "Ball_Trail_Glow",
+	callback = function(value)
+		getgenv().BallTrailGlowEnabled = value
+	end
+})
+
+-- Ä‘Å¸Å’Ë† Monitoramento
+local hue = 0
+local trackedBalls = {}
+
+local function clearEffects(ball)
+	local trail = ball:FindFirstChild("Trail")
+	if trail then trail:Destroy() end
+
+	local emitter = ball:FindFirstChild("ParticleEmitter")
+	if emitter then emitter:Destroy() end
+
+	local glow = ball:FindFirstChild("BallGlow")
+	if glow then glow:Destroy() end
+
+	local att0 = ball:FindFirstChild("Attachment0")
+	if att0 then att0:Destroy() end
+	local att1 = ball:FindFirstChild("Attachment1")
+	if att1 then att1:Destroy() end
+end
+
+local function applyEffects(ball)
+	-- Ă¢â€ºâ€Ă¯Â¸Â Se nÄ‚Â£o ativado, limpa
+	if not getgenv().BallTrailEnabled then
+		if trackedBalls[ball] then
+			clearEffects(ball)
+			trackedBalls[ball] = nil
+		end
+		return
+	end
+
+	-- Ă¢Å“â€¦ Se jÄ‚Â¡ foi aplicado, sÄ‚Â³ atualiza cor se necessÄ‚Â¡rio
+	if trackedBalls[ball] then
+		local trail = ball:FindFirstChild("Trail")
+		if trail then
+			if getgenv().BallTrailRainbowEnabled then
+				local color = Color3.fromHSV(hue / 360, 1, 1)
+				trail.Color = ColorSequence.new(color)
+				getgenv().BallTrailColor = color
+			else
+				trail.Color = ColorSequence.new(getgenv().BallTrailColor or Color3.new(1, 1, 1))
+			end
+		end
+		return
+	end
+
+	-- Ä‘Å¸Â§Âª Marca como feito
+	trackedBalls[ball] = true
+
+	-- Ă¢Å“â€¦ Criar Trail
+	local trail = Instance.new("Trail")
+	trail.Name = "Trail"
+
+	local att0 = Instance.new("Attachment")
+	att0.Name = "Attachment0"
+	att0.Position = Vector3.new(0, ball.Size.Y / 2, 0)
+	att0.Parent = ball
+
+	local att1 = Instance.new("Attachment")
+	att1.Name = "Attachment1"
+	att1.Position = Vector3.new(0, -ball.Size.Y / 2, 0)
+	att1.Parent = ball
+
+	trail.Attachment0 = att0
+	trail.Attachment1 = att1
+	trail.Lifetime = 0.4
+	trail.WidthScale = NumberSequence.new(0.5)
+	trail.Transparency = NumberSequence.new({
+		NumberSequenceKeypoint.new(0, 0),
+		NumberSequenceKeypoint.new(1, 1)
+	})
+	trail.Color = ColorSequence.new(getgenv().BallTrailColor or Color3.new(1, 1, 1))
+	trail.Parent = ball
+
+	-- Ă¢Å“Â¨ Particle
+	if getgenv().BallTrailParticleEnabled then
+		local emitter = Instance.new("ParticleEmitter")
+		emitter.Name = "ParticleEmitter"
+		emitter.Rate = 100
+		emitter.Lifetime = NumberRange.new(0.5, 1)
+		emitter.Speed = NumberRange.new(0, 1)
+		emitter.Size = NumberSequence.new({
+			NumberSequenceKeypoint.new(0, 0.5),
+			NumberSequenceKeypoint.new(1, 0)
+		})
+		emitter.Transparency = NumberSequence.new({
+			NumberSequenceKeypoint.new(0, 0),
+			NumberSequenceKeypoint.new(1, 1)
+		})
+		emitter.Parent = ball
+	end
+
+	-- Ä‘Å¸â€™Â¡ Glow
+	if getgenv().BallTrailGlowEnabled then
+		local glow = Instance.new("PointLight")
+		glow.Name = "BallGlow"
+		glow.Range = 15
+		glow.Brightness = 2
+		glow.Parent = ball
+	end
+end
+
+-- Ă¢â„¢Â»Ă¯Â¸Â Atualizador contÄ‚Â­nuo
+game:GetService("RunService").Heartbeat:Connect(function()
+	hue = (hue + 1) % 360
+
+	for _, ball in pairs(Auto_Parry.Get_Balls()) do
+		applyEffects(ball)
+	end
+end)
+
     local billboardLabels = {}
 
     local Players = game:GetService("Players")
@@ -2826,6 +3127,115 @@ qolPlayerNameVisibility()
         end
     })
 
+    local CustomSky = world:create_module({
+        title = 'Custom Sky',
+        flag = 'Custom_Sky',
+        description = 'Toggles a custom skybox',
+        section = 'left',
+        callback = function(value)
+            local Lighting = game.Lighting
+            local Sky = Lighting:FindFirstChildOfClass("Sky")
+            if value then
+                if not Sky then
+                    Sky = Instance.new("Sky", Lighting)
+                end
+            else
+                if Sky then
+                    local defaultSkyboxIds = {"591058823", "591059876", "591058104", "591057861", "591057625", "591059642"}
+                    local skyFaces = {"SkyboxBk", "SkyboxDn", "SkyboxFt", "SkyboxLf", "SkyboxRt", "SkyboxUp"}
+                    
+                    for index, face in ipairs(skyFaces) do
+                        Sky[face] = "rbxassetid://" .. defaultSkyboxIds[index]
+                    end
+                    Lighting.GlobalShadows = true
+                    
+                end
+            end
+        end
+    })
+    
+    CustomSky:create_dropdown({
+        title = 'Select Sky',
+        flag = 'custom_sky_selector',
+        options = {
+            "Default",
+            "Vaporwave",
+            "Redshift",
+            "Desert",
+            "DaBaby",
+            "Minecraft",
+            "SpongeBob",
+            "Skibidi",
+            "Blaze",
+            "Pussy Cat",
+            "Among Us",
+            "Space Wave",
+            "Space Wave2",
+            "Turquoise Wave",
+            "Dark Night",
+            "Bright Pink",
+            "White Galaxy",
+            "Blue Galaxy"
+        },
+        multi_dropdown = false,
+        maximum_options = 18,
+        callback = function(selectedOption)
+            local skyboxData = nil
+            if selectedOption == "Default" then
+                skyboxData = {"591058823", "591059876", "591058104", "591057861", "591057625", "591059642"}
+            elseif selectedOption == "Vaporwave" then
+                skyboxData = {"1417494030", "1417494146", "1417494253", "1417494402", "1417494499", "1417494643"}
+            elseif selectedOption == "Redshift" then
+                skyboxData = {"401664839", "401664862", "401664960", "401664881", "401664901", "401664936"}
+            elseif selectedOption == "Desert" then
+                skyboxData = {"1013852", "1013853", "1013850", "1013851", "1013849", "1013854"}
+            elseif selectedOption == "DaBaby" then
+                skyboxData = {"7245418472", "7245418472", "7245418472", "7245418472", "7245418472", "7245418472"}
+            elseif selectedOption == "Minecraft" then
+                skyboxData = {"1876545003", "1876544331", "1876542941", "1876543392", "1876543764", "1876544642"}
+            elseif selectedOption == "SpongeBob" then
+                skyboxData = {"7633178166", "7633178166", "7633178166", "7633178166", "7633178166", "7633178166"}
+            elseif selectedOption == "Skibidi" then
+                skyboxData = {"14952256113", "14952256113", "14952256113", "14952256113", "14952256113", "14952256113"}
+            elseif selectedOption == "Blaze" then
+                skyboxData = {"150939022", "150939038", "150939047", "150939056", "150939063", "150939082"}
+            elseif selectedOption == "Pussy Cat" then
+                skyboxData = {"11154422902", "11154422902", "11154422902", "11154422902", "11154422902", "11154422902"}
+            elseif selectedOption == "Among Us" then
+                skyboxData = {"5752463190", "5752463190", "5752463190", "5752463190", "5752463190", "5752463190"}
+            elseif selectedOption == "Space Wave" then
+                skyboxData = {"16262356578", "16262358026", "16262360469", "16262362003", "16262363873", "16262366016"}
+            elseif selectedOption == "Space Wave2" then
+                skyboxData = {"1233158420", "1233158838", "1233157105", "1233157640", "1233157995", "1233159158"}
+            elseif selectedOption == "Turquoise Wave" then
+                skyboxData = {"47974894", "47974690", "47974821", "47974776", "47974859", "47974909"}
+            elseif selectedOption == "Dark Night" then
+                skyboxData = {"6285719338", "6285721078", "6285722964", "6285724682", "6285726335", "6285730635"}
+            elseif selectedOption == "Bright Pink" then
+                skyboxData = {"271042516", "271077243", "271042556", "271042310", "271042467", "271077958"}
+            elseif selectedOption == "White Galaxy" then
+                skyboxData = {"5540798456", "5540799894", "5540801779", "5540801192", "5540799108", "5540800635"}
+            elseif selectedOption == "Blue Galaxy" then
+                skyboxData = {"14961495673", "14961494492", "14961492844", "14961491298", "14961490439", "14961489508"}
+            end
+    
+            if not skyboxData then
+                warn("Sky option not found: " .. tostring(selectedOption))
+                return
+            end
+    
+            local Lighting = game.Lighting
+            local Sky = Lighting:FindFirstChildOfClass("Sky") or Instance.new("Sky", Lighting)
+    
+            local skyFaces = {"SkyboxBk", "SkyboxDn", "SkyboxFt", "SkyboxLf", "SkyboxRt", "SkyboxUp"}
+            for index, face in ipairs(skyFaces) do
+                Sky[face] = "rbxassetid://" .. skyboxData[index]
+            end
+
+            Lighting.GlobalShadows = false
+        end
+    })
+
     local AbilityExploit = world:create_module({
         title = 'Ability Exploit',
         flag = 'AbilityExploit',
@@ -2890,11 +3300,6 @@ qolPlayerNameVisibility()
     })
 
     SkinChanger:change_state(false)
-
-    SkinChanger:create_paragraph({
-        title = "â€¢NOTICE",
-        text = "DONT USE WITH NO RENDER"
-    })							
 
     local skinchangertextbox = SkinChanger:create_textbox({
         title = "Skin Model",
@@ -2995,7 +3400,28 @@ local BallStats = misc:create_module({
         end
     end
 })
-    
+
+    local DisableQuantumEffects = misc:create_module({
+        title = 'Disable Quantum Arena Effects',
+        flag = 'NoQuantumEffects',
+        description = 'Disables Quantum Arena effects.',
+        section = 'right',
+        callback = function(value: boolean)
+            getgenv().NoQuantumEffects = value
+            if value then
+                task.spawn(function()
+                    local quantumfx
+                    while task.wait() and getgenv().NoQuantumEffects and not quantumfx do
+                        for _, v in getconnections(ReplicatedStorage.Remotes.QuantumArena.OnClientEvent) do
+                            quantumfx = v
+                            v:Disable()
+                        end
+                    end
+                end)
+            end
+        end
+    })
+
     local No_Render = misc:create_module({
     title = 'No Render',
     flag = 'No_Render',
@@ -3003,21 +3429,26 @@ local BallStats = misc:create_module({
     section = 'left',
 
     callback = function(state)
+        -- Desativa scripts de efeitos
         if Player:FindFirstChild("PlayerScripts") and Player.PlayerScripts:FindFirstChild("EffectScripts") then
             Player.PlayerScripts.EffectScripts.ClientFX.Disabled = state
         end
 
+        -- ConexÄ‚Âµes
         if state then
+            -- Bloqueia tudo novo em workspace.Runtime
             Connections_Manager['No Render'] = workspace.Runtime.ChildAdded:Connect(function(child)
                 Debris:AddItem(child, 0)
             end)
 
+            -- Deleta efeitos jÄ‚Â¡ existentes
             for _, v in pairs(workspace:GetDescendants()) do
                 if v:IsA("ParticleEmitter") or v:IsA("Trail") or v:IsA("Beam") or v:IsA("Explosion") or v:IsA("Smoke") or v:IsA("Fire") then
                     v.Enabled = false
                 end
             end
 
+            -- Remover decoraÄ‚Â§Ä‚Âµes e efeitos leves
             for _, v in pairs(workspace:GetDescendants()) do
                 if v:IsA("Decal") or v:IsA("Texture") then
                     v.Transparency = 1
@@ -3025,7 +3456,8 @@ local BallStats = misc:create_module({
                     v.Enabled = false
                 end
             end
-	else
+        else
+            -- Desliga a conexÄ‚Â£o se desativar o mÄ‚Â³dulo
             if Connections_Manager['No Render'] then
                 Connections_Manager['No Render']:Disconnect()
                 Connections_Manager['No Render'] = nil
@@ -3096,4 +3528,4 @@ workspace.Balls.ChildRemoved:Connect(function(Value)
 end)
 
 
-main:load()  
+main:load()   
