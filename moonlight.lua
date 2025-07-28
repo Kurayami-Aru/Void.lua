@@ -1,9 +1,8 @@
 local Library = loadstring(game:HttpGet("https://pastefy.app/Ntt9ayWF/raw"))()
 
 local main = Library.new()
-local rage = main:create_tab('Blatant', 'rbxassetid://76499042599127')
-local custom = main:create_tab('Customize', 'rbxassetid://85168909131990')
 
+local rage = main:create_tab('Blatant', 'rbxassetid://76499042599127')
 
 repeat task.wait() until game:IsLoaded()
 local Players = game:GetService('Players')
@@ -1867,36 +1866,5 @@ local LobbyAP = rage:create_module({
         end
     })
 
-local SkinChanger = custom:create_module({
-        title = 'Skin Changer',
-        flag = 'SkinChanger',
-        description = 'Skin Changer',
-        section = 'left',
-        callback = function(value: boolean)
-            getgenv().skinChanger = value
-            if value then
-                getgenv().updateSword()
-            end
-        end
-    })
-
-    SkinChanger:change_state(false)
-
-    local skinchangertextbox = SkinChanger:create_textbox({
-        title = "Skin Name (Case Sensitive)",
-        placeholder = "Enter Sword Skin Name... ",
-        flag = "SkinChangerTextbox",
-        callback = function(text)
-            getgenv().swordModel = text
-            getgenv().swordAnimations = text
-            getgenv().swordFX = text
-            if getgenv().skinChanger then
-                getgenv().updateSword()
-            end
-        end
-    })
-
-
-
-
+                                
 main:load()
