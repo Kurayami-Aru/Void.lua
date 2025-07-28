@@ -2,8 +2,8 @@ local Library = loadstring(game:HttpGet("https://pastefy.app/Ntt9ayWF/raw"))()
 
 local main = Library.new()
 local rage = main:create_tab('Blatant', 'rbxassetid://76499042599127')
-local player = main:create_tab('Player', 'rbxassetid://126017907477623')
-local world = main:create_tab('World', 'rbxassetid://85168909131990')
+local detect = main:create_tab('Detection', 'rbxassetid://76499042599127')
+local custom = main:create_tab('Customize', 'rbxassetid://85168909131990')
 local misc = main:create_tab('Misc', 'rbxassetid://132243429647479')
 
 repeat task.wait() until game:IsLoaded()
@@ -1578,8 +1578,7 @@ do
         end
     end
 })
-
-if isMobile then
+							
         SpamParry:create_checkbox({
             title = "UI",
             flag = "Spam_UI",
@@ -1588,7 +1587,7 @@ if isMobile then
 
         if value then
             local gui = Instance.new("ScreenGui")
-            gui.Name = "ManualSpamUI"
+            gui.Name = "SpamUI"
             gui.ResetOnSpawn = false
             gui.Parent = game.CoreGui
 
@@ -1613,8 +1612,8 @@ if isMobile then
             uiStroke.Parent = frame
 
             local button = Instance.new("TextButton")
-            button.Name = "ClashModeButton"
-            button.Text = "Clash Mode"
+            button.Name = "StartButton"
+            button.Text = "Start"
             button.Size = UDim2.new(0, 160, 0, 40)
             button.Position = UDim2.new(0.5, -80, 0.5, -20)
             button.BackgroundTransparency = 1
@@ -1628,33 +1627,32 @@ if isMobile then
 
             local function toggle()
                 activated = not activated
-                button.Text = activated and "Stop" or "Clash Mode"
+                button.Text = activated and "Stop" or "Start"
                 if activated then
-                    Connections_Manager['Manual Spam UI'] = game:GetService("RunService").Heartbeat:Connect(function()
+                    Connections_Manager['Spam UI'] = game:GetService("RunService").Heartbeat:Connect(function()
                         Auto_Parry.Parry(Selected_Parry_Type)
                     end)
                 else
-                    if Connections_Manager['Manual Spam UI'] then
-                        Connections_Manager['Manual Spam UI']:Disconnect()
-                        Connections_Manager['Manual Spam UI'] = nil
+                    if Connections_Manager['Spam UI'] then
+                        Connections_Manager['Spam UI']:Disconnect()
+                        Connections_Manager['Spam UI'] = nil
                     end
                 end
             end
 
             button.MouseButton1Click:Connect(toggle)
         else
-            if game.CoreGui:FindFirstChild("ManualSpamUI") then
-                game.CoreGui:FindFirstChild("ManualSpamUI"):Destroy()
+            if game.CoreGui:FindFirstChild("SpamUI") then
+                game.CoreGui:FindFirstChild("SpamUI"):Destroy()
             end
 
-            if Connections_Manager['Manual Spam UI'] then
-                Connections_Manager['Manual Spam UI']:Disconnect()
-                Connections_Manager['Manual Spam UI'] = nil
+            if Connections_Manager['Spam UI'] then
+                Connections_Manager['Spam UI']:Disconnect()
+                Connections_Manager['Spam UI'] = nil
             end
         end
     end
-    })
-end
+})
 							
 if not isMobile then
         local AnimationFix = SpamParry:create_checkbox({
