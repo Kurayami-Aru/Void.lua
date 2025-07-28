@@ -2,7 +2,6 @@ local Library = loadstring(game:HttpGet("https://pastefy.app/Ntt9ayWF/raw"))()
 
 local main = Library.new()
 local rage = main:create_tab('Blatant', 'rbxassetid://76499042599127')
-local detect = main:create_tab('Detection', 'rbxassetid://76499042599127')
 local custom = main:create_tab('Customize', 'rbxassetid://85168909131990')
 local misc = main:create_tab('Misc', 'rbxassetid://132243429647479')
 
@@ -1413,7 +1412,16 @@ do
         callback = function(value: boolean)
             getgenv().PhantomV2Detection = value
         end
-    })		
+    })	
+
+    module:create_checkbox({
+        title = "Slash Of Fury Detection",
+        flag = "SlashOfFuryDetection",
+        callback = function(value: boolean)
+            getgenv().SlashOfFuryDetection = value
+        end
+    })
+						
 
     module:create_checkbox({
         title = "Cooldown Protection",
@@ -1837,62 +1845,6 @@ end
         flag = "Lobby_AP_Notify",
         callback = function(value: boolean)
             getgenv().LobbyAPNotify = value
-        end
-    })
-
-local module = detect:create_module({
-        title = 'Infinity Detection',
-        flag = 'Inf_detect',
-        description = 'Stop parry when turn on inf',
-        section = 'left',
-        callback = function(value: boolean)
-	    if value then
-		getgenv().InfinityDetection = value
-            end
-        end
-    })
-
-local module = detect:create_module({
-        title = 'Slashes Of Fury Detection',
-        flag = 'SOF_detect',
-        description = 'Stop parry when turn on SOF',
-        section = 'right',
-        callback = function(value: boolean)
-	    if value then
-		getgenv().SlashOfFuryDetection = value
-        end
-    })
-
-local module = detect:create_module({
-        title = 'Anti Phantom',
-        flag = 'Anti_Phantom',
-        description = 'Anti Phantom',
-        section = 'left',
-        callback = function(value: boolean)
-	    if value then
-		getgenv().PhantomV2Detection = value
-        end
-    })
-
-local module = detect:create_module({
-        title = 'Cooldown Protection',
-        flag = 'Cooldown_Protection',
-        description = 'Auto use ability when you miss parry',
-        section = 'right',
-        callback = function(value: boolean)
-	    if value then
-		getgenv().CooldownProtection = value
-        end
-    })
-
-local module = detect:create_module({
-        title = 'Auto Ability',
-        flag = 'Auto_Ability',
-        description = 'Auto use ability',
-        section = 'left',
-        callback = function(value: boolean)
-	    if value then
-		getgenv().AutoAbility = value
         end
     })
 											
