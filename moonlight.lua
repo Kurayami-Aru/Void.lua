@@ -1994,7 +1994,7 @@ local StrafeSpeed = 36
         title = 'Camera FOV',
         flag = 'Camera_FOV',
     
-        maximum_value = 150,
+        maximum_value = 120,
         minimum_value = 50,
         value = 70,
     
@@ -2008,7 +2008,7 @@ local StrafeSpeed = 36
         end
     })
     
--- MÄ‚Â³dulo principal de animaÄ‚Â§Ä‚Âµes
+-- Módulo principal de animações
 local Animations = player:create_module({    
     title = 'Emotes',    
     flag = 'Emotes',    
@@ -2053,6 +2053,7 @@ local Animations = player:create_module({
     end    
 })
 
+-- Checkbox dentro do módulo
 Animations:create_checkbox({
     title = "Loop Emote",
     flag = "Loop_Emote",
@@ -2916,7 +2917,7 @@ BallTrail:create_checkbox({
 	end
 })
 
--- Ä‘Å¸Å’Ë† Monitoramento
+-- 🌈 Monitoramento
 local hue = 0
 local trackedBalls = {}
 
@@ -2937,7 +2938,7 @@ local function clearEffects(ball)
 end
 
 local function applyEffects(ball)
-	-- Ă¢â€ºâ€Ă¯Â¸Â Se nÄ‚Â£o ativado, limpa
+	-- ⛔️ Se não ativado, limpa
 	if not getgenv().BallTrailEnabled then
 		if trackedBalls[ball] then
 			clearEffects(ball)
@@ -2946,7 +2947,7 @@ local function applyEffects(ball)
 		return
 	end
 
-	-- Ă¢Å“â€¦ Se jÄ‚Â¡ foi aplicado, sÄ‚Â³ atualiza cor se necessÄ‚Â¡rio
+	-- ✅ Se já foi aplicado, só atualiza cor se necessário
 	if trackedBalls[ball] then
 		local trail = ball:FindFirstChild("Trail")
 		if trail then
@@ -2961,10 +2962,10 @@ local function applyEffects(ball)
 		return
 	end
 
-	-- Ä‘Å¸Â§Âª Marca como feito
+	-- 🧪 Marca como feito
 	trackedBalls[ball] = true
 
-	-- Ă¢Å“â€¦ Criar Trail
+	-- ✅ Criar Trail
 	local trail = Instance.new("Trail")
 	trail.Name = "Trail"
 
@@ -2989,7 +2990,7 @@ local function applyEffects(ball)
 	trail.Color = ColorSequence.new(getgenv().BallTrailColor or Color3.new(1, 1, 1))
 	trail.Parent = ball
 
-	-- Ă¢Å“Â¨ Particle
+	-- ✨ Particle
 	if getgenv().BallTrailParticleEnabled then
 		local emitter = Instance.new("ParticleEmitter")
 		emitter.Name = "ParticleEmitter"
@@ -3007,7 +3008,7 @@ local function applyEffects(ball)
 		emitter.Parent = ball
 	end
 
-	-- Ä‘Å¸â€™Â¡ Glow
+	-- 💡 Glow
 	if getgenv().BallTrailGlowEnabled then
 		local glow = Instance.new("PointLight")
 		glow.Name = "BallGlow"
@@ -3017,7 +3018,7 @@ local function applyEffects(ball)
 	end
 end
 
--- Ă¢â„¢Â»Ă¯Â¸Â Atualizador contÄ‚Â­nuo
+-- ♻️ Atualizador contínuo
 game:GetService("RunService").Heartbeat:Connect(function()
 	hue = (hue + 1) % 360
 
@@ -3045,7 +3046,7 @@ function qolPlayerNameVisibility()
 
 		local head = character:WaitForChild("Head")
 
-		-- Ä‘Å¸Â§  Criar o Billboard fixo
+		-- 🧠 Criar o Billboard fixo
 		local billboardGui = Instance.new("BillboardGui")
 		billboardGui.Name = "AbilityBillboard"
 		billboardGui.Adornee = head
@@ -3287,8 +3288,8 @@ qolPlayerNameVisibility()
     })
 
     local SkinChanger = misc:create_module({
-        title = 'Skin Changer (Custom)',
-        flag = 'SkinChanger(Custom)',
+        title = 'Skin Changer',
+        flag = 'SkinChanger',
         description = 'Skin Changer',
         section = 'left',
         callback = function(value: boolean)
@@ -3302,41 +3303,18 @@ qolPlayerNameVisibility()
     SkinChanger:change_state(false)
 
     local skinchangertextbox = SkinChanger:create_textbox({
-        title = "Skin Model",
-        placeholder = "Enter Sword Skin Model... ",
+        title = "Skin Name (Case Sensitive)",
+        placeholder = "Enter Sword Skin Name... ",
         flag = "SkinChangerTextbox",
         callback = function(text)
             getgenv().swordModel = text
-            if getgenv().skinChanger then
-                getgenv().updateSword()
-            end
-        end
-    })
-
-    local skinchangertextbox = SkinChanger:create_textbox({
-        title = "Skin Animation",
-        placeholder = "Enter Sword Skin Animation... ",
-        flag = "SkinChangerTextbox",
-        callback = function(text)
             getgenv().swordAnimations = text
-            if getgenv().skinChanger then
-                getgenv().updateSword()
-            end
-        end
-    })
-
-    local skinchangertextbox = SkinChanger:create_textbox({
-        title = "Skin FX",
-        placeholder = "Enter Sword Skin FX... ",
-        flag = "SkinChangerTextbox",
-        callback = function(text)
             getgenv().swordFX = text
             if getgenv().skinChanger then
                 getgenv().updateSword()
             end
         end
     })
-
 
 local ballStatsUI
 local updateConn
@@ -3353,20 +3331,20 @@ local BallStats = misc:create_module({
                 ballStatsUI = Instance.new("ScreenGui")
                 ballStatsUI.Name = "BallStatsUI"
                 ballStatsUI.ResetOnSpawn = false
-                ballStatsUI.DisplayOrder = 9999 -- Ä‘Å¸Â§  prioridade mÄ‚Â¡xima
-                ballStatsUI.ZIndexBehavior = Enum.ZIndexBehavior.Global -- Ä‘Å¸â€Â¼ permite sobreposiÄ‚Â§Ä‚Â£o visual
-                ballStatsUI.Parent = player:WaitForChild("PlayerGui") -- Ă¢Å“â€¦ continua no PlayerGui
+                ballStatsUI.DisplayOrder = 9999 -- 🧠 prioridade máxima
+                ballStatsUI.ZIndexBehavior = Enum.ZIndexBehavior.Global -- 🔼 permite sobreposição visual
+                ballStatsUI.Parent = player:WaitForChild("PlayerGui") -- ✅ continua no PlayerGui
 
                 local textLabel = Instance.new("TextLabel")
                 textLabel.Name = "SpeedDisplay"
                 textLabel.Size = UDim2.new(0, 180, 0, 24)
-                textLabel.Position = UDim2.new(0, 10, 0, 10) -- Ă¢Â Ă¯Â¸Â EXATO MESMO LUGAR
+                textLabel.Position = UDim2.new(0, 10, 0, 10) -- ⚠️ EXATO MESMO LUGAR
                 textLabel.BackgroundTransparency = 1
                 textLabel.TextColor3 = Color3.new(1, 1, 1)
                 textLabel.Font = Enum.Font.Gotham
-                textLabel.TextSize = 15 -- sÄ‚Â³ um pouco maior
+                textLabel.TextSize = 15 -- só um pouco maior
                 textLabel.Text = "0.0"
-                textLabel.ZIndex = 9999 -- Ä‘Å¸Â§  por cima de tudo
+                textLabel.ZIndex = 9999 -- 🧠 por cima de tudo
                 textLabel.Parent = ballStatsUI
 
                 updateConn = game:GetService("RunService").RenderStepped:Connect(function()
@@ -3401,6 +3379,132 @@ local BallStats = misc:create_module({
     end
 })
 
+    local visualPart
+
+    local Visualiser = misc:create_module({
+        title = 'Visualiser',
+        flag = 'Visualiser',
+        description = 'Parry Range Visualiser',
+        section = 'right',
+        callback = function(value: boolean)
+            if value then
+                if not visualPart then
+                    visualPart = Instance.new("Part")
+                    visualPart.Name = "VisualiserPart"
+                    visualPart.Shape = Enum.PartType.Ball
+                    visualPart.Material = Enum.Material.ForceField
+                    -- Initial color; will be overridden by slider/checkbox callbacks
+                    visualPart.Color = Color3.fromRGB(255, 255, 255)
+                    visualPart.Transparency = 0  
+                    visualPart.CastShadow = false 
+                    visualPart.Anchored = true
+                    visualPart.CanCollide = false
+                    visualPart.Parent = workspace
+                end
+    
+                Connections_Manager['Visualiser'] = game:GetService("RunService").RenderStepped:Connect(function()
+                    local character = Player.Character
+                    local HumanoidRootPart = character and character:FindFirstChild("HumanoidRootPart")
+                    if HumanoidRootPart and visualPart then
+                        visualPart.CFrame = HumanoidRootPart.CFrame  
+                    end
+    
+                    if getgenv().VisualiserRainbow then
+                        local hue = (tick() % 5) / 5
+                        visualPart.Color = Color3.fromHSV(hue, 1, 1)
+                    else
+                        local hueVal = getgenv().VisualiserHue or 0
+                        visualPart.Color = Color3.fromHSV(hueVal / 360, 1, 1)
+                    end
+    
+                    local speed = 0
+                    local maxSpeed = 350 
+                    local Balls = Auto_Parry.Get_Balls()
+    
+                    for _, Ball in pairs(Balls) do
+                        if Ball and Ball:FindFirstChild("zoomies") then
+                            local Velocity = Ball.AssemblyLinearVelocity
+                            speed = math.min(Velocity.Magnitude, maxSpeed) / 6.5  
+                            break
+                        end
+                    end
+    
+                    local size = math.max(speed, 6.5)
+                    if visualPart then
+                        visualPart.Size = Vector3.new(size, size, size)
+                    end
+                end)
+            else
+                if Connections_Manager['Visualiser'] then
+                    Connections_Manager['Visualiser']:Disconnect()
+                    Connections_Manager['Visualiser'] = nil
+                end
+    
+                if visualPart then
+                    visualPart:Destroy()
+                    visualPart = nil
+                end
+            end
+        end
+    })
+
+
+    Visualiser:create_checkbox({
+        title = 'Rainbow',
+        flag = 'VisualiserRainbow',
+        callback = function(value)
+            getgenv().VisualiserRainbow = value
+        end
+    })
+
+    Visualiser:create_slider({
+        title = 'Color Hue',
+        flag = 'VisualiserHue',
+        minimum_value = 0,
+        maximum_value = 360,
+        value = 0,
+        callback = function(value)
+            getgenv().VisualiserHue = value
+        end
+    })
+    
+
+    local AutoClaimRewards = misc:create_module({
+        title = 'Auto Claim Rewards',
+        flag = 'AutoClaimRewards',
+        description = 'Automatically claims rewards.',
+        section = 'left',
+        callback = function(value: boolean)
+            getgenv().AutoClaimRewards = value
+            if value then
+                local rs = game:GetService("ReplicatedStorage")
+                local net = rs:WaitForChild("Packages")
+                    :WaitForChild("_Index")
+                    :WaitForChild("sleitnick_net@0.1.0")
+                    :WaitForChild("net")
+                    
+                task.spawn(function()
+                    net["RF/RedeemQuestsType"]:InvokeServer("Battlepass", "Weekly")
+                    net["RF/RedeemQuestsType"]:InvokeServer("Battlepass", "Daily")
+                    net["RF/ClaimAllDailyMissions"]:InvokeServer("Daily")
+                    net["RF/ClaimAllDailyMissions"]:InvokeServer("Weekly")
+                    net["RF/ClaimAllClanBPQuests"]:InvokeServer()
+        
+                    local joinTimestamp = tonumber(plr:GetAttribute("JoinedTimestamp")) + 10
+                    for i = 1, 6 do
+                        while workspace:GetServerTimeNow() < joinTimestamp + (i * 300) + 1 do
+                            task.wait(1)
+                            if not getgenv().AutoClaimRewards then 
+                                return 
+                            end
+                        end
+                        net["RF/ClaimPlaytimeReward"]:InvokeServer(i)
+                    end
+                end)
+            end
+        end
+    })
+
     local DisableQuantumEffects = misc:create_module({
         title = 'Disable Quantum Arena Effects',
         flag = 'NoQuantumEffects',
@@ -3423,48 +3527,72 @@ local BallStats = misc:create_module({
     })
 
     local No_Render = misc:create_module({
-    title = 'No Render',
-    flag = 'No_Render',
-    description = 'Disables rendering of effects',
-    section = 'left',
-
-    callback = function(state)
-        -- Desativa scripts de efeitos
-        if Player:FindFirstChild("PlayerScripts") and Player.PlayerScripts:FindFirstChild("EffectScripts") then
+        title = 'No Render',
+        flag = 'No_Render',
+        description = 'Disables rendering of effects',
+        section = 'left',
+        
+        callback = function(state)
             Player.PlayerScripts.EffectScripts.ClientFX.Disabled = state
-        end
-
-        -- ConexÄ‚Âµes
-        if state then
-            -- Bloqueia tudo novo em workspace.Runtime
-            Connections_Manager['No Render'] = workspace.Runtime.ChildAdded:Connect(function(child)
-                Debris:AddItem(child, 0)
-            end)
-
-            -- Deleta efeitos jÄ‚Â¡ existentes
-            for _, v in pairs(workspace:GetDescendants()) do
-                if v:IsA("ParticleEmitter") or v:IsA("Trail") or v:IsA("Beam") or v:IsA("Explosion") or v:IsA("Smoke") or v:IsA("Fire") then
-                    v.Enabled = false
+    
+            if state then
+                Connections_Manager['No Render'] = workspace.Runtime.ChildAdded:Connect(function(Value)
+                    Debris:AddItem(Value, 0)
+                end)
+            else
+                if Connections_Manager['No Render'] then
+                    Connections_Manager['No Render']:Disconnect()
+                    Connections_Manager['No Render'] = nil
                 end
             end
+        end
+    })
 
-            -- Remover decoraÄ‚Â§Ä‚Âµes e efeitos leves
-            for _, v in pairs(workspace:GetDescendants()) do
-                if v:IsA("Decal") or v:IsA("Texture") then
-                    v.Transparency = 1
-                elseif v:IsA("PointLight") or v:IsA("SpotLight") or v:IsA("SurfaceLight") then
-                    v.Enabled = false
+    local CustomAnnouncer = misc:create_module({
+        title = 'Custom Announcer',
+        flag = 'Custom_Announcer',
+        description = 'Customize the game announcements',
+        section = 'right',
+        callback = function(value: boolean)
+            if value then
+                local Announcer = Player.PlayerGui:WaitForChild("announcer")
+                local Winner = Announcer:FindFirstChild("Winner")
+                if Winner then
+                    Winner.Text = Library._config._flags["announcer_text"] or "discord.gg/Riser"
                 end
-            end
-        else
-            -- Desliga a conexÄ‚Â£o se desativar o mÄ‚Â³dulo
-            if Connections_Manager['No Render'] then
-                Connections_Manager['No Render']:Disconnect()
-                Connections_Manager['No Render'] = nil
+                Announcer.ChildAdded:Connect(function(Value)
+                    if Value.Name == "Winner" then
+                        Value.Changed:Connect(function(Property)
+                            if Property == "Text" and Library._config._flags["Custom_Announcer"] then
+                                Value.Text = Library._config._flags["announcer_text"] or "discord.gg/Riser"
+                            end
+                        end)
+                        if Library._config._flags["Custom_Announcer"] then
+                            Value.Text = Library._config._flags["announcer_text"] or "discord.gg/Riser"
+                        end
+                    end
+                end)
             end
         end
-    end
-})
+    })
+
+    CustomAnnouncer:create_textbox({
+        title = "Custom Announcement Text",
+        placeholder = "Enter custom announcer text... ",
+        flag = "announcer_text",
+        callback = function(text)
+            Library._config._flags["announcer_text"] = text
+            
+            if Library._config._flags["Custom_Announcer"] then
+                local Announcer = Player.PlayerGui:WaitForChild("announcer")
+                local Winner = Announcer:FindFirstChild("Winner")
+                if Winner then
+                    Winner.Text = text
+                end
+            end
+        end
+    })
+end
 
 ReplicatedStorage.Remotes.ParrySuccessAll.OnClientEvent:Connect(function(_, root)
     if root.Parent and root.Parent ~= Player.Character then
@@ -3528,4 +3656,5 @@ workspace.Balls.ChildRemoved:Connect(function(Value)
 end)
 
 
-main:load()   
+
+main:load()  
