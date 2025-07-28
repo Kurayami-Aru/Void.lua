@@ -21,14 +21,14 @@ local Remotes = {}
 local Parry_Key = nil
 local Speed_Divisor_Multiplier = 1.1
 local LobbyAP_Speed_Divisor_Multiplier = 1.1
-local firstParryFired = true
+local firstParryFired = false
 local ParryThreshold = 1.0
 local firstParryType = 'F_Key'
 local Previous_Positions = {}
 local VirtualInputManager = game:GetService("VirtualInputManager")
 local VirtualInputService = game:GetService("VirtualInputManager")
 local parryCooldown = 0.0
-local lastParryTime = 0.0
+local lastParryTime = 0
 
 local GuiService = game:GetService('GuiService')
 
@@ -772,7 +772,7 @@ if Distance < Ball_Distance_Threshold then
     return false
 end
 
-local adjustedReachTime = Reach_Time + 0.03 -- compensaÄ‚Â§Ä‚Â£o real de ping
+local adjustedReachTime = Reach_Time + 0.03 -- compensação real de ping
 
 if Speed < 300 then
     if (tick() - Curving) < (adjustedReachTime / 1.2) then return true end
@@ -784,7 +784,7 @@ else
     if (tick() - Curving) < (adjustedReachTime / 1.5) then return true end
 end
 
--- Ä‘Å¸Â§  CorreÄ‚Â§Ä‚Â£o por Ä‚Â¢ngulo invertido (dot reverso)
+-- 🧠 Correção por ângulo invertido (dot reverso)
 local Dot_Threshold = (0 - Ping / 1000)
 local Direction_Difference = (Ball_Direction - Velocity.Unit)
 local Direction_Similarity = Direction:Dot(Direction_Difference.Unit)
@@ -794,7 +794,7 @@ if Dot_Difference < Dot_Threshold then
     return true
 end
 
--- Ä‘Å¸ÂÂ¯ DetecÄ‚Â§Ä‚Â£o angular (curva real)
+-- 🎯 Detecção angular (curva real)
 local Clamped_Dot = math.clamp(Dot, -1, 1)
 local Radians = math.deg(math.asin(Clamped_Dot))
 Lerp_Radians = Auto_Parry.Linear_Interpolation(Lerp_Radians, Radians, 0.8)
@@ -815,7 +815,7 @@ else
     end
 end
 
--- Ä‘Å¸Â§Âª VerificaÄ‚Â§Ä‚Â£o de intenÄ‚Â§Ä‚Â£o (histÄ‚Â³rico de curva anterior)
+-- 🧪 Verificação de intenção (histórico de curva anterior)
 if #Previous_Velocity == 4 then
     for i = 1, 2 do
         local prevDir = (Ball_Direction - Previous_Velocity[i].Unit).Unit
@@ -826,7 +826,7 @@ if #Previous_Velocity == 4 then
     end
 end
 
--- Ä‘Å¸ÂÂ¨ DetecÄ‚Â§Ä‚Â£o de curva pra trÄ‚Â¡s real
+-- 🚨 Detecção de curva pra trás real
 local backwardsCurveDetected = false
 local backwardsAngleThreshold = 60
 local horizDirection = Vector3.new(playerPos.X - ballPos.X, 0, playerPos.Z - ballPos.Z)
@@ -902,7 +902,7 @@ _G.In_Close_Contact = _G.In_Close_Contact or false
 
 local now = tick()
 
--- Ä‘Å¸ÂÂ¯ DetecÄ‚Â§Ä‚Â£o de contato prÄ‚Â³ximo
+-- 🎯 Detecção de contato próximo
 if Target_Distance <= 3 then
     _G.In_Close_Contact = true
 end
@@ -912,7 +912,7 @@ if _G.In_Close_Contact and Target_Distance > 3.3 then
     _G.Last_Close_Contact = now
 end
 
--- Ă¢Â Ă¯Â¸Â Mais rigoroso quando estÄ‚Â¡ fugindo ou nÄ‚Â£o em combate
+-- ⚠️ Mais rigoroso quando está fugindo ou não em combate
 local can_use_div10 = (not _G.In_Close_Contact) and ((now - _G.Last_Close_Contact) >= 1.5)
 
 if can_use_div10 and MoveDir.Magnitude > 0.2 and MoveDir:Dot(TargetDir) < -0.4 then
@@ -923,7 +923,7 @@ if can_use_div10 and TargetMoveDir.Magnitude > 0.2 and TargetMoveDir:Dot(-Target
     Movement_Factor = 10
 end
 
--- Ä‘Å¸â€œÂ Limite de ativaÄ‚Â§Ä‚Â£o baseado em ping e distÄ‚Â¢ncia
+-- 📏 Limite de ativação baseado em ping e distância
 local Maximum_Spam_Distance = self.Ping * 0.7 + math.min(Speed / (Movement_Factor * 1.2), 80)
 
 if self.Entity_Properties.Distance > Maximum_Spam_Distance then
@@ -938,7 +938,7 @@ if Target_Distance > Maximum_Spam_Distance then
     return Spam_Accuracy
 end
 
--- Ä‘Å¸Â§  Controle mais preciso do Dot para evitar ativaÄ‚Â§Ä‚Â£o precoce
+-- 🧠 Controle mais preciso do Dot para evitar ativação precoce
 local Dot_Reduction = math.clamp(-Dot, 0, 1) -- transforma em positivo
 local Dot_Impact = math.clamp(Dot_Reduction * (Speed / 40), 0, 4)
 
@@ -1127,54 +1127,18 @@ local function cooldownProtection()
     return false
 end
 
-local Camera = workspace.CurrentCamera
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local Abilities = Player.Character:WaitForChild("Abilities")
-
-local function UseSwapAbility()
-    if Abilities:FindFirstChild("Swap") and Abilities.Swap.Enabled then
-        Parried = false
-
-        -- Executa Swap sem mexer na cÄ‚Â¢mera
-        ReplicatedStorage.Remotes.AbilityButtonPress:Fire()
-        return true
-    end
-    return false
-end
-
 local function AutoAbility()
     if isCooldownInEffect2(AbilityCD) then
-        -- Lista de habilidades que ativam Parried = true
-        local usableAbilities = {
-            "Raging Deflection",
-            "Rapture",
-            "Calming Deflection",
-            "Aerodynamic Slash",
-            "Fracture",
-            "Death Slash",
-            "Swap" -- Swap incluÄ‚Â­do na lista
-        }
-
-        for _, abilityName in ipairs(usableAbilities) do
-            local ability = Abilities:FindFirstChild(abilityName)
-            if ability and ability.Enabled then
-                if abilityName == "Swap" then
-                    -- Swap = Parried false
-                    return UseSwapAbility()
-                else
-                    -- Outras = Parried true + DeathSlashShoot
-                    Parried = true
-                    ReplicatedStorage.Remotes.AbilityButtonPress:Fire()
-                    task.wait(2.432)
-                    ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("DeathSlashShootActivation"):FireServer(true)
-                    return true
-                end
-            end
+        if Player.Character.Abilities["Raging Deflection"].Enabled or Player.Character.Abilities["Rapture"].Enabled or Player.Character.Abilities["Calming Deflection"].Enabled or Player.Character.Abilities["Aerodynamic Slash"].Enabled or Player.Character.Abilities["Fracture"].Enabled or Player.Character.Abilities["Death Slash"].Enabled then
+            Parried = true
+            game:GetService("ReplicatedStorage").Remotes.AbilityButtonPress:Fire()
+            task.wait(2.432)
+            game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("DeathSlashShootActivation"):FireServer(true)
+            return true
         end
     end
     return false
 end
-
 do
     local module = rage:create_module({
         title = 'Auto Parry',
@@ -1875,6 +1839,453 @@ end
             getgenv().LobbyAPNotify = value
         end
     })
-							
+
+local module = detect:create_module({
+        title = 'Infinity Detection',
+        flag = 'Inf_detect',
+        description = 'Stop parry when turn on inf',
+        section = 'left',
+        callback = function(value: boolean)
+	    if value then
+		getgenv().InfinityDetection = value
+            end
+        end
+    })
+
+local module = detect:create_module({
+        title = 'Slashes Of Fury Detection',
+        flag = 'SOF_detect',
+        description = 'Stop parry when turn on SOF',
+        section = 'right',
+        callback = function(value: boolean)
+	    if value then
+		getgenv().SlashOfFuryDetection = value
+        end
+    })
+
+local module = detect:create_module({
+        title = 'Anti Phantom',
+        flag = 'Anti_Phantom',
+        description = 'Anti Phantom',
+        section = 'left',
+        callback = function(value: boolean)
+	    if value then
+		getgenv().PhantomV2Detection = value
+        end
+    })
+
+local module = detect:create_module({
+        title = 'Cooldown Protection',
+        flag = 'Cooldown_Protection',
+        description = 'Auto use ability when you miss parry',
+        section = 'right',
+        callback = function(value: boolean)
+	    if value then
+		getgenv().CooldownProtection = value
+        end
+    })
+
+local module = detect:create_module({
+        title = 'Auto Ability',
+        flag = 'Auto_Ability',
+        description = 'Auto use ability',
+        section = 'left',
+        callback = function(value: boolean)
+	    if value then
+		getgenv().AutoAbility = value
+        end
+    })
+											
+local SkinChanger = custom:create_module({
+        title = 'Skin Changer',
+        flag = 'SkinChanger',
+        description = 'Skin Changer',
+        section = 'left',
+        callback = function(value: boolean)
+            getgenv().skinChanger = value
+            if value then
+                getgenv().updateSword()
+            end
+        end
+    })
+
+    SkinChanger:change_state(false)
+
+    SkinChanger:create_paragraph({
+        title = "EVERYONE CAN SEE ANIMATIONS",
+        text = "IF YOU USE SKIN CHANGER BACKSWORD YOU MUST EQUIP AN ACTUAL BACKSWORD"
+    })
+
+    local skinchangertextbox = SkinChanger:create_textbox({
+        title = "Skin Name (Case Sensitive) ï¿¬",
+        placeholder = "Enter Sword Skin Name... ",
+        flag = "SkinChangerTextbox",
+        callback = function(text)
+            getgenv().swordModel = text
+            getgenv().swordAnimations = text
+            getgenv().swordFX = text
+            if getgenv().skinChanger then
+                getgenv().updateSword()
+            end
+        end
+    })
+											
+_G.PlayerCosmeticsCleanup = {}
+    
+    local PlayerCosmetics = custom:create_module({
+        title = "Player Cosmetics",
+        flag = "Player_Cosmetics",
+        description = "Apply headless and korblox",
+        section = "right",
+        callback = function(value: boolean)
+            local players = game:GetService("Players")
+            local lp = players.LocalPlayer
+    
+            local function applyKorblox(character)
+                local rightLeg = character:FindFirstChild("RightLeg") or character:FindFirstChild("Right Leg")
+                if not rightLeg then
+                    warn("Right leg not found on character")
+                    return
+                end
+                
+                for _, child in pairs(rightLeg:GetChildren()) do
+                    if child:IsA("SpecialMesh") then
+                        child:Destroy()
+                    end
+                end
+                local specialMesh = Instance.new("SpecialMesh")
+                specialMesh.MeshId = "rbxassetid://101851696"
+                specialMesh.TextureId = "rbxassetid://115727863"
+                specialMesh.Scale = Vector3.new(1, 1, 1)
+                specialMesh.Parent = rightLeg
+            end
+    
+            local function saveRightLegProperties(char)
+                if char then
+                    local rightLeg = char:FindFirstChild("RightLeg") or char:FindFirstChild("Right Leg")
+                    if rightLeg then
+                        local originalMesh = rightLeg:FindFirstChildOfClass("SpecialMesh")
+                        if originalMesh then
+                            _G.PlayerCosmeticsCleanup.originalMeshId = originalMesh.MeshId
+                            _G.PlayerCosmeticsCleanup.originalTextureId = originalMesh.TextureId
+                            _G.PlayerCosmeticsCleanup.originalScale = originalMesh.Scale
+                        else
+                            _G.PlayerCosmeticsCleanup.hadNoMesh = true
+                        end
+                        
+                        _G.PlayerCosmeticsCleanup.rightLegChildren = {}
+                        for _, child in pairs(rightLeg:GetChildren()) do
+                            if child:IsA("SpecialMesh") then
+                                table.insert(_G.PlayerCosmeticsCleanup.rightLegChildren, {
+                                    ClassName = child.ClassName,
+                                    Properties = {
+                                        MeshId = child.MeshId,
+                                        TextureId = child.TextureId,
+                                        Scale = child.Scale
+                                    }
+                                })
+                            end
+                        end
+                    end
+                end
+            end
+            
+            local function restoreRightLeg(char)
+                if char then
+                    local rightLeg = char:FindFirstChild("RightLeg") or char:FindFirstChild("Right Leg")
+                    if rightLeg and _G.PlayerCosmeticsCleanup.rightLegChildren then
+                        for _, child in pairs(rightLeg:GetChildren()) do
+                            if child:IsA("SpecialMesh") then
+                                child:Destroy()
+                            end
+                        end
+                        
+                        if _G.PlayerCosmeticsCleanup.hadNoMesh then
+                            return
+                        end
+                        
+                        for _, childData in ipairs(_G.PlayerCosmeticsCleanup.rightLegChildren) do
+                            if childData.ClassName == "SpecialMesh" then
+                                local newMesh = Instance.new("SpecialMesh")
+                                newMesh.MeshId = childData.Properties.MeshId
+                                newMesh.TextureId = childData.Properties.TextureId
+                                newMesh.Scale = childData.Properties.Scale
+                                newMesh.Parent = rightLeg
+                            end
+                        end
+                    end
+                end
+            end
+    
+            if value then
+                CosmeticsActive = true
+    
+                getgenv().Config = {
+                    Headless = true
+                }
+                
+                if lp.Character then
+                    local head = lp.Character:FindFirstChild("Head")
+                    if head and getgenv().Config.Headless then
+                        _G.PlayerCosmeticsCleanup.headTransparency = head.Transparency
+                        
+                        local decal = head:FindFirstChildOfClass("Decal")
+                        if decal then
+                            _G.PlayerCosmeticsCleanup.faceDecalId = decal.Texture
+                            _G.PlayerCosmeticsCleanup.faceDecalName = decal.Name
+                        end
+                    end
+                    
+                    saveRightLegProperties(lp.Character)
+                    applyKorblox(lp.Character)
+                end
+                
+                _G.PlayerCosmeticsCleanup.characterAddedConn = lp.CharacterAdded:Connect(function(char)
+                    local head = char:FindFirstChild("Head")
+                    if head and getgenv().Config.Headless then
+                        _G.PlayerCosmeticsCleanup.headTransparency = head.Transparency
+                        
+                        local decal = head:FindFirstChildOfClass("Decal")
+                        if decal then
+                            _G.PlayerCosmeticsCleanup.faceDecalId = decal.Texture
+                            _G.PlayerCosmeticsCleanup.faceDecalName = decal.Name
+                        end
+                    end
+                    
+                    saveRightLegProperties(char)
+                    applyKorblox(char)
+                end)
+                
+                if getgenv().Config.Headless then
+                    headLoop = task.spawn(function()
+                        while CosmeticsActive do
+                            local char = lp.Character
+                            if char then
+                                local head = char:FindFirstChild("Head")
+                                if head then
+                                    head.Transparency = 1
+                                    local decal = head:FindFirstChildOfClass("Decal")
+                                    if decal then
+                                        decal:Destroy()
+                                    end
+                                end
+                            end
+                            task.wait(0.1)
+                        end
+                    end)
+                end
+    
+            else
+                CosmeticsActive = false
+    
+                if _G.PlayerCosmeticsCleanup.characterAddedConn then
+                    _G.PlayerCosmeticsCleanup.characterAddedConn:Disconnect()
+                    _G.PlayerCosmeticsCleanup.characterAddedConn = nil
+                end
+    
+                if headLoop then
+                    task.cancel(headLoop)
+                    headLoop = nil
+                end
+    
+                local char = lp.Character
+                if char then
+                    local head = char:FindFirstChild("Head")
+                    if head and _G.PlayerCosmeticsCleanup.headTransparency ~= nil then
+                        head.Transparency = _G.PlayerCosmeticsCleanup.headTransparency
+                        
+                        if _G.PlayerCosmeticsCleanup.faceDecalId then
+                            local newDecal = head:FindFirstChildOfClass("Decal") or Instance.new("Decal", head)
+                            newDecal.Name = _G.PlayerCosmeticsCleanup.faceDecalName or "face"
+                            newDecal.Texture = _G.PlayerCosmeticsCleanup.faceDecalId
+                            newDecal.Face = Enum.NormalId.Front
+                        end
+                    end
+                    
+                    restoreRightLeg(char)
+                end
+    
+                _G.PlayerCosmeticsCleanup = {}
+            end
+        end
+    })
+
+local StrafeSpeed = 36
+
+    local Strafe = custom:create_module({
+        title = 'Speed',
+        flag = 'Speed',
+        description = 'Changes character speed',
+        section = 'left',
+    
+        callback = function(value)
+            if value then
+                Connections_Manager['Strafe'] = game:GetService("RunService").PreSimulation:Connect(function()
+                    local character = game.Players.LocalPlayer.Character
+                    if character and character:FindFirstChild("Humanoid") then
+                        character.Humanoid.WalkSpeed = StrafeSpeed
+                    end
+                end)
+            else
+                local character = game.Players.LocalPlayer.Character
+                if character and character:FindFirstChild("Humanoid") then
+                    character.Humanoid.WalkSpeed = 36
+                end
+                
+                if Connections_Manager['Strafe'] then
+                    Connections_Manager['Strafe']:Disconnect()
+                    Connections_Manager['Strafe'] = nil
+                end
+            end
+        end
+    })
+    
+    Strafe:create_slider({
+        title = 'Strafe Speed',
+        flag = 'Strafe_Speed',
+        minimum_value = 36,
+        maximum_value = 200,
+        value = 36,
+        round_number = true,
+        callback = function(value)
+            StrafeSpeed = value
+        end
+    })
+
+local Spinbot = custom:create_module({
+        title = 'Spinbot',
+        flag = 'Spinbot',
+
+        description = 'Spins Player',
+        section = 'right',
+
+        callback = function(value: boolean)
+
+            getgenv().Spinbot = value
+            if value then
+                getgenv().spin = true
+                getgenv().spinSpeed = getgenv().spinSpeed or 1 
+                local Players = game:GetService("Players")
+                local RunService = game:GetService("RunService")
+                local Client = Players.LocalPlayer
+    
+                
+                local function spinCharacter()
+                    while getgenv().spin do
+                        RunService.Heartbeat:Wait()
+                        local char = Client.Character
+                        local funcHRP = char and char:FindFirstChild("HumanoidRootPart")
+                        
+                        if char and funcHRP then
+                            funcHRP.CFrame *= CFrame.Angles(0, getgenv().spinSpeed, 0)
+                        end
+                    end
+                end
+    
+                
+                if not getgenv().spinThread then
+                    getgenv().spinThread = coroutine.create(spinCharacter)
+                    coroutine.resume(getgenv().spinThread)
+                end
+    
+            else
+                getgenv().spin = false
+    
+                
+                if getgenv().spinThread then
+                    getgenv().spinThread = nil
+                end
+            end
+        end
+    })
+
+    Spinbot:create_slider({
+        title = 'Spinbot Speed',
+        flag = 'Spinbot_Speed',
+    
+        maximum_value = 100,
+        minimum_value = 1,
+        value = 1,
+    
+        round_number = true,
+    
+        callback = function(value)
+            getgenv().spinSpeed = math.rad(value)
+        end
+    })		
+
+ local CameraToggle = custom:create_module({
+        title = 'Field of View',
+        flag = 'Field_Of_View',
+    
+        description = 'Changes Camera POV',
+        section = 'left',
+    
+        callback = function(value)
+            getgenv().CameraEnabled = value
+            local Camera = game:GetService("Workspace").CurrentCamera
+    
+            if value then
+                getgenv().CameraFOV = getgenv().CameraFOV or 70
+                Camera.FieldOfView = getgenv().CameraFOV
+                
+                if not getgenv().FOVLoop then
+                    getgenv().FOVLoop = game:GetService("RunService").RenderStepped:Connect(function()
+                        if getgenv().CameraEnabled then
+                            Camera.FieldOfView = getgenv().CameraFOV
+                        end
+                    end)
+                end
+            else
+                Camera.FieldOfView = 70
+                
+                if getgenv().FOVLoop then
+                    getgenv().FOVLoop:Disconnect()
+                    getgenv().FOVLoop = nil
+                end
+            end
+        end
+    })
+    
+    CameraToggle:create_slider({
+        title = 'Camera FOV',
+        flag = 'Camera_FOV',
+    
+        maximum_value = 120,
+        minimum_value = 50,
+        value = 70,
+    
+        round_number = true,
+    
+        callback = function(value)
+            getgenv().CameraFOV = value
+            if getgenv().CameraEnabled then
+                game:GetService("Workspace").CurrentCamera.FieldOfView = value
+            end
+        end
+    })		
+
+local No_Render = misc:create_module({
+        title = 'No Render',
+        flag = 'No_Render',
+        description = 'Disables rendering of effects',
+        section = 'left',
+        
+        callback = function(state)
+            Player.PlayerScripts.EffectScripts.ClientFX.Disabled = state
+    
+            if state then
+                Connections_Manager['No Render'] = workspace.Runtime.ChildAdded:Connect(function(Value)
+                    Debris:AddItem(Value, 0)
+                end)
+            else
+                if Connections_Manager['No Render'] then
+                    Connections_Manager['No Render']:Disconnect()
+                    Connections_Manager['No Render'] = nil
+                end
+            end
+        end
+    })											
+															
     
 main:load()  
