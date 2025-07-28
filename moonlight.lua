@@ -3,6 +3,12 @@ local Library = loadstring(game:HttpGet("https://pastefy.app/Ntt9ayWF/raw"))()
 local main = Library.new()
 
 local rage = main:create_tab('Blatant', 'rbxassetid://76499042599127')
+local player = main:create_tab('Player', 'rbxassetid://126017907477623')
+local world = main:create_tab('World', 'rbxassetid://85168909131990')
+local farm = main:create_tab('Farm', 'rbxassetid://132243429647479')
+local misc = main:create_tab('Misc', 'rbxassetid://132243429647479')
+
+
 
 repeat task.wait() until game:IsLoaded()
 local Players = game:GetService('Players')
@@ -1292,6 +1298,23 @@ do
         end
     })
 
+    local dropdown3 = module:create_dropdown({
+        title = 'First Parry Type',
+        flag = 'First_Parry_Type',
+
+        options = {
+            'F_Key',
+            'Left_Click',
+            'Navigation'
+        },
+
+        multi_dropdown = false,
+        maximum_options = 3,
+        callback = function(value)
+            firstParryType = value
+        end
+    })
+
     local parryTypeMap = {
         ["Camera"] = "Camera",
         ["Slowball"] = "Slowball",
@@ -1403,6 +1426,14 @@ do
             if value then
                 getgenv().InfinityDetection = value
             end
+        end
+    })
+
+    module:create_checkbox({
+        title = "Death Slash Detection",
+        flag = "DeathSlash_Detection",
+        callback = function(value: boolean)
+            getgenv().DeathSlashDetection = value
         end
     })
 
@@ -1550,7 +1581,7 @@ local Ping_Threshold = math.clamp(Ping / 10, 1, 16)
                     if Distance <= Spam_Accuracy and Parries > threshold then
                         if getgenv().SpamParryKeypress then
                         if Distance > Spam_Accuracy or Target_Distance > Spam_Accuracy then
-    return
+    return -- cancela se jÃ¡ tÃ¡ longe, evita falso spam
 end
                             VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.F, false, game) 
                         else
@@ -1567,7 +1598,38 @@ end
         end
     })
 
-if not isMobile then
+    local dropdown2 = SpamParry:create_dropdown({
+        title = 'Parry Type',
+        flag = 'Spam_Parry_Type',
+
+        options = {
+            'Legit',
+            'Blatant'
+        },
+
+        multi_dropdown = false,
+        maximum_options = 2,
+
+        callback = function(value: string)
+        end
+    })
+
+    SpamParry:create_slider({
+        title = "Parry Threshold",
+        flag = "Parry_Threshold",
+        maximum_value = 3,
+        minimum_value = 1,
+        value = 2.5,
+        round_number = false,
+        callback = function(value: number)
+            ParryThreshold = value
+        end
+    })
+
+    SpamParry:create_divider({
+    })
+
+    if not isMobile then
         local AnimationFix = SpamParry:create_checkbox({
             title = "Animation Fix",
             flag = "AnimationFix",
@@ -1635,7 +1697,7 @@ local Ping_Threshold = math.clamp(Ping / 10, 1, 16)
     
                         if Distance <= Spam_Accuracy and Parries > threshold then
 if Distance > Spam_Accuracy or Target_Distance > Spam_Accuracy then
-    return
+    return -- cancela se jÃ¡ tÃ¡ longe, evita falso spam
 end
 if tick() - (Last_Parry or 0) < 0.1 then return end
 Last_Parry = tick()
@@ -1654,83 +1716,7 @@ Last_Parry = tick()
         AnimationFix:change_state(true)
     end
 
-local SpamUI = SpamParry:create_checkbox({
-            title = "UI",
-            flag = "SpamUI",
-            callback = function(value: boolean)
-                if value then
-                    getgenv().spamui = value
-
-        if value then
-            local gui = Instance.new("ScreenGui")
-            gui.Name = "ManualSpamUI"
-            gui.ResetOnSpawn = false
-            gui.Parent = game.CoreGui
-
-            local frame = Instance.new("Frame")
-            frame.Name = "MainFrame"
-            frame.Position = UDim2.new(0, 20, 0, 20)
-            frame.Size = UDim2.new(0, 200, 0, 100)
-            frame.BackgroundColor3 = Color3.fromRGB(10, 10, 50)
-            frame.BackgroundTransparency = 0.3
-            frame.BorderSizePixel = 0
-            frame.Active = true
-            frame.Draggable = true
-            frame.Parent = gui
-
-            local uiCorner = Instance.new("UICorner")
-            uiCorner.CornerRadius = UDim.new(0, 12)
-            uiCorner.Parent = frame
-
-            local uiStroke = Instance.new("UIStroke")
-            uiStroke.Thickness = 2
-            uiStroke.Color = Color3.new(0, 0, 0)
-            uiStroke.Parent = frame
-
-            local button = Instance.new("TextButton")
-            button.Name = "StartButton"
-            button.Text = "Start"
-            button.Size = UDim2.new(0, 160, 0, 40)
-            button.Position = UDim2.new(0.5, -80, 0.5, -20)
-            button.BackgroundTransparency = 1
-            button.BorderSizePixel = 0
-            button.Font = Enum.Font.GothamSemibold
-            button.TextColor3 = Color3.new(1, 1, 1)
-            button.TextSize = 22
-            button.Parent = frame
-
-            local activated = false
-
-            local function toggle()
-                activated = not activated
-                button.Text = activated and "Stop" or "Start"
-                if activated then
-                    Connections_Manager['Spam UI'] = game:GetService("RunService").Heartbeat:Connect(function()
-                        Auto_Parry.Parry(Selected_Parry_Type)
-                    end)
-                else
-                    if Connections_Manager['Spam UI'] then
-                        Connections_Manager['Spam UI']:Disconnect()
-                        Connections_Manager['Spam UI'] = nil
-                    end
-                end
-            end
-
-            button.MouseButton1Click:Connect(toggle)
-        else
-            if game.CoreGui:FindFirstChild("SpamUI") then
-                game.CoreGui:FindFirstChild("SpamUI"):Destroy()
-            end
-
-            if Connections_Manager['Spam UI'] then
-                Connections_Manager['Spam UI']:Disconnect()
-                Connections_Manager['Spam UI'] = nil
-            end
-        end
-    end
-  })
-
-SpamParry:create_checkbox({
+    SpamParry:create_checkbox({
         title = "Keypress",
         flag = "Auto_Spam_Parry_Keypress",
         callback = function(value: boolean)
@@ -1746,125 +1732,4 @@ SpamParry:create_checkbox({
         end
     })
 
-local LobbyAP = rage:create_module({
-        title = 'Lobby AP',
-        flag = 'Lobby_AP',
-        description = 'Auto parries ball in lobby',
-        section = 'right',
-        callback = function(state)
-            if getgenv().LobbyAPNotify then
-                if state then
-                    Library.SendNotification({
-                        title = "Module Notification",
-                        text = "Lobby AP has been turned ON",
-                        duration = 3
-                    })
-                else
-                    Library.SendNotification({
-                        title = "Module Notification",
-                        text = "Lobby AP has been turned OFF",
-                        duration = 3
-                    })
-                end
-            end
-            if state then
-                Connections_Manager['Lobby AP'] = RunService.PreSimulation:Connect(function()
-                    local Ball = Auto_Parry.Lobby_Balls()
-                    if not Ball then
-                        return
-                    end
-    
-                    local Zoomies = Ball:FindFirstChild('zoomies')
-                    if not Zoomies then
-                        return
-                    end
-    
-                    Ball:GetAttributeChangedSignal('target'):Once(function()
-                        Training_Parried = false
-                    end)
-    
-                    if Training_Parried then
-                        return
-                    end
-    
-                    local Ball_Target = Ball:GetAttribute('target')
-                    local Velocity = Zoomies.VectorVelocity
-                    local Distance = Player:DistanceFromCharacter(Ball.Position)
-                    local Speed = Velocity.Magnitude
-    
-                    local Ping = game:GetService('Stats').Network.ServerStatsItem['Data Ping']:GetValue() / 10
-                    local LobbyAPcappedSpeedDiff = math.min(math.max(Speed - 9.5, 0), 650)
-                    local LobbyAPspeed_divisor_base = 2.4 + LobbyAPcappedSpeedDiff * 0.002
-    
-                    local LobbyAPeffectiveMultiplier = LobbyAP_Speed_Divisor_Multiplier
-                    if getgenv().LobbyAPRandomParryAccuracyEnabled then
-                        LobbyAPeffectiveMultiplier = 0.7 + (math.random(1, 100) - 1) * (0.35 / 99)
-                    end
-    
-                    local LobbyAPspeed_divisor = LobbyAPspeed_divisor_base * LobbyAPeffectiveMultiplier
-                    local LobbyAPParry_Accuracys = Ping + math.max(Speed / LobbyAPspeed_divisor, 9.5)
-    
-                    if Ball_Target == tostring(Player) and Distance <= LobbyAPParry_Accuracys then
-                            if getgenv().LobbyAPKeypress then
-                                VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.F, false, game) 
-                            else
-                                Auto_Parry.Parry(Selected_Parry_Type)
-                            end
-                        Training_Parried = true
-                    end
-                    local Last_Parrys = tick()
-                    repeat 
-                        RunService.PreSimulation:Wait() 
-                    until (tick() - Last_Parrys) >= 1 or not Training_Parried
-                    Training_Parried = false
-                end)
-            else
-                if Connections_Manager['Lobby AP'] then
-                    Connections_Manager['Lobby AP']:Disconnect()
-                    Connections_Manager['Lobby AP'] = nil
-                end
-            end
-        end
-    })
-
-    LobbyAP:create_slider({
-        title = 'Parry Accuracy',
-        flag = 'Parry_Accuracy',
-        maximum_value = 100,
-        minimum_value = 1,
-        value = 100,
-        round_number = true,
-        callback = function(value: number)
-            LobbyAP_Speed_Divisor_Multiplier = 0.7 + (value - 1) * (0.35 / 99)
-        end
-    })
-
-    LobbyAP:create_divider({
-    })
-    
-    LobbyAP:create_checkbox({
-        title = "Randomized Parry Accuracy",
-        flag = "Random_Parry_Accuracy",
-        callback = function(value: boolean)
-            getgenv().LobbyAPRandomParryAccuracyEnabled = value
-        end
-    })
-
-    LobbyAP:create_checkbox({
-        title = "Keypress",
-        flag = "Lobby_AP_Keypress",
-        callback = function(value: boolean)
-            getgenv().LobbyAPKeypress = value
-        end
-    })
-
-    LobbyAP:create_checkbox({
-        title = "Notify",
-        flag = "Lobby_AP_Notify",
-        callback = function(value: boolean)
-            getgenv().LobbyAPNotify = value
-        end
-    })
-
-                                
-main:load()
+    main:load()  
