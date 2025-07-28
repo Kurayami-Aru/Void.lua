@@ -1403,6 +1403,13 @@ local module = rage:create_module({
     module:create_divider({
     })
 
+    module:create_checkbox({
+        title = "Notify",
+        flag = "Auto_Parry_Notify",
+        callback = function(value: boolean)
+            getgenv().AutoParryNotify = value
+        end
+    })
 
 
 main:load()
