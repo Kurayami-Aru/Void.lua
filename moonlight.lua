@@ -3,7 +3,6 @@ local Library = loadstring(game:HttpGet("https://pastefy.app/Ntt9ayWF/raw"))()
 local main = Library.new()
 
 local rage = main:create_tab('Blatant', 'rbxassetid://76499042599127')
-local detect = main:create_tab('Detection', 'rbxassetid://76499042599127')
 local player = main:create_tab('Player', 'rbxassetid://126017907477623')
 local world = main:create_tab('World', 'rbxassetid://85168909131990')
 local misc = main:create_tab('Misc', 'rbxassetid://132243429647479')
@@ -1283,7 +1282,7 @@ do
                         end
                         local Last_Parrys = tick()
                         repeat
-                            RunService.PreSimulation:Wait()
+                            RunService.Heartbeat:Wait()
                         until (tick() - Last_Parrys) >= 1 or not Parried
                         Parried = false
                     end
@@ -1402,6 +1401,40 @@ do
     })
 
     module:create_checkbox({
+        title = "Infinity Detection",
+        flag = "Infinity_Detection",
+        callback = function(value: boolean)
+            if value then
+                getgenv().InfinityDetection = value
+            end
+        end
+    })
+
+    module:create_checkbox({
+        title = "Slash Of Fury Detection",
+        flag = "SlashOfFuryDetection",
+        callback = function(value: boolean)
+            getgenv().SlashOfFuryDetection = value
+        end
+    })
+
+    module:create_checkbox({
+        title = "Anti Phantom",
+        flag = "Anti_Phantom",
+        callback = function(value: boolean)
+            getgenv().PhantomV2Detection = value
+        end
+    })
+
+    module:create_checkbox({
+        title = "Cooldown Protection",
+        flag = "CooldownProtection",
+        callback = function(value: boolean)
+            getgenv().CooldownProtection = value
+        end
+    })
+
+    module:create_checkbox({
         title = "Auto Ability",
         flag = "AutoAbility",
         callback = function(value: boolean)
@@ -1443,7 +1476,7 @@ do
                 Connections_Manager['Auto Spam'] = RunService.PreSimulation:Connect(function()
     local now = tick()
     if not lastAutoSpam then lastAutoSpam = 0 end
-    if now - lastAutoSpam < 0.001 then return end
+    if now - lastAutoSpam < 0.000001 then return end
     lastAutoSpam = now
                 local Ball = Auto_Parry.Get_Ball()
 
@@ -1817,51 +1850,6 @@ end
             getgenv().LobbyAPNotify = value
         end
     })
-
-    local module = detect:create_module({
-        title = 'Infinity Detection',
-        flag = 'Inf_detect',
-        description = 'Infinity Detection',
-        section = 'left',
-        callback = function(value: boolean)
-	    if value then
-		getgenv().InfinityDetection = value
-            end
-        end
-    })
-
-    local module = detect:create_module({
-        title = 'Anti Phantom',
-        flag = 'Anti_Phantom',
-        description = 'Anti Phantom',
-        section = 'right',
-        callback = function(value: boolean)
-	    if value then
-		getgenv().PhantomV2Detection = value
-        end
-    })
-
-    local module = detect:create_module({
-        title = 'Slashes Of Fury Detection',
-        flag = 'SOF_detect',
-        description = 'Slashes Of Fury Detection',
-        section = 'left',
-        callback = function(value: boolean)
-	    if value then
-		getgenv().SlashOfFuryDetection = value
-        end
-    })
-
-    local module = detect:create_module({
-        title = 'Cooldown Protection',
-        flag = 'CD_Protection',
-        description = 'Cooldown Protection',
-        section = 'right',
-        callback = function(value: boolean)
-	    if value then
-		getgenv().CooldownProtection = value
-        end
-    })		
 									
 local StrafeSpeed = 36
 
