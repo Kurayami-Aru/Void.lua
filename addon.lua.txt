@@ -1596,21 +1596,11 @@ Tabs.DetectionTab:Toggle({
     })
 
 Tabs.DetectionTab:Toggle({
-    Title = "Slashes Of Fury Detection",
-    Desc = "Stop parry when turn on SOF",
-    Callback = function(value)
-        if value then
-             getgenv().SlashOfFuryDetection = value
-            end
-        end
-    })
-
-Tabs.DetectionTab:Toggle({
     Title = "Anti Phantom",
     Desc = "Stop parry when Phantom target you",
     Callback = function(value)
         if value then
-             getgenv().DeathSlashDetection = value
+             getgenv().PhantomV2Detection = value
             end
         end
     })
