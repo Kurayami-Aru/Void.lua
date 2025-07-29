@@ -777,13 +777,13 @@ end
 local adjustedReachTime = Reach_Time + 0.03 -- compensação real de ping
 
 if Speed < 300 then
-    if (tick() - Curving) < (adjustedReachTime / 1.2) then return true end
+    if (tick() - Curving) < (adjustedReachTime / 1.1) then return true end
 elseif Speed < 450 then
-    if (tick() - Curving) < (adjustedReachTime / 1.21) then return true end
+    if (tick() - Curving) < (adjustedReachTime / 1.11) then return true end
 elseif Speed < 600 then
-    if (tick() - Curving) < (adjustedReachTime / 1.335) then return true end
+    if (tick() - Curving) < (adjustedReachTime / 1.315) then return true end
 else
-    if (tick() - Curving) < (adjustedReachTime / 1.5) then return true end
+    if (tick() - Curving) < (adjustedReachTime / 1.4) then return true end
 end
 
 -- 🧠 Correção por ângulo invertido (dot reverso)
@@ -829,8 +829,8 @@ if #Previous_Velocity == 4 then
 end
 
 -- 🚨 Detecção de curva pra trás real
-local backwardsCurveDetected = false
-local backwardsAngleThreshold = 100
+local backwardsCurveDetected = true
+local backwardsAngleThreshold = 70
 local horizDirection = Vector3.new(playerPos.X - ballPos.X, 0, playerPos.Z - ballPos.Z)
 
 if horizDirection.Magnitude > 0 then
@@ -1267,7 +1267,7 @@ do
 
                             local Parry_Time = os.clock()
                             local Time_View = Parry_Time - (Last_Parry)
-                            if Time_View > 0.5 then
+                            if Time_View > 0.09 then
                                 Auto_Parry.Parry_Animation()
                             end
 
