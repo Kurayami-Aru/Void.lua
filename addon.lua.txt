@@ -1518,7 +1518,7 @@ Tabs.PlayerTab:Slider({
     end
 })
 
-Tabs.VisualsTab:Toggle({
+Tabs.CustomTab:Toggle({
     Title = "Skin Changer",
     Desc = "Change Skin",
     Callback = function(state)
@@ -1526,7 +1526,7 @@ Tabs.VisualsTab:Toggle({
     end
 })
 
-Tabs.VisualsTab:Input({
+Tabs.CustomTab:Input({
     Title = "Input Sword",
     Placeholder = "Enter Skin Name [Case Sensitive!!]",
     Callback = function(v) swordName = v end
