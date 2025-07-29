@@ -3524,27 +3524,6 @@ local BallStats = misc:create_module({
         end
     })
 
-    local DisableQuantumEffects = misc:create_module({
-        title = 'Disable Encrypted Clone',
-        flag = 'NoQuantumEffects',
-        description = 'Disables Quantum Arena effects.',
-        section = 'right',
-        callback = function(value: boolean)
-            getgenv().NoEncryptedEffects = value
-            if value then
-                task.spawn(function()
-                    local encryptedfx
-                    while task.wait() and getgenv().NoEncryptedEffects and not encryptedfx do
-                        for _, v in getconnections(ReplicatedStorage.Remotes.EncryptedClobe.OnClientEvent) do
-                            encryptedfx = v
-                            v:Disable()
-                        end
-                    end
-                end)
-            end
-        end
-    })
-
     local No_Render = misc:create_module({
         title = 'No Render',
         flag = 'No_Render',
