@@ -1165,7 +1165,7 @@ do
                 end
             end
             if value then
-                Connections_Manager['Auto Parry'] = RunService.PreSimulation:Connect(function()
+                Connections_Manager['Auto Parry'] = RunService.Heartbeat:Connect(function()
                     local One_Ball = Auto_Parry.Get_Ball()
                     local Balls = Auto_Parry.Get_Balls()
 
