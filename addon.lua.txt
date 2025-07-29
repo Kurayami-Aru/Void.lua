@@ -469,43 +469,127 @@ function Auto_Parry.Is_Curved()
     local Dot_Difference = Dot - Direction_Similarity
     local Distance = (Player.Character.PrimaryPart.Position - Ball.Position).Magnitude
 
-    local Pings = game:GetService('Stats').Network.ServerStatsItem['Data Ping']:GetValue()
+    local Ping = game:GetService('Stats').Network.ServerStatsItem['Data Ping']:GetValue()
+    local Velocity = Zoomies.VectorVelocity
+    local Ball_Direction = Velocity.Unit
 
-    local Dot_Threshold = 0.5 - (Pings / 1000)
-    local Reach_Time = Distance / Speed - (Pings / 1000)
+    local playerPos = Player.Character.PrimaryPart.Position
+    local ballPos = Ball.Position
+    local Direction = (playerPos - ballPos).Unit
+    local Dot = Direction:Dot(Ball_Direction)
+    local Speed = Velocity.Magnitude
 
-    local Ball_Distance_Threshold = 15 - math.min(Distance / 1000, 15) + Speed_Threshold
+    local Speed_Threshold = math.min(Speed/100, 40)
+    local Angle_Threshold = 40 * math.max(Dot, 0)
+    local Distance = (playerPos - ballPos).Magnitude
+    local Reach_Time = Distance / Speed - (Ping / 1000)
+    
+    local Ball_Distance_Threshold = 15 - math.min(Distance/1000, 15) + Speed_Threshold
 
-    local Clamped_Dot = math.clamp(Dot, -1, 1)
-    local Radians = math.rad(math.asin(Clamped_Dot))
+    table.insert(Previous_Velocity, Velocity)
+    if #Previous_Velocity > 4 then
+        table.remove(Previous_Velocity, 1)
+    end
 
-    Lerp_Radians = Auto_Parry.Linear_Interpolation(Lerp_Radians, Radians, 0.8)
+    if Ball:FindFirstChild('AeroDynamicSlashVFX') then
+        Debris:AddItem(Ball.AeroDynamicSlashVFX, 0)
+        Tornado_Time = tick()
+    end
 
-    if Speed > 100 and Reach_Time > Pings / 10 then
+    if Runtime:FindFirstChild('Tornado') then
+        if (tick() - Tornado_Time) < ((Runtime.Tornado:GetAttribute("TornadoTime") or 1) + 0.314159) then
+            return true
+        end
+    end
+
+local Enough_Speed = Speed > 160
+if Enough_Speed and Reach_Time > (Ping / 10 + 0.03) then
+    if Speed < 300 then
         Ball_Distance_Threshold = math.max(Ball_Distance_Threshold - 15, 15)
+    elseif Speed <= 600 then
+        Ball_Distance_Threshold = math.max(Ball_Distance_Threshold - 17, 17)
+    elseif Speed <= 1000 then
+        Ball_Distance_Threshold = math.max(Ball_Distance_Threshold - 19, 19)
+    else
+        Ball_Distance_Threshold = math.max(Ball_Distance_Threshold - 20, 20)
     end
+end
 
-    if Distance < Ball_Distance_Threshold then
-        return false
+if Distance < Ball_Distance_Threshold then
+    return false
+end
+
+local adjustedReachTime = Reach_Time + 0.03
+
+if Speed < 300 then
+    if (tick() - Curving) < (adjustedReachTime / 1.1) then return true end
+elseif Speed < 450 then
+    if (tick() - Curving) < (adjustedReachTime / 1.11) then return true end
+elseif Speed < 600 then
+    if (tick() - Curving) < (adjustedReachTime / 1.325) then return true end
+else
+    if (tick() - Curving) < (adjustedReachTime / 1.4) then return true end
+end
+
+local Dot_Threshold = (0 - Ping / 1000)
+local Direction_Difference = (Ball_Direction - Velocity.Unit)
+local Direction_Similarity = Direction:Dot(Direction_Difference.Unit)
+local Dot_Difference = Dot - Direction_Similarity
+
+if Dot_Difference < Dot_Threshold then
+    return true
+end
+
+local Clamped_Dot = math.clamp(Dot, -1, 1)
+local Radians = math.deg(math.asin(Clamped_Dot))
+Lerp_Radians = Auto_Parry.Linear_Interpolation(Lerp_Radians, Radians, 0.8)
+
+if Speed < 300 then
+    if Lerp_Radians < 0.02 then
+        Last_Warping = tick()
     end
-
-    if Dot_Difference < Dot_Threshold then
+    if (tick() - Last_Warping) < (adjustedReachTime / 1.19) then
         return true
     end
-
+else
     if Lerp_Radians < 0.018 then
         Last_Warping = tick()
     end
-
-    if (tick() - Last_Warping) < (Reach_Time / 1.5) then
+    if (tick() - Last_Warping) < (adjustedReachTime / 1.5) then
         return true
     end
+end
 
-    if (tick() - Curving) < (Reach_Time / 1.5) then
-        return true
+if #Previous_Velocity == 4 then
+    for i = 1, 2 do
+        local prevDir = (Ball_Direction - Previous_Velocity[i].Unit).Unit
+        local prevDot = Direction:Dot(prevDir)
+        if (Dot - prevDot) < Dot_Threshold then
+            return true
+        end
     end
+end
 
-    return Dot < Dot_Threshold
+local backwardsCurveDetected = true
+local backwardsAngleThreshold = 90
+local horizDirection = Vector3.new(playerPos.X - ballPos.X, 0, playerPos.Z - ballPos.Z)
+
+if horizDirection.Magnitude > 0 then
+    horizDirection = horizDirection.Unit
+end
+
+local awayFromPlayer = -horizDirection
+local horizBallDir = Vector3.new(Ball_Direction.X, 0, Ball_Direction.Z)
+
+if horizBallDir.Magnitude > 0 then
+    horizBallDir = horizBallDir.Unit
+    local backwardsAngle = math.deg(math.acos(math.clamp(awayFromPlayer:Dot(horizBallDir), -1, 1)))
+    if backwardsAngle < backwardsAngleThreshold then
+        backwardsCurveDetected = true
+    end
+end
+
+return (Dot < Dot_Threshold) or backwardsCurveDetected
 end
 
 function Auto_Parry:Get_Ball_Properties()
@@ -628,7 +712,7 @@ Balls.ChildAdded:Connect(function(Value)
                 repeat
                     local Slashes_Counter = tonumber(Sof_Label.Text)
 
-                    if Slashes_Counter and Slashes_Counter < 32 then
+                    if Slashes_Counter and Slashes_Counter < 30 then
                         Auto_Parry.Parry(Selected_Parry_Type)
                     end
 
@@ -793,7 +877,7 @@ WindUI:AddTheme({
 })
 
 local Window = WindUI:CreateWindow({
-    Title = "Zeryx V1.6",
+    Title = "Zeryx V1.8",
     Icon = "zap",
     Author = "Zeryx Staff Team",
     Folder = "ZeryxHub",
@@ -897,7 +981,8 @@ end)
 
 local Tabs = {
     MainTab = Window:Tab({ Title = "Main", Icon = "swords" }),
-    DetectionTab = Window:Tab({ Title = "Detection", Icon = "sword" }),
+    DetectionTab = Window:Tab({ Title = "Detection", Icon = "shield" }),
+    CustomTab = Window:Tab({ Title = "Customize", Icon = "cloud
     PlayerTab = Window:Tab({ Title = "Player", Icon = "user" }),
     VisualsTab = Window:Tab({ Title = "Visuals", Icon = "eye" }),
 }
@@ -1011,7 +1096,7 @@ Tabs.MainTab:Toggle({
 
                             local Parry_Time = os.clock()
                             local Time_View = Parry_Time - (Last_Parry)
-                            if Time_View > 0.5 then
+                            if Time_View > 0.07 then
                                 Auto_Parry.Parry_Animation()
                             end
 
@@ -1433,7 +1518,7 @@ Tabs.PlayerTab:Slider({
     end
 })
 
-Tabs.VisualsTab:Toggle({
+Tabs.CustomTab:Toggle({
     Title = "Skin Changer",
     Desc = "Change Skin",
     Callback = function(state)
@@ -1441,9 +1526,9 @@ Tabs.VisualsTab:Toggle({
     end
 })
 
-Tabs.VisualsTab:Input({
+Tabs.CustomTab:Input({
     Title = "Input Sword",
-    Placeholder = "Enter Skin Name [Capitals Matter!]",
+    Placeholder = "Enter Skin Name [Case Sensitive!!]",
     Callback = function(v) swordName = v end
 })
 
@@ -1507,6 +1592,16 @@ Tabs.DetectionTab:Toggle({
     Callback = function(value)
         if value then
              getgenv().InfinityDetection = value
+            end
+        end
+    })
+
+Tabs.DetectionTab:Toggle({
+    Title = "Slashes Of Fury Detection",
+    Desc = "Stop parry when turn on SOF",
+    Callback = function(value)
+        if value then
+             getgenv().SlashOfFuryDetection = value
             end
         end
     })
