@@ -982,7 +982,6 @@ end)
 local Tabs = {
     MainTab = Window:Tab({ Title = "Main", Icon = "swords" }),
     DetectionTab = Window:Tab({ Title = "Detection", Icon = "shield" }),
-    CustomTab = Window:Tab({ Title = "Customize", Icon = "cloud
     PlayerTab = Window:Tab({ Title = "Player", Icon = "user" }),
     VisualsTab = Window:Tab({ Title = "Visuals", Icon = "eye" }),
 }
@@ -1518,7 +1517,7 @@ Tabs.PlayerTab:Slider({
     end
 })
 
-Tabs.CustomTab:Toggle({
+Tabs.VisualsTab:Toggle({
     Title = "Skin Changer",
     Desc = "Change Skin",
     Callback = function(state)
@@ -1526,7 +1525,7 @@ Tabs.CustomTab:Toggle({
     end
 })
 
-Tabs.CustomTab:Input({
+Tabs.VisualsTab:Input({
     Title = "Input Sword",
     Placeholder = "Enter Skin Name [Case Sensitive!!]",
     Callback = function(v) swordName = v end
