@@ -1096,7 +1096,7 @@ Tabs.MainTab:Toggle({
 
                             local Parry_Time = os.clock()
                             local Time_View = Parry_Time - (Last_Parry)
-                            if Time_View > 0.07 then
+                            if Time_View > 0.5 then
                                 Auto_Parry.Parry_Animation()
                             end
 
@@ -1120,6 +1120,70 @@ Tabs.MainTab:Toggle({
                 if Connections_Manager['Auto Parry'] then
                     Connections_Manager['Auto Parry']:Disconnect()
                     Connections_Manager['Auto Parry'] = nil
+                end
+            end
+        end
+    })
+
+Tabs.MainTab:Toggle({    
+    Title = "Lobby AP",    
+    Desc = "Automatically Parries in lobby",    
+    Callback = function(state)    
+		if state then
+              Connections_Manager['Lobby AP'] = RunService.Heartbeat:Connect(function()
+                    local Ball = Auto_Parry.Lobby_Balls()
+                    if not Ball then
+                        return
+                    end
+    
+                    local Zoomies = Ball:FindFirstChild('zoomies')
+                    if not Zoomies then
+                        return
+                    end
+    
+                    Ball:GetAttributeChangedSignal('target'):Once(function()
+                        Training_Parried = false
+                    end)
+    
+                    if Training_Parried then
+                        return
+                    end
+    
+                    local Ball_Target = Ball:GetAttribute('target')
+                    local Velocity = Zoomies.VectorVelocity
+                    local Distance = Player:DistanceFromCharacter(Ball.Position)
+                    local Speed = Velocity.Magnitude
+    
+                    local Ping = game:GetService('Stats').Network.ServerStatsItem['Data Ping']:GetValue() / 10
+                    local LobbyAPcappedSpeedDiff = math.min(math.max(Speed - 9.5, 0), 650)
+                    local LobbyAPspeed_divisor_base = 2.4 + LobbyAPcappedSpeedDiff * 0.002
+    
+                    local LobbyAPeffectiveMultiplier = LobbyAP_Speed_Divisor_Multiplier
+                    if getgenv().LobbyAPRandomParryAccuracyEnabled then
+                        LobbyAPeffectiveMultiplier = 0.7 + (math.random(1, 100) - 1) * (0.35 / 99)
+                    end
+    
+                    local LobbyAPspeed_divisor = LobbyAPspeed_divisor_base * LobbyAPeffectiveMultiplier
+                    local LobbyAPParry_Accuracys = Ping + math.max(Speed / LobbyAPspeed_divisor, 9.5)
+    
+                    if Ball_Target == tostring(Player) and Distance <= LobbyAPParry_Accuracys then
+                            if getgenv().LobbyAPKeypress then
+                                VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.F, false, game) 
+                            else
+                                Auto_Parry.Parry(Selected_Parry_Type)
+                            end
+                        Training_Parried = true
+                    end
+                    local Last_Parrys = tick()
+                    repeat 
+                        RunService.PreSimulation:Wait() 
+                    until (tick() - Last_Parrys) >= 1 or not Training_Parried
+                    Training_Parried = false
+                end)
+            else
+                if Connections_Manager['Lobby AP'] then
+                    Connections_Manager['Lobby AP']:Disconnect()
+                    Connections_Manager['Lobby AP'] = nil
                 end
             end
         end
@@ -1281,70 +1345,6 @@ Tabs.MainTab:Toggle({
         end
     end
 })
-
-Tabs.MainTab:Toggle({    
-    Title = "Lobby AP",    
-    Desc = "Automatically Parries in lobby",    
-    Callback = function(state)    
-		if state then
-              Connections_Manager['Lobby AP'] = RunService.Heartbeat:Connect(function()
-                    local Ball = Auto_Parry.Lobby_Balls()
-                    if not Ball then
-                        return
-                    end
-    
-                    local Zoomies = Ball:FindFirstChild('zoomies')
-                    if not Zoomies then
-                        return
-                    end
-    
-                    Ball:GetAttributeChangedSignal('target'):Once(function()
-                        Training_Parried = false
-                    end)
-    
-                    if Training_Parried then
-                        return
-                    end
-    
-                    local Ball_Target = Ball:GetAttribute('target')
-                    local Velocity = Zoomies.VectorVelocity
-                    local Distance = Player:DistanceFromCharacter(Ball.Position)
-                    local Speed = Velocity.Magnitude
-    
-                    local Ping = game:GetService('Stats').Network.ServerStatsItem['Data Ping']:GetValue() / 10
-                    local LobbyAPcappedSpeedDiff = math.min(math.max(Speed - 9.5, 0), 650)
-                    local LobbyAPspeed_divisor_base = 2.4 + LobbyAPcappedSpeedDiff * 0.002
-    
-                    local LobbyAPeffectiveMultiplier = LobbyAP_Speed_Divisor_Multiplier
-                    if getgenv().LobbyAPRandomParryAccuracyEnabled then
-                        LobbyAPeffectiveMultiplier = 0.7 + (math.random(1, 100) - 1) * (0.35 / 99)
-                    end
-    
-                    local LobbyAPspeed_divisor = LobbyAPspeed_divisor_base * LobbyAPeffectiveMultiplier
-                    local LobbyAPParry_Accuracys = Ping + math.max(Speed / LobbyAPspeed_divisor, 9.5)
-    
-                    if Ball_Target == tostring(Player) and Distance <= LobbyAPParry_Accuracys then
-                            if getgenv().LobbyAPKeypress then
-                                VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.F, false, game) 
-                            else
-                                Auto_Parry.Parry(Selected_Parry_Type)
-                            end
-                        Training_Parried = true
-                    end
-                    local Last_Parrys = tick()
-                    repeat 
-                        RunService.PreSimulation:Wait() 
-                    until (tick() - Last_Parrys) >= 1 or not Training_Parried
-                    Training_Parried = false
-                end)
-            else
-                if Connections_Manager['Lobby AP'] then
-                    Connections_Manager['Lobby AP']:Disconnect()
-                    Connections_Manager['Lobby AP'] = nil
-                end
-            end
-        end
-    })
 
 local parryTypeMap = {
     ["Camera"] = "Camera",
