@@ -3,6 +3,7 @@ local Library = loadstring(game:HttpGet("https://pastefy.app/Ntt9ayWF/raw"))()
 local main = Library.new()
 
 local rage = main:create_tab('Blatant', 'rbxassetid://76499042599127')
+local detect = main:create_tab('Detection', 'rbxassetid://76499042599127')
 local player = main:create_tab('Player', 'rbxassetid://126017907477623')
 local world = main:create_tab('World', 'rbxassetid://85168909131990')
 local misc = main:create_tab('Misc', 'rbxassetid://132243429647479')
@@ -1202,7 +1203,7 @@ do
                         local Speed = Velocity.Magnitude
 
                         local cappedSpeedDiff = math.min(math.max(Speed - 9.5, 0), 650)
-                        local speed_divisor_base = 2.4 + cappedSpeedDiff * 0.002
+                        local speed_divisor_base = 2.1 + cappedSpeedDiff * 0.002
 
                         local effectiveMultiplier = Speed_Divisor_Multiplier
                         if getgenv().RandomParryAccuracyEnabled then
@@ -1214,7 +1215,7 @@ do
                         end
 
                         local speed_divisor = speed_divisor_base * effectiveMultiplier
-                        local Parry_Accuracy = Ping_Threshold + math.max(Speed / speed_divisor, 9.5)
+                        local Parry_Accuracy = Ping_Threshold + math.max(Speed / speed_divisor, 8.5)
 
                         local Curved = Auto_Parry.Is_Curved(ball, speed)
 
@@ -1375,14 +1376,14 @@ do
         title = 'Parry Accuracy',
         flag = 'Parry_Accuracy',
 
-        maximum_value = 150,
+        maximum_value = 100,
         minimum_value = 1,
         value = 100,
 
         round_number = true,
 
         callback = function(value: boolean)
-           Speed_Divisor_Multiplier = 0.75 + (value - 1) * (0.5 / 149)
+           Speed_Divisor_Multiplier = 0.75 + (value - 1) * (0.335 / 99)
 	end
 })
 							
@@ -1399,40 +1400,6 @@ do
             end
         end
     })
-
-    module:create_checkbox({
-        title = "Infinity Detection",
-        flag = "Infinity_Detection",
-        callback = function(value: boolean)
-            if value then
-                getgenv().InfinityDetection = value
-            end
-        end
-    })
-
-    module:create_checkbox({
-        title = "Anti Phantom",
-        flag = "Anti_Phantom",
-        callback = function(value: boolean)
-            getgenv().PhantomV2Detection = value
-        end
-    })
-
-    module:create_checkbox({
-        title = "Slash Of Fury Detection",
-        flag = "SlashOfFuryDetection",
-        callback = function(value: boolean)
-            getgenv().SlashOfFuryDetection = value
-        end
-    })
-
-    module:create_checkbox({
-        title = "Cooldown Protection",
-        flag = "CooldownProtection",
-        callback = function(value: boolean)
-            getgenv().CooldownProtection = value
-        end
-    })				
 
     module:create_checkbox({
         title = "Auto Ability",
@@ -1560,95 +1527,74 @@ do
             callback = function(value: boolean)
                 getgenv().spamui = value
 
-if value then
-    pcall(function()
-        if game.CoreGui:FindFirstChild("ManualSpamUI") then
-            game.CoreGui.ManualSpamUI:Destroy()
-        end
-    end)
+        if value then
+            local gui = Instance.new("ScreenGui")
+            gui.Name = "SpamUI"
+            gui.ResetOnSpawn = false
+            gui.Parent = game.CoreGui
 
-    local ScreenGui = Instance.new("ScreenGui")
-    ScreenGui.Name = "ManualSpamUI"
-    ScreenGui.ResetOnSpawn = false
-    ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-    ScreenGui.Parent = game.CoreGui
+            local frame = Instance.new("Frame")
+            frame.Name = "MainFrame"
+            frame.Position = UDim2.new(0, 20, 0, 20)
+            frame.Size = UDim2.new(0, 200, 0, 100)
+            frame.BackgroundColor3 = Color3.fromRGB(10, 10, 50)
+            frame.BackgroundTransparency = 0.3
+            frame.BorderSizePixel = 0
+            frame.Active = true
+            frame.Draggable = true
+            frame.Parent = gui
 
-    local Frame = Instance.new("Frame")
-    Frame.Name = "Main"
-    Frame.Size = UDim2.new(0, 150, 0, 65)
-    Frame.Position = UDim2.new(0.4, 0, 0.4, 0)
-    Frame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-    Frame.BorderSizePixel = 0
-    Frame.Active = true
-    Frame.Draggable = true
-    Frame.Parent = ScreenGui
+            local uiCorner = Instance.new("UICorner")
+            uiCorner.CornerRadius = UDim.new(0, 12)
+            uiCorner.Parent = frame
 
-    Instance.new("UICorner", Frame).CornerRadius = UDim.new(0, 6)
+            local uiStroke = Instance.new("UIStroke")
+            uiStroke.Thickness = 2
+            uiStroke.Color = Color3.new(0, 0, 0)
+            uiStroke.Parent = frame
 
-    local Title = Instance.new("TextLabel")
-    Title.Size = UDim2.new(1, 0, 0.4, 0)
-    Title.Position = UDim2.new(0, 0, 0, 0)
-    Title.BackgroundTransparency = 1
-    Title.Font = Enum.Font.GothamBold
-    Title.Text = "Manual Spam"
-    Title.TextColor3 = Color3.fromRGB(255, 255, 255)
-    Title.TextSize = 13
-    Title.TextWrapped = true
-    Title.Parent = Frame
+            local button = Instance.new("TextButton")
+            button.Name = "StartButton"
+            button.Text = "Start"
+            button.Size = UDim2.new(0, 150, 0, 65)
+            button.Position = UDim2.new(0.5, -80, 0.5, -20)
+            button.BackgroundTransparency = 1
+            button.BorderSizePixel = 0
+            button.Font = Enum.Font.GothamSemibold
+            button.TextColor3 = Color3.new(255, 255, 255)
+            button.TextSize = 22
+            button.Parent = frame
 
-    local Toggle = Instance.new("TextButton")
-    Toggle.Size = UDim2.new(0.95, 0, 0.5, 0)
-    Toggle.Position = UDim2.new(0.025, 0, 0.43, 0)
-    Toggle.Text = "OFF"
-    Toggle.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-    Toggle.TextColor3 = Color3.fromRGB(255, 255, 255)
-    Toggle.Font = Enum.Font.GothamBold
-    Toggle.TextSize = 14
-    Toggle.BorderSizePixel = 0
-    Toggle.AutoButtonColor = false
-    Toggle.Parent = Frame
+            local activated = false
 
-    Instance.new("UICorner", Toggle).CornerRadius = UDim.new(0, 6)
+            local function toggle()
+                activated = not activated
+                button.Text = activated and "Stop" or "Start"
+                if activated then
+                    Connections_Manager['Spam UI'] = game:GetService("RunService").Heartbeat:Connect(function()
+                        Auto_Parry.Parry(Selected_Parry_Type)
+                    end)
+                else
+                    if Connections_Manager['Spam UI'] then
+                        Connections_Manager['Spam UI']:Disconnect()
+                        Connections_Manager['Spam UI'] = nil
+                    end
+                end
+            end
 
-    getgenv().ManualSpamEnabled = false
-
-    local function SetToggle(state)
-        getgenv().ManualSpamEnabled = state
-        Toggle.Text = state and "ON" or "OFF"
-        Toggle.BackgroundColor3 = state and Color3.fromRGB(100, 100, 100) or Color3.fromRGB(60, 60, 60)
-        if state then
-            Connections_Manager['Spam UI'] = game:GetService("RunService").Heartbeat:Connect(function()
-                pcall(function()
-                    Auto_Parry.Parry(Selected_Parry_Type)
-                end)
-            end)
+            button.MouseButton1Click:Connect(toggle)
         else
+            if game.CoreGui:FindFirstChild("SpamUI") then
+                game.CoreGui:FindFirstChild("SpamUI"):Destroy()
+            end
+
             if Connections_Manager['Spam UI'] then
                 Connections_Manager['Spam UI']:Disconnect()
                 Connections_Manager['Spam UI'] = nil
             end
         end
     end
-
-    Toggle.MouseButton1Click:Connect(function()
-        SetToggle(not getgenv().ManualSpamEnabled)
-    end)
-
-    game:GetService("UserInputService").InputBegan:Connect(function(input, gp)
-        if gp then return end
-        if input.KeyCode == Enum.KeyCode.E then
-            SetToggle(not getgenv().ManualSpamEnabled)
-        end
-    end)
-else
-    if game.CoreGui:FindFirstChild("ManualSpamUI") then
-        game.CoreGui:FindFirstChild("ManualSpamUI"):Destroy()
-    end
-    if Connections_Manager['Spam UI'] then
-        Connections_Manager['Spam UI']:Disconnect()
-        Connections_Manager['Spam UI'] = nil
-    end
-end
+})
 							
 if not isMobile then
         local AnimationFix = SpamParry:create_checkbox({
@@ -1871,7 +1817,52 @@ end
             getgenv().LobbyAPNotify = value
         end
     })
-							
+
+    local module = detect:create_module({
+        title = 'Infinity Detection',
+        flag = 'Inf_detect',
+        description = 'Infinity Detection',
+        section = 'left',
+        callback = function(value: boolean)
+	    if value then
+		getgenv().InfinityDetection = value
+            end
+        end
+    })
+
+    local module = detect:create_module({
+        title = 'Anti Phantom',
+        flag = 'Anti_Phantom',
+        description = 'Anti Phantom',
+        section = 'right',
+        callback = function(value: boolean)
+	    if value then
+		getgenv().PhantomV2Detection = value
+        end
+    })
+
+    local module = detect:create_module({
+        title = 'Slashes Of Fury Detection',
+        flag = 'SOF_detect',
+        description = 'Slashes Of Fury Detection',
+        section = 'left',
+        callback = function(value: boolean)
+	    if value then
+		getgenv().SlashOfFuryDetection = value
+        end
+    })
+
+    local module = detect:create_module({
+        title = 'Cooldown Protection',
+        flag = 'CD_Protection',
+        description = 'Cooldown Protection',
+        section = 'right',
+        callback = function(value: boolean)
+	    if value then
+		getgenv().CooldownProtection = value
+        end
+    })		
+									
 local StrafeSpeed = 36
 
     local Strafe = player:create_module({
