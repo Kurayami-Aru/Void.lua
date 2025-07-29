@@ -981,6 +981,7 @@ end)
 
 local Tabs = {
     MainTab = Window:Tab({ Title = "Main", Icon = "swords" }),
+    CustomTab = Window:Tab({ Title = "Customize", Icon = "cloud" }),
     DetectionTab = Window:Tab({ Title = "Detection", Icon = "shield" }),
     PlayerTab = Window:Tab({ Title = "Player", Icon = "user" }),
     VisualsTab = Window:Tab({ Title = "Visuals", Icon = "eye" }),
