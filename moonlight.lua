@@ -1569,7 +1569,7 @@ do
             local frame = Instance.new("Frame")
             frame.Name = "MainFrame"
             frame.Position = UDim2.new(0, 20, 0, 20)
-            frame.Size = UDim2.new(0, 150, 0, 65)
+            frame.Size = UDim2.new(0, 200, 0, 100)
             frame.BackgroundColor3 = Color3.fromRGB(10, 10, 50)
             frame.BackgroundTransparency = 0.3
             frame.BorderSizePixel = 0
@@ -1589,7 +1589,7 @@ do
             local button = Instance.new("TextButton")
             button.Name = "StartButton"
             button.Text = "Start"
-            button.Size = UDim2.new(0, 150, 0, 65)
+            button.Size = UDim2.new(0, 160, 0, 40)
             button.Position = UDim2.new(0.5, -80, 0.5, -20)
             button.BackgroundTransparency = 1
             button.BorderSizePixel = 0
