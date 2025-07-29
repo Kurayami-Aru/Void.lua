@@ -522,13 +522,13 @@ end
 local adjustedReachTime = Reach_Time + 0.03
 
 if Speed < 300 then
-    if (tick() - Curving) < (adjustedReachTime / 1.1) then return true end
+    if (tick() - Curving) < (adjustedReachTime / 1.2) then return true end
 elseif Speed < 450 then
-    if (tick() - Curving) < (adjustedReachTime / 1.11) then return true end
+    if (tick() - Curving) < (adjustedReachTime / 1.21) then return true end
 elseif Speed < 600 then
-    if (tick() - Curving) < (adjustedReachTime / 1.325) then return true end
+    if (tick() - Curving) < (adjustedReachTime / 1.335) then return true end
 else
-    if (tick() - Curving) < (adjustedReachTime / 1.4) then return true end
+    if (tick() - Curving) < (adjustedReachTime / 1.5) then return true end
 end
 
 local Dot_Threshold = (0 - Ping / 1000)
@@ -570,8 +570,8 @@ if #Previous_Velocity == 4 then
     end
 end
 
-local backwardsCurveDetected = true
-local backwardsAngleThreshold = 90
+local backwardsCurveDetected = false
+local backwardsAngleThreshold = 85
 local horizDirection = Vector3.new(playerPos.X - ballPos.X, 0, playerPos.Z - ballPos.Z)
 
 if horizDirection.Magnitude > 0 then
