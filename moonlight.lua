@@ -3055,7 +3055,7 @@ function qolPlayerNameVisibility()
 
 		local textLabel = Instance.new("TextLabel")
 		textLabel.Size = UDim2.new(1, 0, 1, 0)
-		textLabel.TextColor3 = Color3.fromRGB(0, 255, 255) -- ciano
+		textLabel.TextColor3 = Color3.fromRGB(255, 255, 255) -- ciano
 		textLabel.TextSize = 12
 		textLabel.Font = Enum.Font.SourceSansSemibold
 		textLabel.BackgroundTransparency = 1
