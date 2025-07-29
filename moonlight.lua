@@ -1569,7 +1569,7 @@ do
             local frame = Instance.new("Frame")
             frame.Name = "MainFrame"
             frame.Position = UDim2.new(0, 20, 0, 20)
-            frame.Size = UDim2.new(0, 200, 0, 100)
+            frame.Size = UDim2.new(0, 150, 0, 65)
             frame.BackgroundColor3 = Color3.fromRGB(10, 10, 50)
             frame.BackgroundTransparency = 0.3
             frame.BorderSizePixel = 0
