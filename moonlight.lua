@@ -1165,7 +1165,7 @@ do
                 end
             end
             if value then
-                Connections_Manager['Auto Parry'] = RunService.Heartbeat:Connect(function()
+                Connections_Manager['Auto Parry'] = RunService.PreSimulation:Connect(function()
                     local One_Ball = Auto_Parry.Get_Ball()
                     local Balls = Auto_Parry.Get_Balls()
 
@@ -1382,7 +1382,7 @@ do
         round_number = true,
 
         callback = function(value: boolean)
-           Speed_Divisor_Multiplier = 0.75 + (value - 1) * (0.35 / 149)
+           Speed_Divisor_Multiplier = 0.75 + (value - 1) * (0.5 / 149)
 	end
 })
 							
