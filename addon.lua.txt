@@ -1590,7 +1590,6 @@ Tabs.VisualsTab:Toggle({
     Title = "No Render",
     Default = false,
     Callback = function(state)
-        if state then
             Player.PlayerScripts.EffectScripts.ClientFX.Disabled = state
     
             if state then
