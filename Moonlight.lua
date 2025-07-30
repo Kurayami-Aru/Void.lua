@@ -1325,3 +1325,34 @@ mainTab.create_description_toggle({
             end
         end
     })
+
+getgenv().config = {
+    enabled = false,
+    model = "",
+    anim = "",
+    fx = ""
+}
+
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local LocalPlayer = Players.LocalPlayer
+
+local swords = require(ReplicatedStorage:WaitForChild("Shared", 9e9)
+    :WaitForChild("ReplicatedInstances", 9e9)
+    :WaitForChild("Swords", 9e9))
+
+customTab.create_title({ name = "Skin Changer", section = "left" })
+
+customTab.create_description_toggle({
+  name = "Skin Changer",
+  description = "Change your skin sword",
+  flag = "skin",
+  enabled = false,
+  section = "right",
+  callback = function(v)
+      getgenv().config.enabled = v
+        getgenv().updateSword()
+    end
+})
+
+						
