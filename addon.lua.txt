@@ -571,7 +571,7 @@ if #Previous_Velocity == 4 then
 end
 
 local backwardsCurveDetected = false
-local backwardsAngleThreshold = 85
+local backwardsAngleThreshold = 100
 local horizDirection = Vector3.new(playerPos.X - ballPos.X, 0, playerPos.Z - ballPos.Z)
 
 if horizDirection.Magnitude > 0 then
@@ -1585,6 +1585,26 @@ Tabs.VisualsTab:Toggle({
         end
     end
 })
+
+Tabs.VisualsTab:Toggle({
+    Title = "No Render",
+    Default = false,
+    Callback = function(state)
+        if state then
+            Player.PlayerScripts.EffectScripts.ClientFX.Disabled = state
+    
+            if state then
+                Connections_Manager['No Render'] = workspace.Runtime.ChildAdded:Connect(function(Value)
+                    Debris:AddItem(Value, 0)
+                end)
+            else
+                if Connections_Manager['No Render'] then
+                    Connections_Manager['No Render']:Disconnect()
+                    Connections_Manager['No Render'] = nil
+                end
+            end
+        end
+    })
 
 Tabs.DetectionTab:Toggle({
     Title = "Infinity Detection",
