@@ -1586,26 +1586,6 @@ Tabs.VisualsTab:Toggle({
     end
 })
 
-Tabs.VisualsTab:Toggle({
-    Title = "No Render",
-    Default = false,
-    Callback = function(state)
-        if state then
-            Player.PlayerScripts.EffectScripts.ClientFX.Disabled = state
-    
-            if state then
-                Connections_Manager['No Render'] = workspace.Runtime.ChildAdded:Connect(function(Value)
-                    Debris:AddItem(Value, 0)
-                end)
-            else
-                if Connections_Manager['No Render'] then
-                    Connections_Manager['No Render']:Disconnect()
-                    Connections_Manager['No Render'] = nil
-                end
-            end
-        end
-    })
-
 Tabs.DetectionTab:Toggle({
     Title = "Infinity Detection",
     Desc = "Stop parry when turn on Infinity",
