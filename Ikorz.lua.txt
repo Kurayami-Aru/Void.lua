@@ -209,11 +209,11 @@ Cat.BorderSizePixel = 0
 Cat.Position = UDim2.new(0.93, 0, 0.2, 0)
 Cat.Size = UDim2.new(0, 25, 0, 25)
 Cat.ZIndex = 3
-Cat.Image = "rbxassetid://6038458940"
+Cat.Image = "rbxassetid://6038460231"
 
 local frames = {
-    "rbxassetid://6038458940",
-    "rbxassetid://6038527144",
+    "rbxassetid://6038460231",
+    "rbxassetid://6038458931",
 }
 
 local frameIndex = 1
