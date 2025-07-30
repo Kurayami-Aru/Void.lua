@@ -1258,4 +1258,70 @@ mainTab.create_description_toggle({
         end
     end
 })
+
+mainTab.create_title({ name = "Detection", section = "right" })
+
+mainTab.create_description_toggle({
+  name = "Infinity Detection",
+  description = "Stop parry when turn on Infinity",
+  flag = "detect",
+  enabled = false,
+  section = "right",
+  callback = function(value)
+      if value then
+             getgenv().InfinityDetection = value
+            end
+        end
+    })
+
+mainTab.create_description_toggle({
+  name = "Anti Phantom",
+  description = "Anti Phantom",
+  flag = "detect",
+  enabled = false,
+  section = "right",
+  callback = function(value)
+      if value then
+	  getgenv().PhantomV2Detection = value
+            end
+        end
+    })
     
+mainTab.create_description_toggle({
+  name = "Slashes Of Fury Detection",
+  description = "Auto parry when turn on SOF",
+  flag = "detect",
+  enabled = false,
+  section = "right",
+  callback = function(value)
+      if value then 
+	  getgenv().SlashOfFuryDetection = value
+            end
+        end
+    })
+
+mainTab.create_description_toggle({
+  name = "Cooldown Protection",
+  description = "Auto use ability when you miss parry",
+  flag = "detect",
+  enabled = false,
+  section = "right",
+  callback = function(value)
+      if value then
+	  getgenv().CooldownProtection = value
+            end
+        end
+    })	
+
+mainTab.create_description_toggle({
+  name = "Auto ability",
+  description = "Auto use ability",
+  flag = "detect",
+  enabled = false,
+  section = "right",
+  callback = function(value)
+      if value then
+	  getgenv().AutoAbility = value
+            end
+        end
+    })
