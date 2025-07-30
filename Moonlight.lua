@@ -441,7 +441,7 @@ local Curving = tick()
 local Runtime = workspace.Runtime
 
 
-function Auto_Parry.Is_Curved()
+function Auto_Parry.Is_Curved(ball, speed)
     local Ball = Auto_Parry.Get_Ball()
 
     if not Ball then
