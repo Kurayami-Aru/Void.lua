@@ -262,6 +262,23 @@ function Library.__init()
     end
 
   AnimateGif(Cat, 60, 40, 2, 3, 5, "rbxassetid://98733765100102", 10)
+local originalPosition = Cat.Position
+
+task.spawn(function()
+	while Cat:IsDescendantOf(game) do
+		local tweenUp = TweenService:Create(Cat, TweenInfo.new(0.4, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {
+			Position = originalPosition - UDim2.new(0, 0, 0, 5)
+		})
+		tweenUp:Play()
+		tweenUp.Completed:Wait()
+
+		local tweenDown = TweenService:Create(Cat, TweenInfo.new(0.4, Enum.EasingStyle.Sine, Enum.EasingDirection.In), {
+			Position = originalPosition + UDim2.new(0, 0, 0, 5)
+		})
+		tweenDown:Play()
+		tweenDown.Completed:Wait()
+	end
+end)
 
   local startTime = os.time()
 
