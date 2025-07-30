@@ -1185,7 +1185,7 @@ mainTab.create_description_toggle({
   name = "Manual Spam",
   description = "Manual spam incoming balls",
   flag = "spam",
-  enabled = true,
+  enabled = false,
   section = "right",
   callback = function(value)
       getgenv().spamui = value
