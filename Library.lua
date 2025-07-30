@@ -173,7 +173,7 @@ function Library.__init()
 	TextLabel.Position = UDim2.new(0.0938254446, 0, 0.496794879, 0)
 	TextLabel.Size = UDim2.new(0, 75, 0, 16)
 	TextLabel.FontFace = Font.new("rbxasset://fonts/families/Montserrat.json", Enum.FontWeight.SemiBold)
-	TextLabel.Text = 'ikorz BETA'
+	TextLabel.Text = 'Moonlight'
 	TextLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
 	TextLabel.TextScaled = true
 	TextLabel.TextSize = 14.000
