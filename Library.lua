@@ -216,9 +216,8 @@ local frames = {
     "rbxassetid://6038458931",
 }
 
-local frameIndex = 1
 local lastChange = tick()
-local switchInterval = 0.25
+local switchInterval = 0.23
 
 RunService.RenderStepped:Connect(function()
 	if tick() - lastChange >= switchInterval and Cat:IsDescendantOf(game) then
