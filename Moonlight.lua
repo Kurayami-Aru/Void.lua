@@ -1355,17 +1355,6 @@ customTab.create_description_toggle({
     end
 })
 
-customTab.create_textbox({
-  name = "Sword name"
-  placeholder = "Enter Skin name (Case Sensitive)"
-  Callback = function(v)
-      getgenv().config.model = v
-      getgenv().config.anim = v
-      getgenv().config.fx = v
-      getgenv().updateSword()
-    end
-})
-
 local function getSlash(name)
     local s = swords:GetSword(name)
     return (s and s.SlashName) or "SlashEffect"
