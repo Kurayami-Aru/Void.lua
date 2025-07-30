@@ -47,6 +47,21 @@ local VirtualInputService = game:GetService("VirtualInputManager")
 
 local GuiService = game:GetService('GuiService')
 
+local function performFirstPress(parryType)
+    if parryType == 'F_Key' then
+        VirtualInputService:SendKeyEvent(true, Enum.KeyCode.F, false, nil)
+    elseif parryType == 'Left_Click' then
+        VirtualInputManager:SendMouseButtonEvent(0, 0, 0, true, game, 0)
+    elseif parryType == 'Navigation' then
+        local button = Players.LocalPlayer.PlayerGui.Hotbar.Block
+        updateNavigation(button)
+        VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.Return, false, game)
+        VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.Return, false, game)
+        task.wait(0.01)
+        updateNavigation(nil)
+    end
+end
+
 if not LPH_OBFUSCATED then
     function LPH_JIT(Function) return Function end
     function LPH_JIT_MAX(Function) return Function end
