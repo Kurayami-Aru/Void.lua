@@ -217,7 +217,7 @@ local frames = {
 }
 
 local lastChange = tick()
-local switchInterval = 0.23
+local switchInterval = 0.15
 
 RunService.RenderStepped:Connect(function()
 	if tick() - lastChange >= switchInterval and Cat:IsDescendantOf(game) then
