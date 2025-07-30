@@ -1355,7 +1355,7 @@ customTab.create_description_toggle({
     end
 })
 
-customTab.create_input({
+customTab.create_textbox({
   name = "Sword name"
   placeholder = "Enter Skin name (Case Sensitive)"
   Callback = function(v)
