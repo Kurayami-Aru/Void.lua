@@ -216,6 +216,7 @@ local frames = {
     "rbxassetid://6038458931",
 }
 
+local frameIndex = 1
 local lastChange = tick()
 local switchInterval = 0.15
 
