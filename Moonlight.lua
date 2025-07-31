@@ -1403,21 +1403,3 @@ mainTab.create_description_toggle({
         end
     })
 
-customTab.create_title({ name = "Customize", section = "right" })
-
-customTab.create_description_toggle({
-  name = "Skin Changer",
-  description = "Change skin sword",
-  flag = "custom",
-  enabled = false,
-  section = "left",
-  callback = function(state)
-      enabled = state
-    end
-})
-						
-customTab.create_textbox({
-  name = "Skin Name"
-  placeholder = "Enter Skin Name here"
-  callback = function(v) swordName = v end
-})
