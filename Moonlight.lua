@@ -1416,7 +1416,7 @@ customTab.create_description_toggle({
     end
 })
 
-customTab:create_input({
+customTab:create_textbox({
     name = "Skin Changer",
     placeholder = "Skin name",
     section = "left",
