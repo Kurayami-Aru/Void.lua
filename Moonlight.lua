@@ -1555,62 +1555,183 @@ playerTab.create_slider({
     end
 })
 
-playerTab.create_title({ name = "Emote", section = "right" })						
+playerTab.create_title({ name = "Player Comestic", section = "right" })						
 
 playerTab.create_description_toggle({
-  name = "Emote",
-  description = "Choose emote",
-  flag = "emote",
+  name = "Player Cosmetics",
+  description = "Apply korblox and headless",
+  flag = "cosmestic",
   enabled = false,
   section = "right",
   callback = function(value)
-      getgenv().Animations = value    
-
-        if value then    
-            Connections_Manager['Animations'] = RunService.Heartbeat:Connect(function()    
-                if not Player.Character or not Player.Character.PrimaryPart then    
-                    return    
-                end    
-
-                local Speed = Player.Character.PrimaryPart.AssemblyLinearVelocity.Magnitude    
-
-                if Speed > 30 then    
-                    if Animation.track and not getgenv().LoopEmote then    
-                        Animation.track:Stop()    
-                        Animation.track:Destroy()    
-                        Animation.track = nil    
-                    end    
-                else    
-                    if not Animation.track and Animation.current then    
-                        Auto_Parry.Play_Animation(Animation.current)    
-                    end    
-                end    
-            end)    
-        else    
-            if Animation.track then    
-                Animation.track:Stop()    
-                Animation.track:Destroy()    
-                Animation.track = nil    
-            end    
-
-            if Connections_Manager['Animations'] then    
-                Connections_Manager['Animations']:Disconnect()    
-                Connections_Manager['Animations'] = nil    
-            end    
-        end    
-    end    
-})
-
-playerTab.create_dropdown({
-  name = "Emote",
-  flag = "custom_emote",
-  section = "right",
-  options = {"Emotes_Data"},
-  callback = function(value)
-      selected_animation = value
+      local players = game:GetService("Players")
+            local lp = players.LocalPlayer
     
-            if getgenv().Animations then
-                Auto_Parry.Play_Animation(value)
+            local function applyKorblox(character)
+                local rightLeg = character:FindFirstChild("RightLeg") or character:FindFirstChild("Right Leg")
+                if not rightLeg then
+                    warn("Right leg not found on character")
+                    return
+                end
+                
+                for _, child in pairs(rightLeg:GetChildren()) do
+                    if child:IsA("SpecialMesh") then
+                        child:Destroy()
+                    end
+                end
+                local specialMesh = Instance.new("SpecialMesh")
+                specialMesh.MeshId = "rbxassetid://101851696"
+                specialMesh.TextureId = "rbxassetid://115727863"
+                specialMesh.Scale = Vector3.new(1, 1, 1)
+                specialMesh.Parent = rightLeg
+            end
+    
+            local function saveRightLegProperties(char)
+                if char then
+                    local rightLeg = char:FindFirstChild("RightLeg") or char:FindFirstChild("Right Leg")
+                    if rightLeg then
+                        local originalMesh = rightLeg:FindFirstChildOfClass("SpecialMesh")
+                        if originalMesh then
+                            _G.PlayerCosmeticsCleanup.originalMeshId = originalMesh.MeshId
+                            _G.PlayerCosmeticsCleanup.originalTextureId = originalMesh.TextureId
+                            _G.PlayerCosmeticsCleanup.originalScale = originalMesh.Scale
+                        else
+                            _G.PlayerCosmeticsCleanup.hadNoMesh = true
+                        end
+                        
+                        _G.PlayerCosmeticsCleanup.rightLegChildren = {}
+                        for _, child in pairs(rightLeg:GetChildren()) do
+                            if child:IsA("SpecialMesh") then
+                                table.insert(_G.PlayerCosmeticsCleanup.rightLegChildren, {
+                                    ClassName = child.ClassName,
+                                    Properties = {
+                                        MeshId = child.MeshId,
+                                        TextureId = child.TextureId,
+                                        Scale = child.Scale
+                                    }
+                                })
+                            end
+                        end
+                    end
+                end
+            end
+            
+            local function restoreRightLeg(char)
+                if char then
+                    local rightLeg = char:FindFirstChild("RightLeg") or char:FindFirstChild("Right Leg")
+                    if rightLeg and _G.PlayerCosmeticsCleanup.rightLegChildren then
+                        for _, child in pairs(rightLeg:GetChildren()) do
+                            if child:IsA("SpecialMesh") then
+                                child:Destroy()
+                            end
+                        end
+                        
+                        if _G.PlayerCosmeticsCleanup.hadNoMesh then
+                            return
+                        end
+                        
+                        for _, childData in ipairs(_G.PlayerCosmeticsCleanup.rightLegChildren) do
+                            if childData.ClassName == "SpecialMesh" then
+                                local newMesh = Instance.new("SpecialMesh")
+                                newMesh.MeshId = childData.Properties.MeshId
+                                newMesh.TextureId = childData.Properties.TextureId
+                                newMesh.Scale = childData.Properties.Scale
+                                newMesh.Parent = rightLeg
+                            end
+                        end
+                    end
+                end
+            end
+    
+            if value then
+                CosmeticsActive = true
+    
+                getgenv().Config = {
+                    Headless = true
+                }
+                
+                if lp.Character then
+                    local head = lp.Character:FindFirstChild("Head")
+                    if head and getgenv().Config.Headless then
+                        _G.PlayerCosmeticsCleanup.headTransparency = head.Transparency
+                        
+                        local decal = head:FindFirstChildOfClass("Decal")
+                        if decal then
+                            _G.PlayerCosmeticsCleanup.faceDecalId = decal.Texture
+                            _G.PlayerCosmeticsCleanup.faceDecalName = decal.Name
+                        end
+                    end
+                    
+                    saveRightLegProperties(lp.Character)
+                    applyKorblox(lp.Character)
+                end
+                
+                _G.PlayerCosmeticsCleanup.characterAddedConn = lp.CharacterAdded:Connect(function(char)
+                    local head = char:FindFirstChild("Head")
+                    if head and getgenv().Config.Headless then
+                        _G.PlayerCosmeticsCleanup.headTransparency = head.Transparency
+                        
+                        local decal = head:FindFirstChildOfClass("Decal")
+                        if decal then
+                            _G.PlayerCosmeticsCleanup.faceDecalId = decal.Texture
+                            _G.PlayerCosmeticsCleanup.faceDecalName = decal.Name
+                        end
+                    end
+                    
+                    saveRightLegProperties(char)
+                    applyKorblox(char)
+                end)
+                
+                if getgenv().Config.Headless then
+                    headLoop = task.spawn(function()
+                        while CosmeticsActive do
+                            local char = lp.Character
+                            if char then
+                                local head = char:FindFirstChild("Head")
+                                if head then
+                                    head.Transparency = 1
+                                    local decal = head:FindFirstChildOfClass("Decal")
+                                    if decal then
+                                        decal:Destroy()
+                                    end
+                                end
+                            end
+                            task.wait(0.1)
+                        end
+                    end)
+                end
+    
+            else
+                CosmeticsActive = false
+    
+                if _G.PlayerCosmeticsCleanup.characterAddedConn then
+                    _G.PlayerCosmeticsCleanup.characterAddedConn:Disconnect()
+                    _G.PlayerCosmeticsCleanup.characterAddedConn = nil
+                end
+    
+                if headLoop then
+                    task.cancel(headLoop)
+                    headLoop = nil
+                end
+    
+                local char = lp.Character
+                if char then
+                    local head = char:FindFirstChild("Head")
+                    if head and _G.PlayerCosmeticsCleanup.headTransparency ~= nil then
+                        head.Transparency = _G.PlayerCosmeticsCleanup.headTransparency
+                        
+                        if _G.PlayerCosmeticsCleanup.faceDecalId then
+                            local newDecal = head:FindFirstChildOfClass("Decal") or Instance.new("Decal", head)
+                            newDecal.Name = _G.PlayerCosmeticsCleanup.faceDecalName or "face"
+                            newDecal.Texture = _G.PlayerCosmeticsCleanup.faceDecalId
+                            newDecal.Face = Enum.NormalId.Front
+                        end
+                    end
+                    
+                    restoreRightLeg(char)
+                end
+    
+                _G.PlayerCosmeticsCleanup = {}
             end
         end
     })
