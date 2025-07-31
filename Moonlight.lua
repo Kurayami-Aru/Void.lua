@@ -1420,7 +1420,6 @@ customTab:create_textbox({
     name = "Skin name",
     placeholder = "Enter skin name (Case Sensitive)",
     section = "left",
-    default = "",
     Callback = function(v) 
 	swordName = v 
     end
