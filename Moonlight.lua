@@ -1403,3 +1403,24 @@ mainTab.create_description_toggle({
         end
     })
 
+customTab.create_title({ name = "Customize", section = "right" })
+
+customTab.create_description_toggle({
+  name = "Skin Changer",
+  description = "Change skin sword",
+  flag = "custom",
+  enabled = false,
+  section = "left",
+  callback = function(state)
+      enabled = state
+    end
+})
+
+customTab:create_input({
+    name = "Skin Changer",
+    placeholder = "Skin name",
+    default = "",
+    callback = function(text)
+        print("User nhập:", text)
+    end
+})				
