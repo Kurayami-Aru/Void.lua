@@ -912,7 +912,7 @@ task.spawn(function()
 end)
 						
 local mainTab   = mainLib.create_tab("Main")
-local customTab   = mainLib.create_tab("Customize")
+local playerTab   = mainLib.create_tab("Player")
 
 mainTab.create_title({ name = "Parry", section = "left" })
 
@@ -1403,24 +1403,154 @@ mainTab.create_description_toggle({
         end
     })
 
-customTab.create_title({ name = "Customize", section = "left" })
+playerTab.create_title({ name = "Player Speed", section = "left" })
 
-customTab.create_description_toggle({
-  name = "Skin Changer",
-  description = "Change skin sword",
-  flag = "custom",
+playerTab.create_description_toggle({
+  name = "Strafe",
+  description = "Change your speed player",
+  flag = "speed",
   enabled = false,
   section = "left",
-  callback = function(state)
-      enabled = state
+  callback = function(value)
+      if value then	
+	  Connections_Manager['Strafe'] = game:GetService("RunService").PreSimulation:Connect(function()
+                local character = game.Players.LocalPlayer.Character
+                if character and character:FindFirstChild("Humanoid") then
+                    character.Humanoid.WalkSpeed = StrafeSpeed
+                end
+            end)
+        else
+            local character = game.Players.LocalPlayer.Character
+            if character and character:FindFirstChild("Humanoid") then
+                character.Humanoid.WalkSpeed = 36
+            end
+            
+            if Connections_Manager['Strafe'] then
+                Connections_Manager['Strafe']:Disconnect()
+                Connections_Manager['Strafe'] = nil
+            end
+        end
     end
 })
 
-customTab:create_textbox({
-    name = "Skin name",
-    placeholder = "Enter skin name (Case Sensitive)",
-    section = "left",
-    Callback = function(v) 
-	swordName = v 
+playerTab.create_slider({
+  name = "Speed",
+  flag = "speed_player",
+  section = "left",
+  value = 36,
+  minimum_value = 36,
+  maximum_value = 350,
+  increment = 1,
+  callback = function(value)
+      StrafeSpeed = value
+    end
+})			
+
+playerTab.create_title({ name = "Spin Bot", section = "right" })
+
+playerTab.create_description_toggle({
+  name = "Spin Bot",
+  description = "Kururing Kuru Kuru",
+  flag = "spin",
+  enabled = false,
+  section = "right",
+  callback = function(value)
+      getgenv().Spinbot = value
+        if value then
+            getgenv().spin = true
+            getgenv().spinSpeed = getgenv().spinSpeed or 1 
+            local Players = game:GetService("Players")
+            local RunService = game:GetService("RunService")
+            local Client = Players.LocalPlayer
+
+            
+            local function spinCharacter()
+                while getgenv().spin do
+                    RunService.Heartbeat:Wait()
+                    local char = Client.Character
+                    local funcHRP = char and char:FindFirstChild("HumanoidRootPart")
+                    
+                    if char and funcHRP then
+                        funcHRP.CFrame *= CFrame.Angles(0, getgenv().spinSpeed, 0)
+                    end
+                end
+            end
+
+            if not getgenv().spinThread then
+                getgenv().spinThread = coroutine.create(spinCharacter)
+                coroutine.resume(getgenv().spinThread)
+            end
+
+        else
+            getgenv().spin = false
+
+            
+            if getgenv().spinThread then
+                getgenv().spinThread = nil
+            end
+        end
     end
 })
+
+playerTab.create_slider({
+  name = "Speed",
+  flag = "speed_spin",
+  section = "right",
+  value = 1,
+  minimum_value = 1,
+  maximum_value = 120,
+  increment = 1,
+  callback = function(value)	
+      getgenv().spinSpeed = math.rad(value)
+    end
+})
+
+playerTab.create_title({ name = "Field Of View", section = "left" })	
+
+playerTab.create_description_toggle({
+  name = "Field Of View",
+  description = "Controller your FOV",
+  flag = "fov",
+  enabled = false,
+  section = "left",
+  callback = function(value)
+      getgenv().CameraEnabled = value
+        local Camera = game:GetService("Workspace").CurrentCamera
+
+        if value then
+            getgenv().CameraFOV = getgenv().CameraFOV or 70
+            Camera.FieldOfView = getgenv().CameraFOV
+            
+            if not getgenv().FOVLoop then
+                getgenv().FOVLoop = game:GetService("RunService").RenderStepped:Connect(function()
+                    if getgenv().CameraEnabled then
+                        Camera.FieldOfView = getgenv().CameraFOV
+                    end
+                end)
+            end
+        else
+            Camera.FieldOfView = 70
+            
+            if getgenv().FOVLoop then
+                getgenv().FOVLoop:Disconnect()
+                getgenv().FOVLoop = nil
+            end
+        end
+    end
+})
+
+playerTab.create_slider({
+  name = "Value",
+  flag = "fov_value",
+  section = "right",
+  value = 70,
+  minimum_value = 50,
+  maximum_value = 120,
+  increment = 1,
+  callback = function(value)	
+      getgenv().CameraFOV = value
+        if getgenv().CameraEnabled then
+            game:GetService("Workspace").CurrentCamera.FieldOfView = value
+        end
+    end
+})								
