@@ -1417,8 +1417,8 @@ customTab.create_description_toggle({
 })
 
 customTab:create_textbox({
-    name = "Skin Changer",
-    placeholder = "Skin name",
+    name = "Skin name",
+    placeholder = "Enter skin name (Case Sensitive)",
     section = "left",
     default = "",
     Callback = function(v) 
