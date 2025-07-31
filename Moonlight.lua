@@ -1601,3 +1601,16 @@ playerTab.create_description_toggle({
     end    
 })
 
+playerTab.create_dropdown({
+  name = "Emote",
+  flag = "custom_emote",
+  section = "right",
+  options = {"Emotes_Data"},
+  callback = function(value)
+      selected_animation = value
+    
+            if getgenv().Animations then
+                Auto_Parry.Play_Animation(value)
+            end
+        end
+    })
