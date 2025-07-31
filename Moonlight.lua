@@ -1260,7 +1260,7 @@ mainTab.create_description_toggle({
 
 mainTab.create_description_toggle({
   name = "Manual Spam",
-  description = "Manual spam incoming balls",
+  description = "Manual spam balls",
   flag = "spam",
   enabled = false,
   section = "right",
