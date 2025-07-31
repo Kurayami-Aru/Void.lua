@@ -1553,86 +1553,51 @@ playerTab.create_slider({
             game:GetService("Workspace").CurrentCamera.FieldOfView = value
         end
     end
-})								
+})
+
+playerTab.create_title({ name = "Emote", section = "right" })						
 
 playerTab.create_description_toggle({
-  name = "Hit sound",
-  description = "Hit sound",
-  flag = "sound",
+  name = "Emote",
+  description = "Choose emote",
+  flag = "emote",
   enabled = false,
   section = "right",
   callback = function(value)
-      hit_Sound_Enabled = value
-  end
+      getgenv().Animations = value    
+
+        if value then    
+            Connections_Manager['Animations'] = RunService.Heartbeat:Connect(function()    
+                if not Player.Character or not Player.Character.PrimaryPart then    
+                    return    
+                end    
+
+                local Speed = Player.Character.PrimaryPart.AssemblyLinearVelocity.Magnitude    
+
+                if Speed > 30 then    
+                    if Animation.track and not getgenv().LoopEmote then    
+                        Animation.track:Stop()    
+                        Animation.track:Destroy()    
+                        Animation.track = nil    
+                    end    
+                else    
+                    if not Animation.track and Animation.current then    
+                        Auto_Parry.Play_Animation(Animation.current)    
+                    end    
+                end    
+            end)    
+        else    
+            if Animation.track then    
+                Animation.track:Stop()    
+                Animation.track:Destroy()    
+                Animation.track = nil    
+            end    
+
+            if Connections_Manager['Animations'] then    
+                Connections_Manager['Animations']:Disconnect()    
+                Connections_Manager['Animations'] = nil    
+            end    
+        end    
+    end    
 })
 
-local Folder = Instance.new("Folder")
-    Folder.Name = "Useful Utility"
-    Folder.Parent = workspace
-    
-    local hit_Sound = Instance.new('Sound', Folder)
-    hit_Sound.Volume = 6
-    
-    local hitSoundOptions = { 
-        "Medal", 
-        "Fatality", 
-        "Skeet",
-        "Switches",
-        "Rust Headshot", 
-        "Neverlose Sound", 
-        "Bubble", 
-        "Laser", 
-        "Steve", 
-        "Call of Duty", 
-        "Bat", 
-        "TF2 Critical", 
-        "Saber", 
-        "Bameware"
-    }
-    
-    local hitSoundIds = {
-        Medal = "rbxassetid://6607336718",
-        Fatality = "rbxassetid://6607113255",
-        Skeet = "rbxassetid://6607204501",
-        Switches = "rbxassetid://6607173363",
-        ["Rust Headshot"] = "rbxassetid://138750331387064",
-        ["Neverlose Sound"] = "rbxassetid://110168723447153",
-        Bubble = "rbxassetid://6534947588",
-        Laser = "rbxassetid://7837461331",
-        Steve = "rbxassetid://4965083997",
-        ["Call of Duty"] = "rbxassetid://5952120301",
-        Bat = "rbxassetid://3333907347",
-        ["TF2 Critical"] = "rbxassetid://296102734",
-        Saber = "rbxassetid://8415678813",
-        Bameware = "rbxassetid://3124331820"
-}		
-
-playerTab.create_slider({
-  name = "Volume",
-  flag = "sound_volume",
-  section = "right",
-  value = 5,
-  minimum_value = 1,
-  maximum_value = 10,
-  increment = 1,
-  callback = function(value)	
-      hit_Sound.Volume = value
-  end
-})	
-
-playerTab.create_dropdown({
-  name = "Choose sound",
-  flag = "sound",
-  section = "right",
-  option = "Camera",
-  options = {"Medal", "Fatality", "Skeet", "Switches", "Rust Headshot", "Neverlose Sound", "Bubble", "Laser", "Steve", "Call of Duty", "Bat", "TF2 Critical", "Saber", "Bameware"},
-  callback = function(selectedOption)
-            if hitSoundIds[selectedOption] then
-                hit_Sound.SoundId = hitSoundIds[selectedOption]
-            else
-                warn("Invalid hit sound selection: " .. tostring(selectedOption))
-            end
-        end
-    })
-
-						
