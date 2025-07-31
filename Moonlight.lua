@@ -1542,7 +1542,7 @@ playerTab.create_description_toggle({
 playerTab.create_slider({
   name = "Value",
   flag = "fov_value",
-  section = "right",
+  section = "left",
   value = 70,
   minimum_value = 50,
   maximum_value = 120,
