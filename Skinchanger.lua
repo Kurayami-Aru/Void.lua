@@ -92,3 +92,7 @@ local ChangeSkin = CustomWindow:NewSection("Skin Changer")
 ChangeSkin:CreateToggle("Skin Changer", function(state)
 enabled = state
 end)
+
+ChangeSkin:CreateTextbox("Enter Skin Here!!", function(v)
+swordName = v 
+end)
