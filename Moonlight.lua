@@ -1564,10 +1564,7 @@ playerTab.create_description_toggle({
   enabled = false,
   section = "right",
   callback = function(value)
-      local players = game:GetService("Players")
-            local lp = players.LocalPlayer
-    
-            local function applyKorblox(character)
+      local function applyKorblox(character)
                 local rightLeg = character:FindFirstChild("RightLeg") or character:FindFirstChild("Right Leg")
                 if not rightLeg then
                     warn("Right leg not found on character")
