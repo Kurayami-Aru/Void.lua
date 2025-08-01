@@ -6,82 +6,20 @@ local StarterGui = game:GetService("StarterGui")
 local UserInputService = game:GetService("UserInputService")
 local CoreGui = game:GetService("CoreGui")
 
-local enabled = false
-local swordName = ""
-local p = game:GetService("Players").LocalPlayer
-local rs = game:GetService("ReplicatedStorage")
-local swords = require(rs:WaitForChild("Shared", 9e9):WaitForChild("ReplicatedInstances", 9e9):WaitForChild("Swords", 9e9))
-local ctrl, playFx, lastParry = nil, nil, 0
-local function getSlash(name)
-    local s = swords:GetSword(name)
-    return (s and s.SlashName) or "SlashEffect"
-end
-local function setSword()
-    if not enabled then return end
-    setupvalue(rawget(swords, "EquipSwordTo"), 2, false)
-    swords:EquipSwordTo(p.Character, swordName)
-    ctrl:SetSword(swordName)
-end
-updateSword = function()
-    setSword()
-end
-while task.wait() and not ctrl do
-    for _, v in getconnections(rs.Remotes.FireSwordInfo.OnClientEvent) do
-        if v.Function and islclosure(v.Function) then
-            local u = getupvalues(v.Function)
-            if #u == 1 and type(u[1]) == "table" then
-                ctrl = u[1]
-                break
-            end
-        end
-    end
-end
-local parryConnA, parryConnB
-while task.wait() and not parryConnA do
-    for _, v in getconnections(rs.Remotes.ParrySuccessAll.OnClientEvent) do
-        if v.Function and getinfo(v.Function).name == "parrySuccessAll" then
-            parryConnA, playFx = v, v.Function
-            v:Disable()
-            break
-        end
-    end
-end
-while task.wait() and not parryConnB do
-    for _, v in getconnections(rs.Remotes.ParrySuccessClient.Event) do
-        if v.Function and getinfo(v.Function).name == "parrySuccessAll" then
-            parryConnB = v
-            v:Disable()
-            break
-        end
-    end
-end
-rs.Remotes.ParrySuccessAll.OnClientEvent:Connect(function(...)
-    setthreadidentity(2)
-    local args = {...}
-    if tostring(args[4]) ~= p.Name then
-        lastParry = tick()
-    elseif enabled then
-        args[1] = getSlash(swordName)
-        args[3] = swordName
-    end
-    return playFx(unpack(args))
-end)
-task.spawn(function()
-    while task.wait(1) do
-        if enabled and swordName ~= "" then
-            local c = p.Character or p.CharacterAdded:Wait()
-            if p:GetAttribute("CurrentlyEquippedSword") ~= swordName or not c:FindFirstChild(swordName) then
-                setSword()
-            end
-            for _, m in pairs(c:GetChildren()) do
-                if m:IsA("Model") and m.Name ~= swordName then
-                    m:Destroy()
-                end
-                task.wait()
-            end
-        end
-    end
-end)
+getgenv().config = {
+    enabled = false,
+    model = "",
+    anim = "",
+    fx = ""
+}
+
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local LocalPlayer = Players.LocalPlayer
+
+local swords = require(ReplicatedStorage:WaitForChild("Shared", 9e9)
+    :WaitForChild("ReplicatedInstances", 9e9)
+    :WaitForChild("Swords", 9e9))
 
 local Library = loadstring(Game:HttpGet("https://raw.githubusercontent.com/bloodball/-back-ups-for-libs/main/wizard"))()
 
@@ -89,10 +27,94 @@ local CustomWindow = Library:NewWindow("Moonlight")
 
 local ChangeSkin = CustomWindow:NewSection("Skin Changer")
 
-ChangeSkin:CreateToggle("Skin Changer", function(state)
-enabled = state
+ChangeSkin:CreateToggle("Skin Changer", function(v)
+getgenv().config.enabled = v
+getgenv().updateSword()
 end)
 
 ChangeSkin:CreateTextbox("Enter Skin Here!!", function(v)
-swordName = v 
+getgenv().config.model = v
+getgenv().config.anim = v
+getgenv().config.fx = v
+getgenv().config.slash = getSlash(v)
+getgenv().updateSword()      
 end)
+
+local function getSlash(name)
+    local s = swords:GetSword(name)
+    return (s and s.SlashName) or "SlashEffect"
+end
+
+getgenv().config.slash = getSlash(getgenv().config.fx)
+
+local ctrl
+for _, conn in ipairs(getconnections(ReplicatedStorage.Remotes.FireSwordInfo.OnClientEvent)) do
+    if conn.Function and islclosure(conn.Function) then
+        local u = getupvalues(conn.Function)
+        if #u == 1 and typeof(u[1]) == "table" then
+            ctrl = u[1]
+            break
+        end
+    end
+end
+
+local function setSword()
+    if not getgenv().config.enabled then return end
+    local char = LocalPlayer.Character
+    if not char then return end
+
+    setupvalue(rawget(swords, "EquipSwordTo"), 2, false)
+    swords:EquipSwordTo(char, getgenv().config.model)
+    if ctrl then ctrl:SetSword(getgenv().config.anim) end
+end
+
+getgenv().updateSword = function()
+    getgenv().config.slash = getSlash(getgenv().config.fx)
+    setSword()
+end
+
+local playFx
+for _, conn in ipairs(getconnections(ReplicatedStorage.Remotes.ParrySuccessAll.OnClientEvent)) do
+    if conn.Function and debug.getinfo(conn.Function).name == "parrySuccessAll" then
+        playFx = conn.Function
+        conn:Disable()
+        break
+    end
+end
+
+ReplicatedStorage.Remotes.ParrySuccessAll.OnClientEvent:Connect(function(...)
+    local a = {...}
+    if tostring(a[4]) == LocalPlayer.Name and getgenv().config.enabled then
+        a[1], a[3] = getgenv().config.slash, getgenv().config.fx
+    end
+    return playFx(unpack(a))
+end)
+
+Players.LocalPlayer.CharacterAdded:Connect(function()
+    task.delay(1, function()
+        if getgenv().config.enabled then
+            getgenv().updateSword()
+        end
+    end)
+end)
+
+task.spawn(function()
+    while task.wait(1.5) do
+        if getgenv().config.enabled then
+            local char = LocalPlayer.Character
+            if not char then continue end
+
+            if LocalPlayer:GetAttribute("CurrentlyEquippedSword") ~= getgenv().config.model
+            or not char:FindFirstChild(getgenv().config.model) then
+                setSword()
+            end
+
+            for _, obj in char:GetChildren() do
+                if obj:IsA("Model") and obj.Name ~= getgenv().config.model then
+                    obj:Destroy()
+                end
+            end
+        end
+    end
+end)
+
